@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Danh sách tệp — albertthai-alt/browse</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; margin: 0; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 6px 0; font-size: 1.35rem; }
+    .muted { color: #667085; font-size: 0.95rem; margin: 0 0 12px 0; }
+    .status { margin: 10px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; }
+    .error { color: #b42318; }
+    ul.files { list-style: none; padding: 0; margin: 10px 0 0 0; display: grid; gap: 10px; }
+    .file { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+    .file a { color: #1d4ed8; text-decoration: none; }
+    .file a:hover { text-decoration: underline; }
+    .meta { color: #64748b; font-size: 0.9rem; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0e0f12; color: #eaeef2; }
+      .status { border-color: #1f2937; background: #0b0c10; }
+      .file { border-color: #1f2937; background: #0b0c10; }
+      .muted, .meta { color: #9aa4b2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Danh sách tệp trong kho</h1>
+    <p class="muted">Nguồn: <code>albertthai-alt/browse</code> — duyệt tệp tại thư mục gốc qua GitHub API</p>
+    <div id="status" class="status">Đang tải…</div>
+    <ul id="files" class="files"></ul>
+  </div>
+
+<script>
+const owner = 'albertthai-alt';
+const repo  = 'browse';
+const path  = ''; // root
+
+// basePath: relative path from this page to the HTML files.
+// Using './' so links work on GitHub Pages when the files are in the same folder as this listing file.
+const basePath = './';
+
+function formatSize(size) {
+  try {
+    if (size == null || isNaN(size)) return '';
+    if (size < 1024) return size + ' B';
+    if (size < 1024*1024) return (size/1024).toFixed(1) + ' KB';
+    return (size/(1024*1024)).toFixed(1) + ' MB';
+  } catch { return ''; }
+}
+
+async function listFiles() {
+  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const statusEl = document.getElementById('status');
+  try {
+    const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github.v3+json' }});
+    if (!res.ok) {
+      if (res.status === 403) {
+        throw new Error('Rate limited or API access denied (403). Try again later.');
+      }
+      throw new Error('HTTP ' + res.status);
+    }
+    const items = await res.json();
+
+    const files = items
+      .filter(i => i.type === 'file' && i.name.toLowerCase() !== 'index.html')
+      .sort((a,b) => a.name.localeCompare(b.name));
+
+    const ul = document.getElementById('files');
+    ul.innerHTML = '';
+
+    if (files.length === 0) {
+      statusEl.textContent = 'Không tìm thấy tệp nào trong thư mục gốc.';
+      return;
+    }
+
+    files.forEach(f => {
+      const li = document.createElement('li');
+      li.className = 'file';
+
+      const left = document.createElement('div');
+      const a = document.createElement('a');
+      a.href = basePath + encodeURIComponent(f.name).replace(/%2F/g, '/');
+      a.textContent = f.name;
+      a.target = '_self';
+      left.appendChild(a);
+
+      const right = document.createElement('div');
+      right.className = 'meta';
+      const size = formatSize(f.size);
+      const gh = document.createElement('a');
+      gh.href = f.html_url;
+      gh.textContent = 'GitHub';
+      gh.target = '_blank';
+      gh.rel = 'noopener';
+      right.appendChild(document.createTextNode(size ? size + ' · ' : ''));
+      right.appendChild(gh);
+
+      li.appendChild(left);
+      li.appendChild(right);
+      ul.appendChild(li);
+    });
+
+    statusEl.textContent = 'Đã tìm thấy ' + files.length + ' tệp. Nhấp để mở.';
+  } catch (err) {
+    console.error(err);
+    document.getElementById('status').innerHTML = `<span class="error">Error: ${err.message}</span>`;
+    document.getElementById('files').innerHTML = '';
+  }
+}
+
+listFiles();
+</script>
+</body>
+</html>
