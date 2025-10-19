@@ -13,14 +13,20 @@
     .status { margin: 10px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; }
     .error { color: #b42318; }
     ul.files { list-style: none; padding: 0; margin: 10px 0 0 0; display: grid; gap: 10px; }
-    .file { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
-    .file a { color: #1d4ed8; text-decoration: none; }
-    .file a:hover { text-decoration: underline; }
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+    .row a { color: #1d4ed8; text-decoration: none; }
+    .row a:hover { text-decoration: underline; }
     .meta { color: #64748b; font-size: 0.9rem; }
+    .kind { font-size: 0.85rem; padding: 2px 6px; border-radius: 999px; border: 1px solid #e2e8f0; margin-right: 8px; }
+    .kind.folder { background: #eef2ff; border-color: #c7d2fe; color: #3730a3; }
+    .kind.file { background: #f1f5f9; border-color: #e2e8f0; color: #334155; }
+    .crumbs { margin: 8px 0 0 0; font-size: 0.95rem; }
+    .crumbs a { color: #1d4ed8; text-decoration: none; }
+    .crumbs a:hover { text-decoration: underline; }
     @media (prefers-color-scheme: dark) {
       body { background: #0e0f12; color: #eaeef2; }
       .status { border-color: #1f2937; background: #0b0c10; }
-      .file { border-color: #1f2937; background: #0b0c10; }
+      .row { border-color: #1f2937; background: #0b0c10; }
       .muted, .meta { color: #9aa4b2; }
     }
   </style>
@@ -30,17 +36,52 @@
     <h1>Danh sách tệp trong kho</h1>
     <p class="muted">Nguồn: <code>albertthai-alt/browse</code> — duyệt tệp tại thư mục gốc qua GitHub API</p>
     <div id="status" class="status">Đang tải…</div>
+    <div id="crumbs" class="crumbs"></div>
     <ul id="files" class="files"></ul>
   </div>
 
 <script>
 const owner = 'albertthai-alt';
 const repo  = 'browse';
-const path  = ''; // root
+// Current path derived from URL hash (e.g. #quizlet/sub)
+function getPathFromHash() {
+  const raw = (location.hash || '').replace(/^#/, '');
+  const p = decodeURIComponent(raw);
+  // normalize to no leading/trailing '/'
+  return p.replace(/^\/+|\/+$/g, '');
+}
 
-// basePath: relative path from this page to the HTML files.
-// Using './' so links work on GitHub Pages when the files are in the same folder as this listing file.
-const basePath = './';
+function makeBasePath(path) {
+  return './' + (path ? path + '/' : '');
+}
+
+function setPath(newPath) {
+  const norm = (newPath || '').replace(/^\/+|\/+$/g, '');
+  location.hash = encodeURIComponent(norm);
+}
+
+function renderCrumbs(path) {
+  const el = document.getElementById('crumbs');
+  const parts = path ? path.split('/') : [];
+  const frag = document.createDocumentFragment();
+  const root = document.createElement('a');
+  root.href = '#';
+  root.textContent = 'Root';
+  root.onclick = (e) => { e.preventDefault(); setPath(''); };
+  frag.appendChild(root);
+  let acc = '';
+  parts.forEach((seg, idx) => {
+    frag.appendChild(document.createTextNode(' / '));
+    acc = acc ? (acc + '/' + seg) : seg;
+    const a = document.createElement('a');
+    a.href = '#' + encodeURIComponent(acc);
+    a.textContent = seg;
+    a.onclick = (e) => { e.preventDefault(); setPath(acc); };
+    frag.appendChild(a);
+  });
+  el.innerHTML = '';
+  el.appendChild(frag);
+}
 
 function formatSize(size) {
   try {
@@ -52,8 +93,10 @@ function formatSize(size) {
 }
 
 async function listFiles() {
-  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const path = getPathFromHash();
+  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path ? encodeURIComponent(path).replace(/%2F/g,'/') : ''}`;
   const statusEl = document.getElementById('status');
+  const basePath = makeBasePath(path);
   try {
     const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github.v3+json' }});
     if (!res.ok) {
@@ -64,23 +107,59 @@ async function listFiles() {
     }
     const items = await res.json();
 
-    const files = items
-      .filter(i => i.type === 'file' && i.name.toLowerCase() !== 'index.html')
-      .sort((a,b) => a.name.localeCompare(b.name));
+    // Separate dirs and files; exclude index.html
+    const dirs = items.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name));
+    const files = items.filter(i => i.type === 'file' && i.name.toLowerCase() !== 'index.html').sort((a,b) => a.name.localeCompare(b.name));
 
     const ul = document.getElementById('files');
     ul.innerHTML = '';
 
-    if (files.length === 0) {
-      statusEl.textContent = 'Không tìm thấy tệp nào trong thư mục gốc.';
+    renderCrumbs(path);
+    if (dirs.length === 0 && files.length === 0) {
+      statusEl.textContent = 'Thư mục trống.';
       return;
     }
 
-    files.forEach(f => {
+    // Render directories first
+    dirs.forEach(d => {
       const li = document.createElement('li');
-      li.className = 'file';
+      li.className = 'row';
 
       const left = document.createElement('div');
+      const tag = document.createElement('span');
+      tag.className = 'kind folder';
+      tag.textContent = 'Folder';
+      left.appendChild(tag);
+      const a = document.createElement('a');
+      const nextPath = path ? (path + '/' + d.name) : d.name;
+      a.href = '#' + encodeURIComponent(nextPath);
+      a.textContent = d.name + '/';
+      a.onclick = (e) => { e.preventDefault(); setPath(nextPath); };
+      left.appendChild(a);
+
+      const right = document.createElement('div');
+      right.className = 'meta';
+      const gh = document.createElement('a');
+      gh.href = d.html_url;
+      gh.textContent = 'GitHub';
+      gh.target = '_blank'; gh.rel = 'noopener';
+      right.appendChild(gh);
+
+      li.appendChild(left);
+      li.appendChild(right);
+      ul.appendChild(li);
+    });
+
+    // Render files
+    files.forEach(f => {
+      const li = document.createElement('li');
+      li.className = 'row';
+
+      const left = document.createElement('div');
+      const tag = document.createElement('span');
+      tag.className = 'kind file';
+      tag.textContent = 'File';
+      left.appendChild(tag);
       const a = document.createElement('a');
       a.href = basePath + encodeURIComponent(f.name).replace(/%2F/g, '/');
       a.textContent = f.name;
@@ -103,7 +182,7 @@ async function listFiles() {
       ul.appendChild(li);
     });
 
-    statusEl.textContent = 'Đã tìm thấy ' + files.length + ' tệp. Nhấp để mở.';
+    statusEl.textContent = 'Thư mục: ' + (path || '/') + ' — ' + dirs.length + ' thư mục, ' + files.length + ' tệp.';
   } catch (err) {
     console.error(err);
     document.getElementById('status').innerHTML = `<span class="error">Error: ${err.message}</span>`;
@@ -111,6 +190,7 @@ async function listFiles() {
   }
 }
 
+window.addEventListener('hashchange', listFiles);
 listFiles();
 </script>
 </body>
