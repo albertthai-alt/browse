@@ -163,7 +163,8 @@ async function listFiles() {
       const a = document.createElement('a');
       a.href = basePath + encodeURIComponent(f.name).replace(/%2F/g, '/');
       a.textContent = f.name;
-      a.target = '_self';
+      a.target = '_blank';
+      a.rel = 'noopener';
       left.appendChild(a);
 
       const right = document.createElement('div');
