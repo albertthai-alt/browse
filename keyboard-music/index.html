@@ -165,6 +165,12 @@ let songPos = 0; // index in songTokens
 let showSongNotes = true;
 let highlightKeyboardGuide = true;
 
+function getCurrentMap(inst = currentInstrument) {
+  const fromFile = (keymapJson && keymapJson[inst]) || null;
+  const fromDefault = (DEFAULT_KEYMAP && DEFAULT_KEYMAP[inst]) || null;
+  return fromFile || fromDefault || {};
+}
+
 function toSharpIfNeeded(name, useSharp) {
   if (!useSharp || !name) return name;
   const m = name.match(/^([A-G])(#|b)?(\d)$/);
@@ -453,7 +459,7 @@ function rebuildUI() {
   const kb = document.getElementById('keyboard');
   kb.innerHTML = '';
   const inst = instruments[currentInstrument];
-  const currentMap = keymapJson[currentInstrument] || {};
+  const currentMap = getCurrentMap();
   keyRows.forEach((rowKeys, idx)=>{
     const row = document.createElement('div');
     row.className = 'row ' + (idx===0?'r1':idx===1?'r2':'r3');
@@ -467,7 +473,7 @@ function rebuildUI() {
 }
 
 function refreshLabelsForShift() {
-  const currentMap = keymapJson[currentInstrument] || {};
+  const currentMap = getCurrentMap();
   for (const k of keyRows.flat()) {
     const note = currentMap[k] || '';
     const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
@@ -589,7 +595,7 @@ function updateKeyboardGuideHighlight() {
   if (!expected) return;
   const isSharp = expected.includes('#');
   // Find keys that map to expected note for current instrument
-  const currentMap = keymapJson[currentInstrument] || {};
+  const currentMap = getCurrentMap();
   for (const [k, v] of Object.entries(currentMap)) {
     // Match either direct mapping or sharped form
     if (v === expected || toSharpIfNeeded(v, true) === expected) {
@@ -633,7 +639,7 @@ window.addEventListener('keydown', (e)=>{
   pressedKeys.add(k);
   const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
   if (btn) btn.classList.add('active');
-  const currentMap = keymapJson[currentInstrument] || {};
+  const currentMap = getCurrentMap();
   let name = currentMap[k];
   name = toSharpIfNeeded(name, e.shiftKey || shiftHeld);
   const inst = instruments[currentInstrument];
