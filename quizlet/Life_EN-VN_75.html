@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thẻ ghi nhớ: Life EN-VN #75 — Standalone Trainer</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#0e0f12;color:#eaeef2}
+.container{max-width:900px;margin:0 auto;padding:16px;box-sizing:border-box}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand-title{font-weight:700;font-size:18px}
+.badge{background:#1f2937;color:#eaeef2;padding:4px 8px;border-radius:6px;font-size:12px}
+.section{background:#12141a;border:1px solid #1f2937;border-radius:12px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.btn{background:#334155;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background .15s}
+.btn:hover{background:#3f4a62}
+.btn.primary{background:#2563eb}
+.btn.secondary{background:#334155}
+.btn.active{background:#f59e0b;color:#111827}
+.status{margin-top:8px;min-height:20px;padding:6px 8px;border-radius:8px;background:#0b0c10;border:1px solid #1f2937}
+.status.success{border-color:#065f46;color:#34d399;background:#052b24}
+.status.error{border-color:#7f1d1d;color:#fca5a5;background:#2b0b0b}
+.prompt{white-space:pre-wrap;padding:10px;background:#0b0c10;border:1px solid #1f2937;border-radius:8px;margin:8px 0}
+.input{display:block;width:100%;max-width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #1f2937;background:#0b0c10;color:#eaeef2}
+.progress{opacity:.8}
+.summary{display:grid;gap:10px}
+.summary-item{border:1px solid #1f2937;border-radius:10px;padding:10px;background:#0b0c10}
+.summary-item.ok .badge{background:#065f46}
+.summary-item.fail .badge{background:#7f1d1d}
+pre{white-space:pre-wrap;margin:0}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand-title">Thẻ ghi nhớ: Life EN-VN #75</div>
+    <div class="badge">Standalone Practice/Test</div>
+  </div>
+  <div class="row" style="margin:6px 0 0 0"><div id="loadedCount" class="badge">Đang nạp...</div></div>
+  <script id="cardsData" type="application/json">[{"term":"Gulf","definition":"(n) vùng vịnh"},{"term":"coast","definition":"(n) bờ biển"},{"term":"seize","definition":"(v) chiếm đoạt, cướp lấy\n(...guard ___ food dropped by plane for Filipino forces)"},{"term":"hospice","definition":"(n) bệnh viện dành cho người hấp hối"},{"term":"Juror","definition":"(n) thành viên bồi thẩm đoàn"},{"term":"a blow to","definition":"(exp) một cú đánh vào"},{"term":"coalition","definition":"(n) liên minh\n(Modi may need a ___ to keep his job)"},{"term":"feat","definition":"(n) kỳ tích\n(calls path to victory a historical ___)"},{"term":"scuffle","definition":"(n,v) xô đẩy nhau, ẩu đả"},{"term":"handcuff","definition":"(v) còng tay"},{"term":"backlash","definition":"(n) sự phản ứng dữ dội\n(Eminem faces ___ after referring to...)"},{"term":"verdict","definition":"(n) lời tuyên án\n(after 34-count guilty ___)"},{"term":"Ammonia","definition":"(n) Amoniac (NH3)"},{"term":"Liberals","definition":"(n, plural) người theo chủ nghĩa tự do\n(Political decline of ___)"},{"term":"Nazis","definition":"(n) Đức quốc xã"},{"term":"Gas Chambers","definition":"(np) phòng hơi ngạt\n(___ ran out of gas the day l was born)"},{"term":"foe","definition":"(n) kẻ thù, kẻ địch\n(Trump faces experienced ___ in Democratic primary)"},{"term":"aunt","definition":"(n) cô, dì, bác gái"},{"term":"lure","definition":"(v) dụ dỗ"},{"term":"market manipulation","definition":"(np) thao túng thị trường"},{"term":"belly","definition":"(n) Bụng, dạ dày"},{"term":"python","definition":"(n) con trăn"},{"term":"spot (v)","definition":"(v) phát hiện\n(Or perhaps a different tool that is better a ___ing security issues)"},{"term":"pilgrim","definition":"(n) người hành hương"},{"term":"pact","definition":"(n) hiệp ước\n(U.S.-Saudi Petrodollar ___)"},{"term":"maiden name","definition":"(np) tên thời con gái"},{"term":"at odds with","definition":"(exp) mâu thuẫn với"},{"term":"serve a life sentence","definition":"(exp) lãnh án tù chung thân"},{"term":"make a pledge","definition":"(exp) cam kết"},{"term":"unwavering","definition":"(a) vững vàng, kiên định\n(Roger Federer extends ___ support to Rafael Nadal)"},{"term":"hoax","definition":"(n) trò chơi khăm"},{"term":"prank (v)","definition":"(v) chọc ghẹo, chơi khăm"},{"term":"self-inflicted","definition":"(a-p) tự đặt cho mình, tự giáng cho mình\n(amid ___ creativity crisis and price hikes)"},{"term":"envoy","definition":"(n) phái viên, đại diện ngoại giao\n(A top US ___ visits Beirut ...)"},{"term":"pouch","definition":"(n) túi nhỏ, bao nhỏ"},{"term":"asylum","definition":"(n) tị nạn, chỗ trú ẩn"},{"term":"hurdle","definition":"(n) rào cản, chướng ngại vật\n(Dutch leader Mark Rutte clears a big hurdle to becoming...)"},{"term":"praise","definition":"(v) ca ngợi\n(Putin ___ North Korea's 'firm support' for...)"},{"term":"revelation","definition":"(n) sự tiết lộ\n(ennifer Hudson shares major family ___)"},{"term":"quarterback","definition":"(n) tiền vệ (bóng bầu dục)"},{"term":"obliterate","definition":"(v) xoá sạch, phá huỷ sạch\n(Russia ___ Ukraine's frontline towns)"},{"term":"heir","definition":"(n) người thừa kế\n(Billionaire Coca-Cola ___Alki David ordered...)"},{"term":"intoxication","definition":"(n) say xỉn, trúng độc\n(Rapper Travis Scott arrested on disorderly ___ charge in Miami Beach)"},{"term":"sophisticated","definition":"(a) tinh vi, phức tạp"},{"term":"pilgrimage","definition":"(n) cuộc hành hương"},{"term":"defend","definition":"(v) bảo vệ\n(Lewis Hamilton ___ Max Verstappen...)"},{"term":"hostility","definition":"(n) sự thù địch"},{"term":"breach","definition":"(n) sự vi phạm\n(Woman claims ___ of contract after boyfriend fails to take her to the airport)"},{"term":"leaflet","definition":"(n) tờ rơi"}]</script>
+  <div class="section">
+    <div class="row">
+      <button id="modePractice" class="btn secondary" type="button" onclick="try{ switchToPractice(); }catch(e){}">Thực hành</button>
+      <button id="modeTest" class="btn secondary" type="button" onclick="try{ switchToTest(); }catch(e){}">Kiểm tra</button>
+      <button id="dirDefToTerm" class="btn secondary" type="button" onclick="try{ setDefToTerm(); }catch(e){}">Định nghĩa → Thuật ngữ</button>
+      <button id="dirTermToDef" class="btn secondary" type="button" onclick="try{ setTermToDef(); }catch(e){}">Thuật ngữ → Định nghĩa</button>
+      <span class="progress"><span id="idx">0</span>/<span id="tot">0</span></span>
+    </div>
+    <div id="prompt" class="prompt"></div>
+    <input id="answer" class="input" placeholder="Nhập câu trả lời..." onkeydown="if(event && (event.key==='Enter'||event.keyCode===13)){ event.preventDefault(); try{ check(); }catch(e){} }" />
+    <div class="row">
+      <button id="check" class="btn" type="button" onclick="try{ check(); }catch(e){}">Kiểm tra</button>
+      <button id="skip" class="btn secondary" type="button" onclick="try{ skip(); }catch(e){}">Bỏ qua</button>
+    </div>
+    <div id="fb" class="status"></div>
+  </div>
+  <div class="section">
+    <div class="badge">Kết quả</div>
+    <div id="summaryStats" class="badge" style="margin-bottom:8px;background:#1f2937;color:#eaeef2">Đang tính toán...</div>
+    <div id="sum" class="summary"></div>
+  </div>
+</div>
+<script>
+// Global error surface so page never looks frozen
+window.addEventListener('error', function(ev){
+  try {
+    var el = document.getElementById('loadedCount');
+    if (el) el.textContent = 'Lỗi khởi tạo: ' + (ev && ev.message ? ev.message : 'Không rõ');
+    var dbg = document.getElementById('dbg'); if (dbg) { dbg.style.display='block'; dbg.textContent = String((ev && ev.error) || ev.message || ev); }
+  } catch {}
+});
+var __cards_raw = (function(){ try { var el=document.getElementById('cardsData'); return el ? el.textContent || '' : ''; } catch(e){ return ''; } })();
+const cards=(function(){
+  try {
+    return JSON.parse(__cards_raw || '[]');
+  } catch (e) {
+    try { console.error('Parse cards failed:', e); } catch {}
+    return [];
+  }
+})();
+let mode='practice';
+let testDirection='def_to_term';
+let order=[];let tIdx=0;let pq=[];let results=[];let currentWasWrong=false;let currentFirstWrong='';let currentEnqueued=false;
+function n(s){
+  var txt = String(s == null ? '' : s);
+  try { if (String.prototype.normalize) txt = txt.normalize('NFKD'); } catch {}
+  txt = txt.replace(/\r?\n/g, ' ').replace(/\t/g, ' ');
+  txt = txt.toLowerCase();
+  // strip accents (combining marks) and map đ
+  txt = txt.replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+  // normalize curly quotes
+  txt = txt.replace(/[\u2018\u2019\u201C\u201D]/g, '"');
+  return txt;
+}
+function nf(s){
+  var t = n(s);
+  t = t.replace(/<[^>]*>/g, ' ');
+  t = t.replace(/\([^)]*\)/g, ' ');
+  // remove all non a-z0-9 and spaces, then collapse spaces
+  t = t.replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  // for strict compare, remove spaces entirely
+  return t.replace(/\s+/g, '');
+}
+function sh(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function gi(){if(mode==='practice')return pq.length?pq[0]:0;return order[tIdx]}
+// Inline helpers for buttons
+function switchToPractice(){ mode='practice'; updateModeButtons(); start(); }
+function switchToTest(){ mode='test'; updateModeButtons(); start(); }
+function setDefToTerm(){ testDirection='def_to_term'; updateDirButtons(); render(); }
+function setTermToDef(){ testDirection='term_to_def'; updateDirButtons(); render(); }
+function updateModeButtons(){
+  const mp=document.getElementById('modePractice');
+  const mt=document.getElementById('modeTest');
+  if(mp) mp.classList.toggle('active', mode==='practice');
+  if(mt) mt.classList.toggle('active', mode==='test');
+}
+function updateDirButtons(){
+  const d1=document.getElementById('dirDefToTerm');
+  const d2=document.getElementById('dirTermToDef');
+  if(d1) d1.classList.toggle('active', testDirection==='def_to_term');
+  if(d2) d2.classList.toggle('active', testDirection==='term_to_def');
+}
+function start(){
+  if(mode==='test'){
+    // Trong chế độ test, kiểm tra hết tất cả thẻ theo thứ tự gốc (không shuffle)
+    order=Array.from({length:cards.length},(_,i)=>i);
+  }else{
+    // Trong chế độ practice, shuffle để học hiệu quả hơn
+    order=sh(Array.from({length:cards.length},(_,i)=>i));
+  }
+  tIdx=0;pq=[];for(let i=0;i<cards.length;i++)pq.push(i);updateModeButtons();updateDirButtons();render()
+}
+// show loaded count (always attempt)
+(function(){ try { document.getElementById('loadedCount').textContent='Đã nạp ' + String(cards.length) + ' thẻ'; } catch (e) {} })();
+function render(){const c=cards[gi()];const p=document.getElementById('prompt');if(testDirection==='def_to_term'){p.textContent=c.definition||'';document.getElementById('answer').placeholder='Nhập thuật ngữ...'}else{p.textContent=c.term||'';document.getElementById('answer').placeholder='Nhập định nghĩa...'}
+document.getElementById('answer').value='';const fb=document.getElementById('fb');fb.textContent='';fb.className='status';document.getElementById('idx').textContent=mode==='practice'?String(cards.length-(pq.length-1)):String(tIdx+1);document.getElementById('tot').textContent=String(mode==='practice'?cards.length:order.length);currentWasWrong=false;currentFirstWrong='';currentEnqueued=false;}
+function check(){
+  const i=gi();
+  const c=cards[i];
+  const expectedRaw=(testDirection==='def_to_term'?c.term:c.definition)||'';
+  const exp=nf(expectedRaw);
+  const raw=(document.getElementById('answer').value||'').trim();
+  if(!raw) return;
+  const got=nf(raw);
+  if(exp && got && (got.length===exp.length) && (got===exp)){
+    const fb=document.getElementById('fb');
+    if(currentWasWrong){
+      fb.textContent='Đúng (sau khi sai lần đầu). Không tính điểm.';
+    } else {
+      fb.textContent='Đúng!';
+      results.push({index:i,term:c.term||'',definition:c.definition||'',userAnswer:raw,correctFirstTry:true});
+    }
+    fb.classList.remove('error');
+    fb.classList.add('success');
+    if(mode==='practice'){
+      nextP(true);
+    } else {
+      setTimeout(nextT, 800);
+    }
+  } else {
+    const correct=testDirection==='def_to_term'?(c.term||''):(c.definition||'');
+    const fb=document.getElementById('fb');
+    fb.textContent='Sai. Đáp án: '+correct;
+    fb.classList.remove('success');
+    fb.classList.add('error');
+    currentWasWrong=true;
+    if(!currentFirstWrong)currentFirstWrong=raw;
+    if(mode!=='practice'){
+      const already=results.some(r=>r.index===i);
+      if(!already){
+        results.push({index:i,term:c.term||'',definition:c.definition||'',userAnswer:currentFirstWrong||raw,correctFirstTry:false});
+      }
+      setTimeout(nextT, 800);
+    }
+    if(mode==='practice'){
+      const last=results[results.length-1];
+      const isDup=last&&last.index===i&&((last.userAnswer||'')===(raw||''));
+      if(!isDup){
+        results.push({index:i,term:c.term||'',definition:c.definition||'',userAnswer:raw,correctFirstTry:false});
+      }
+      if(!currentEnqueued){ pq.push(i); currentEnqueued=true; }
+    }
+  }
+}
+function skip(){const i=gi();const c=cards[i];results.push({index:i,term:c.term||'',definition:c.definition||'',userAnswer:'',correctFirstTry:false});if(mode==='practice'){nextP(false)}else{nextT()}}
+function nextT(){if(tIdx<order.length-1){tIdx+=1;render()}else{renderSummary('Kết quả kiểm tra')}}
+function nextP(ok){if(!pq.length)return;const cur=pq.shift();if(!ok)pq.push(cur);if(pq.length)render();else{renderSummary('Kết quả thực hành')}}
+function renderSummary(title){
+  document.getElementById('prompt').textContent='';
+  document.getElementById('fb').textContent=title;
+  const g=new Map();
+  for(const r of results){
+    if(!g.has(r.index)) g.set(r.index,{term:r.term,definition:r.definition,attempts:[],correctFirstTry:r.correctFirstTry});
+    const item=g.get(r.index);
+    item.attempts.push(r.userAnswer||'(bỏ qua)');
+  }
+  
+  // Tính thống kê
+  const totalCards = g.size || cards.length;
+  const correctCount = Array.from(g.values()).filter(item => item.correctFirstTry).length;
+  const percent = totalCards ? Math.round((correctCount / totalCards) * 100) : 0;
+  
+  // Hiển thị thống kê
+  const statsEl = document.getElementById('summaryStats');
+  if(statsEl) {
+    statsEl.textContent = 'Kết quả: ' + correctCount + '/' + totalCards + ' câu đúng (' + percent + '%)';
+  }
+  
+  const items=Array.from(g.entries()).map(function(entry, i){
+    const item=entry[1];
+    const ok=!!item.correctFirstTry;
+    const cls=ok?'ok':'fail';
+    const ans = (mode==='test')
+      ? ('<pre>' + (item.attempts[0]||'') + '</pre>')
+      : ('<ol>' + item.attempts.map(function(a){ return '<li><pre>' + a + '</pre></li>'; }).join('') + '</ol>');
+    return '<div class="summary-item ' + cls + '">' +
+           '<div class="badge">' + (ok?'Đúng':'Sai') + '</div>' +
+           '<div><span class="badge">#' + (i+1) + '</span></div>' +
+           '<div><span class="badge">Thuật ngữ</span> <pre>' + (item.term||'') + '</pre></div>' +
+           '<div><span class="badge">Định nghĩa</span> <pre>' + (item.definition||'') + '</pre></div>' +
+           '<div><span class="badge">Bạn trả lời</span> ' + ans + '</div>' +
+           '</div>';
+  }).join('');
+  document.getElementById('sum').innerHTML=items;
+}
+document.getElementById('tot').textContent=String(cards.length);
+start();
+</script>
+</body>
+</html>
