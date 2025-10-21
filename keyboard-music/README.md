@@ -1,17 +1,17 @@
 # Keyboard Music
 
-A simple browser-based musical keyboard that maps your computer keys to notes. Includes multiple instruments (Piano via Tone.js, Tank Drum, Sáo), Shift-to-sharp modifier, and a guided song player that highlights lyrics and suggests notes.
+A simple browser-based musical keyboard that maps your computer keys to notes. Includes multiple instruments (Piano via Tone.js Sampler), Tank Drum, Sáo, Handpan, Đàn đá (Lithophone), and Đàn tre. Supports Shift-to-sharp, keyboard highlighting, and a guided song player.
 
 ## Features
-- **Piano instrument (default)** using Tone.js poly synth.
-- **Tank Drum** and **Sáo** with sample/synth fallbacks.
-- **Keyboard mapping** with on-screen keys and active state.
-- **Shift-to-sharp**: Holding Shift turns eligible notes F, G, A, C, D into their sharp variants.
+- **Piano (default)**: High-quality Salamander piano via Tone.js `Sampler`, with sustain/hold and subtle reverb.
+- **Other instruments**: Tank Drum (longer ring), Sáo (sustained/vibrato), Handpan (soft, long decay), Đàn đá/Lithophone (bright mallet), Đàn tre.
+- **Keyboard mapping**: On-screen keys, active state, and special guidance highlight.
+- **Shift-to-sharp**: Hold Shift to play sharps for base notes F, G, A, C, D. Sharp guidance uses a distinct red solid outline to indicate Shift is needed.
 - **Song player**:
   - Load a `.txt` file describing lyrics + target notes.
-  - Shows note hints under each lyric token (toggleable).
-  - Highlights the current token and marks completed notes.
-  - Optional guide highlight on the on-screen keyboard for the next expected note.
+  - Show/hide note hints per token (toggle).
+  - Keyboard guidance highlight (toggle). Sharp notes get special highlight.
+  - Progressively highlights and completes tokens as you play correct notes.
 - **Inline favicon**: orange music note icon.
 
 ## Getting Started
@@ -21,24 +21,27 @@ A simple browser-based musical keyboard that maps your computer keys to notes. I
 No build step required.
 
 ## Instruments
-- `Piano` (default): Uses Tone.js. Does not require local samples.
-- `Tank Drum` and `Sáo`: Attempt to load wav samples from folders (if present). If missing, fall back to WebAudio synthesizers.
+- `Piano` (default): Tone.js `Sampler` (Salamander). No local samples needed.
+- `Tank Drum`: WebAudio synth with longer decay tail.
+- `Sáo`: WebAudio sustained tone with gentle vibrato.
+- `Handpan`: WebAudio soft attack, harmonic blend, long decay.
+- `Đàn đá (Lithophone)`: WebAudio bright/glassy mallet with medium-long ring.
+- `Đàn tre`: WebAudio percussive.
 
 Switch instruments via the dropdown in the page header.
 
 ## Keyboard Controls
-- Toggle keyboard hotkeys: checkbox "Bật phím tắt".
-- Keys are shown on screen in three rows. Clicking a key with the mouse/touch also plays the mapped note.
-- Holding **Shift** plays sharps for base notes in `{F, G, A, C, D}` and updates labels accordingly.
-- Remapping basics come from `keymap.json`. Example mapping:
-  - `z` → `A5` (note: key `;` is intentionally unmapped and removed from UI).
+- **Bật phím tắt**: enable/disable keyboard.
+- On-screen keys mirror the mapping; mouse/touch works too.
+- Hold **Shift** for sharps; labels update accordingly.
+- Sharps in guidance are shown with a bold red outline to remind you to hold Shift.
+- Key mapping comes from `keymap.json`. Example: `z` → `A5` (key `;` removed).
 
 ## Song Player
-1. Use the "Tải bài hát (.txt)" file picker to select a song file.
-2. Click "Tải & Hiển thị" to render the lyrics and notes.
-3. Play notes on your keyboard or by clicking keys.
-4. Correct notes advance the current lyric token until the song ends.
-5. Use "Reset bài" to start over.
+1. Use the "Tải bài hát (.txt)" picker → "Tải & Hiển thị".
+2. Play by keyboard or clicking keys.
+3. Correct notes advance and complete tokens; line breaks auto-advance to the next line's first token.
+4. Use "Reset bài" to restart.
 
 ### Song File Format
 Plain text file with tokens in the form:
@@ -54,27 +57,28 @@ hap{A4}py{A4} birth{A4}day{F4} to{G4} you{F4}
 - Notes must be in scientific pitch like `C4`, `F#4`, `Bb3` (flats are parsed but keyboard sharp toggle is the primary helper).
 
 ### Song View Options
-- "Hiển thị nốt nhạc" (default ON): show/hide note hints under each lyric token.
-- "Highlight bàn phím" (default ON): highlights on-screen key(s) mapped to the next expected note.
+- **Hiển thị nốt nhạc** (ON): show/hide note hints.
+- **Highlight bàn phím** (ON): highlight on-screen key(s) for the next expected note.
+- Sharp notes use a distinct style to indicate holding Shift.
 
 ## Project Structure
 ```
 keyboard-music/
-├─ index.html        # App UI + logic (no build step needed)
-├─ keymap.json       # Key-to-note mappings per instrument
-├─ tone.js           # Tone.js piano setup
-├─ Happy Birthday.txt# Example song file
-└─ tank drum/        # Sample wavs (optional, used by Tank Drum)
+├─ index.html         # App UI + logic (no build step needed)
+├─ keymap.json        # Key-to-note mappings per instrument
+├─ tone.js            # Tone.js piano (Sampler + reverb), attack/release helpers
+└─ Happy Birthday.txt # Example song file
 ```
 
 ## Dependencies
-- [Tone.js](https://tonejs.github.io/) loaded via CDN.
+- [Tone.js](https://tonejs.github.io/) via CDN (Sampler + Reverb).
 - Browser Web Audio API.
 
 ## Notes & Limitations
-- Opening via `file://` uses default keymaps if `keymap.json` cannot be fetched.
-- For best compatibility, serve via a local server or open directly in Chromium-based browsers which allow audio context unlock on user gesture.
-- Shift-to-sharp guidance compares exact note names; ensure song notes match the intended octave and accidental.
+- Robust keymap loading: tries multiple paths with cache-busting; falls back to `DEFAULT_KEYMAP` if fetch fails.
+- Opening via `file://`: still works using default keymaps if fetching is blocked.
+- For best compatibility, serve via a local server or use Chromium-based browsers for audio unlock.
+- Guidance compares exact note names; ensure song notes match octave/accidentals.
 
 ## License
 MIT (or your preferred license; update as needed).

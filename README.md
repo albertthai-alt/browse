@@ -6,7 +6,7 @@ Simple client-only browser for a GitHub repository’s root and subfolders.
 
 - **Repo target**: `albertthai-alt/browse` (GitHub REST API v3).
 - **List contents** at any path (root and subfolders).
-- **Exclude** `index.html` from the file list (all other files are shown).
+- **List all files** (including `index.html`).
 - **Folders** appear first; click to navigate into them.
 - **Breadcrumbs** and **Back/Forward** support via hash-based routing.
 - **Open files in a new tab** (keeps the listing in place).

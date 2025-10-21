@@ -1,0 +1,4 @@
+hap{G4}py{G4} birth{A4}day{G4} to{C5} you{B4}
+hap{G4}py{G4} birth{A4}day{G4} to{D5} you{C5}
+hap{G4}py{G4} birth{G5}day{E5} dear{C5} [name]{B4}{A4}
+hap{F#5}py{F#5} birth{E5}day{C5} to{D5} you{C5}

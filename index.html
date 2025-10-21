@@ -111,7 +111,7 @@ async function listFiles() {
 
     // Separate dirs and files; exclude index.html
     const dirs = items.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name));
-    const files = items.filter(i => i.type === 'file' && i.name.toLowerCase() !== 'index.html').sort((a,b) => a.name.localeCompare(b.name));
+    const files = items.filter(i => i.type === 'file').sort((a,b) => a.name.localeCompare(b.name));
 
     const ul = document.getElementById('files');
     ul.innerHTML = '';
