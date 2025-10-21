@@ -48,8 +48,8 @@
       <option value="dan-tre">Đàn tre</option>
     </select>
   </label>
-  <label><input type="checkbox" id="keydownToggle" checked> Bật phím tắt</label>
-  <button id="stopAll">Dừng tất cả</button>
+  <label><input type="checkbox" id="toggleSolfege"> Hiển thị do re mi</label>
+  <label style="margin-left:8px;"><input type="checkbox" id="toggleSongMode"> Chơi theo bài hát</label>
 </div>
 
 <div class="song-controls">
@@ -63,6 +63,7 @@
 </div>
 <div class="song" id="songArea"></div>
 
+<script src="./keymap.js"></script>
 <script>
 // Instruments: add Piano (Tone.js based)
 const instruments = {
@@ -164,6 +165,8 @@ let songTokens = []; // [{text: string, notes: ["C4",...], doneSteps: number}]
 let songPos = 0; // index in songTokens
 let showSongNotes = true;
 let highlightKeyboardGuide = true;
+let showSolfege = false;
+let songMode = false;
 
 function getCurrentMap(inst = currentInstrument) {
   const fromFile = (keymapJson && keymapJson[inst]) || null;
@@ -183,6 +186,26 @@ function toSharpIfNeeded(name, useSharp) {
   if (!eligible[base] || accidental) return name;
   // Edge case for E and B are excluded by eligible
   return base + '#' + oct;
+}
+
+// Convert note name to solfege with octave (e.g., C4 -> "do 4", F#3 -> "fa# 3")
+function noteToSolfege(name) {
+  if (!name) return '-';
+  const m = name.match(/^([A-G])(#|b)?(\d)$/);
+  if (!m) return name;
+  const base = m[1];
+  const acc = m[2] || '';
+  const oct = m[3];
+  const map = { C:'do', D:'re', E:'mi', F:'fa', G:'sol', A:'la', B:'si' };
+  const syl = map[base] || base.toLowerCase();
+  const accTxt = acc === '#' ? '#' : (acc === 'b' ? 'b' : '');
+  return syl + accTxt + ' ' + oct;
+}
+
+function formatKeyLabel(note) {
+  const n = toSharpIfNeeded(note, shiftHeld);
+  if (showSolfege) return noteToSolfege(n);
+  return n || '-';
 }
 
 function ensureAudioContext() {
@@ -205,6 +228,38 @@ function noteToFreq(n) {
   return A4 * Math.pow(2, (midi - midiA4) / 12);
 }
 
+// --- Flute (Sáo) sustain helpers ---
+function startFluteSustain(note) {
+  const freq = noteToFreq(note);
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.frequency.value = 5; // Hz
+  lfoGain.gain.value = 10; // cents
+  lfo.connect(lfoGain).connect(osc.detune);
+  const gain = audioCtx.createGain();
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.55, now + 0.06); // attack
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  lfo.start();
+  let stopped = false;
+  return function stop() {
+    if (stopped) return; stopped = true;
+    const t = audioCtx.currentTime;
+    try {
+      gain.gain.cancelScheduledValues(t);
+      gain.gain.setValueAtTime(gain.gain.value, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    } catch(_) {}
+    try { osc.stop(t + 0.14); } catch(_) {}
+    try { lfo.stop(t + 0.14); } catch(_) {}
+  };
+}
+
 async function loadSamplesForInstrument(instKey) {
   const inst = instruments[instKey];
   const bufs = buffersByInstrument[instKey] || (buffersByInstrument[instKey] = {});
@@ -224,33 +279,20 @@ async function loadSamplesForInstrument(instKey) {
 }
 
 async function loadKeymap() {
-  // Try to fetch keymap.json in hosted environments; fall back to DEFAULT_KEYMAP.
-  // Also attempt cache-busting to avoid stale CDN caches.
-  const tryPaths = [
-    new URL('keymap.json', location.href).toString(),
-    './keymap.json',
-    'keymap.json'
-  ];
-  let loaded = false;
-  for (const base of tryPaths) {
-    const url = base + (base.includes('?') ? '&' : '?') + 'v=' + Date.now();
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) continue;
-      const text = await res.text();
-      // Strip BOM if present
-      const clean = text.replace(/^\uFEFF/, '');
-      keymapJson = JSON.parse(clean);
-      loaded = true;
-      break;
-    } catch (e) {
-      // continue trying next path
-    }
+  // Prefer shared JS keymap when available; otherwise fall back to DEFAULT_KEYMAP
+  if (window && window.SHARED_KEYMAP) {
+    const shared = window.SHARED_KEYMAP;
+    keymapJson = {
+      'piano': shared,
+      'tank-drum': shared,
+      'sao': shared,
+      'handpan': shared,
+      'dan-da': shared,
+      'dan-tre': shared
+    };
+    return;
   }
-  if (!loaded) {
-    // If opened from file:// or fetch failed, use embedded default
-    keymapJson = DEFAULT_KEYMAP;
-  }
+  keymapJson = DEFAULT_KEYMAP;
 }
 
 function makeKeyButton(k, mappedNote, available) {
@@ -258,7 +300,7 @@ function makeKeyButton(k, mappedNote, available) {
   btn.className = 'key';
   btn.setAttribute('data-key', k);
   const labelNote = toSharpIfNeeded(mappedNote, shiftHeld);
-  btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${labelNote || '-'}</div>`;
+  btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${formatKeyLabel(mappedNote)}</div>`;
   if (!available && mappedNote) btn.classList.add('unavailable');
   btn.addEventListener('pointerdown', ()=> {
     ensureAudioContext();
@@ -266,10 +308,14 @@ function makeKeyButton(k, mappedNote, available) {
     const playName = toSharpIfNeeded(mappedNote, shiftHeld);
     if (playName && available) {
       if (currentInstrument === 'piano' && window.tonePiano) {
-        // Ensure song guidance advances even for piano
-        handleNotePlayed(playName);
+        // Song guidance advances only in song mode
+        if (songMode) handleNotePlayed(playName);
         window.tonePiano.attack(playName);
         btn.dataset.activeNote = playName;
+      } else if (currentInstrument === 'sao') {
+        // Sáo sustain while holding
+        if (songMode) handleNotePlayed(playName);
+        btn._fluteStop = startFluteSustain(playName);
       } else {
         playNote(playName);
       }
@@ -280,6 +326,9 @@ function makeKeyButton(k, mappedNote, available) {
     if (currentInstrument === 'piano' && window.tonePiano && btn.dataset.activeNote) {
       window.tonePiano.release(btn.dataset.activeNote);
       delete btn.dataset.activeNote;
+    } else if (currentInstrument === 'sao' && btn._fluteStop) {
+      try { btn._fluteStop(); } catch(_){}
+      delete btn._fluteStop;
     }
   });
   btn.addEventListener('pointerleave', ()=> {
@@ -287,6 +336,9 @@ function makeKeyButton(k, mappedNote, available) {
     if (currentInstrument === 'piano' && window.tonePiano && btn.dataset.activeNote) {
       window.tonePiano.release(btn.dataset.activeNote);
       delete btn.dataset.activeNote;
+    } else if (currentInstrument === 'sao' && btn._fluteStop) {
+      try { btn._fluteStop(); } catch(_){}
+      delete btn._fluteStop;
     }
   });
   return btn;
@@ -294,7 +346,7 @@ function makeKeyButton(k, mappedNote, available) {
 
 function playNote(name) {
   // Validate against song if any
-  handleNotePlayed(name);
+  if (songMode) handleNotePlayed(name);
   if (currentInstrument === 'piano' && window.tonePiano) {
     window.tonePiano.play(name);
     return;
@@ -451,9 +503,28 @@ function stopAll() {
   if (currentInstrument === 'piano' && window.tonePiano) {
     window.tonePiano.stopAll();
   }
+  if (window._fluteActiveByKey) {
+    for (const k in window._fluteActiveByKey) {
+      try { window._fluteActiveByKey[k](); } catch(_){ }
+      delete window._fluteActiveByKey[k];
+    }
+  }
 }
 
-document.getElementById('stopAll').addEventListener('click', stopAll);
+function updateSongModeUI() {
+  const sc = document.querySelector('.song-controls');
+  const sa = document.getElementById('songArea');
+  if (!sc || !sa) return;
+  sc.style.display = songMode ? '' : 'none';
+  sa.style.display = songMode ? '' : 'none';
+  if (!songMode) {
+    // Clear any guide highlights when hiding
+    document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
+    document.querySelectorAll('.key.guide-sharp').forEach(el=> el.classList.remove('guide-sharp'));
+  } else {
+    updateKeyboardGuideHighlight();
+  }
+}
 
 function rebuildUI() {
   const kb = document.getElementById('keyboard');
@@ -477,7 +548,7 @@ function refreshLabelsForShift() {
   for (const k of keyRows.flat()) {
     const note = currentMap[k] || '';
     const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
-    if (el) el.textContent = toSharpIfNeeded(note, shiftHeld) || '-';
+    if (el) el.textContent = formatKeyLabel(note);
   }
 }
 
@@ -584,6 +655,7 @@ function updateKeyboardGuideHighlight() {
   // Clear previous guide highlights
   document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
   document.querySelectorAll('.key.guide-sharp').forEach(el=> el.classList.remove('guide-sharp'));
+  if (!songMode) return;
   if (!highlightKeyboardGuide) return;
   if (!songTokens.length) return;
   // Find next token needing a note
@@ -610,6 +682,8 @@ function updateKeyboardGuideHighlight() {
   rebuildUI();
   await loadSamplesForInstrument(currentInstrument);
   console.log('Samples loaded for', currentInstrument);
+  // Initialize song mode UI (default hidden)
+  updateSongModeUI();
 })();
 
 document.getElementById('instrumentSelect').addEventListener('change', async (e)=>{
@@ -632,7 +706,6 @@ document.getElementById('pasteSongBtn').addEventListener('click', ()=>{
 });
 
 window.addEventListener('keydown', (e)=>{
-  if (!document.getElementById('keydownToggle').checked) return;
   const k = e.key.toLowerCase();
   if (k === 'shift') { if (!shiftHeld) { shiftHeld = true; refreshLabelsForShift(); } return; }
   if (pressedKeys.has(k)) return; // avoid repeats until keyup
@@ -652,6 +725,11 @@ window.addEventListener('keydown', (e)=>{
       window.tonePiano.attack(name);
       // store mapping for release
       (window._pianoActiveByKey = window._pianoActiveByKey || {})[k] = name;
+    } else if (currentInstrument === 'sao') {
+      // Sáo sustain while key is held
+      handleNotePlayed(name);
+      const stop = startFluteSustain(name);
+      (window._fluteActiveByKey = window._fluteActiveByKey || {})[k] = stop;
     } else {
       playNote(name);
     }
@@ -668,6 +746,10 @@ window.addEventListener('keyup', (e)=>{
     const note = window._pianoActiveByKey[k];
     window.tonePiano.release(note);
     delete window._pianoActiveByKey[k];
+  } else if (currentInstrument === 'sao' && window._fluteActiveByKey && window._fluteActiveByKey[k]) {
+    const stop = window._fluteActiveByKey[k];
+    try { stop(); } catch(_){}
+    delete window._fluteActiveByKey[k];
   }
 });
 
@@ -698,6 +780,14 @@ document.getElementById('toggleShowNotes').addEventListener('change', (e)=>{
 document.getElementById('toggleHighlightKeys').addEventListener('change', (e)=>{
   highlightKeyboardGuide = !!e.target.checked;
   updateKeyboardGuideHighlight();
+});
+document.getElementById('toggleSolfege').addEventListener('change', (e)=>{
+  showSolfege = !!e.target.checked;
+  refreshLabelsForShift();
+});
+document.getElementById('toggleSongMode').addEventListener('change', (e)=>{
+  songMode = !!e.target.checked;
+  updateSongModeUI();
 });
 </script>
 <!-- Tone.js and piano layer -->
