@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Keyboard Music</title>
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="%23fff3e6"/><path d="M44 10v28.5c0 4.418-5.373 8-12 8s-12-3.582-12-8 5.373-8 12-8c2.21 0 4.245.43 6 .118V10h6z" fill="%23ff7a00"/></svg>' />
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; display:flex; flex-direction:column; align-items:center; padding:24px; background: #faf7f3; color:#222; }
+  h1 { margin-bottom:8px; }
+  p { margin-top:0; color:#444; }
+  .keyboard { display:flex; flex-direction:column; gap:8px; margin-top:18px; }
+  .row { display:flex; gap:8px; }
+  .row.r2 { margin-left: 28px; }
+  .row.r3 { margin-left: 56px; }
+  .key { width:52px; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(180deg,#fff 0%,#f0efe8 100%); border:1px solid #ddd; border-radius:8px; box-shadow: 0 6px 18px rgba(30,30,30,0.06); cursor:pointer; user-select:none; }
+  .key .k { font-weight:600; }
+  .key .n { font-size:11px; color:#666; margin-top:2px; }
+  .key:active { transform: translateY(2px) scale(.995); box-shadow:none; }
+  .key.active { outline:2px solid #0a66c2; outline-offset:-2px; }
+  .key.unavailable { opacity: .45; filter: grayscale(25%); cursor: default; }
+  .controls { margin-top:18px; }
+  label { margin-right:8px; }
+  .song { margin-top:18px; max-width: 820px; line-height: 2; }
+  .token { display:inline-block; padding:2px 4px; border-radius:6px; margin:2px 3px; background:#fff; border:1px solid #eee; }
+  .token .hints { display:block; font-size:10px; color:#777; margin-top:1px; }
+  .token.current { outline:2px solid #0a66c2; outline-offset:1px; background:#eef5ff; }
+  .token.done { background:#e9f9ee; border-color:#bdebd0; }
+  .token .doneStep { color:#3a8f5d; }
+  .song-controls { margin-top:10px; }
+  .key.guide { outline:2px dashed #ff7a00; outline-offset:-2px; }
+  
+</style>
+</head>
+<body>
+<h1>Keyboard Music</h1>
+<div class="keyboard" id="keyboard"></div>
+<div class="controls">
+  <label>Nhạc cụ:
+    <select id="instrumentSelect">
+      <option value="piano" selected>Piano</option>
+      <option value="tank-drum">Tank Drum</option>
+      <option value="sao">Sáo</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="keydownToggle" checked> Bật phím tắt</label>
+  <button id="stopAll">Dừng tất cả</button>
+</div>
+
+<div class="song-controls">
+  <label>Tải bài hát (.txt): <input type="file" id="songFile" accept=".txt" /></label>
+  <button id="loadSongBtn">Tải & Hiển thị</button>
+  <button id="resetSongBtn">Reset bài</button>
+  <label><input type="checkbox" id="toggleShowNotes" checked> Hiển thị nốt nhạc</label>
+  <label><input type="checkbox" id="toggleHighlightKeys" checked> Highlight bàn phím</label>
+</div>
+<div class="song" id="songArea"></div>
+
+<script>
+// Instruments: add Piano (Tone.js based)
+const instruments = {
+  'piano': {
+    label: 'Piano',
+    synth: 'tone-piano',
+    pathPrefix: '',
+    notes: [] // availability not restricted
+  },
+  'tank-drum': {
+    label: 'Tank Drum',
+    synth: 'percussive',
+    pathPrefix: 'tank drum/',
+    notes: ['C4','D4','E4','G4','A4','C5','D5','E5']
+  },
+  'sao': {
+    label: 'Sáo',
+    synth: 'flute',
+    pathPrefix: 'sao/',
+    // Use a bit higher register for sáo
+    notes: ['C5','D5','E5','G5','A5','C6','D6','E6']
+  }
+};
+let currentInstrument = 'piano';
+
+// Default keymap used when running from file:// or when fetching keymap.json fails
+const DEFAULT_KEYMAP = {
+  'tank-drum': {
+    q:'C3', w:'D3', e:'E3', r:'F3', t:'G3', y:'A3', u:'B3',
+    i:'C4', o:'D4', p:'E4', a:'F4', s:'G4', d:'A4', f:'B4',
+    g:'C5', h:'D5', j:'E5', k:'F5', l:'G5',
+    z:'A5', x:'C6', c:'D6', v:'E6', b:'F6', n:'G6', m:'A6', ',':'B6'
+  },
+  'sao': {
+    q:'C3', w:'D3', e:'E3', r:'F3', t:'G3', y:'A3', u:'B3',
+    i:'C4', o:'D4', p:'E4', a:'F4', s:'G4', d:'A4', f:'B4',
+    g:'C5', h:'D5', j:'E5', k:'F5', l:'G5',
+    z:'A5', x:'C6', c:'D6', v:'E6', b:'F6', n:'G6', m:'A6', ',':'B6'
+  },
+  'piano': {
+    q:'C3', w:'D3', e:'E3', r:'F3', t:'G3', y:'A3', u:'B3',
+    i:'C4', o:'D4', p:'E4', a:'F4', s:'G4', d:'A4', f:'B4',
+    g:'C5', h:'D5', j:'E5', k:'F5', l:'G5',
+    z:'A5', x:'C6', c:'D6', v:'E6', b:'F6', n:'G6', m:'A6', ',':'B6'
+  }
+};
+
+const keyRows = [
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['z','x','c','v','b','n','m',',']
+];
+const keyOrderFlat = keyRows.flat();
+const keyMap = ['z','x','c','v','b','n','m',',']; // legacy note order for quick mapping if needed
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const buffersByInstrument = { 'tank-drum': {}, 'sao': {} }; // instrument -> { name -> AudioBuffer|undefined }
+let keymapJson = {}; // loaded from keymap.json
+let pressedKeys = new Set();
+let shiftHeld = false;
+
+// Song state
+let songTokens = []; // [{text: string, notes: ["C4",...], doneSteps: number}]
+let songPos = 0; // index in songTokens
+let showSongNotes = true;
+let highlightKeyboardGuide = true;
+
+function toSharpIfNeeded(name, useSharp) {
+  if (!useSharp || !name) return name;
+  const m = name.match(/^([A-G])(#|b)?(\d)$/);
+  if (!m) return name;
+  const base = m[1];
+  const accidental = m[2] || '';
+  const oct = m[3];
+  // Only sharpify for F,G,A,C,D when no existing accidental
+  const eligible = { F:1, G:1, A:1, C:1, D:1 };
+  if (!eligible[base] || accidental) return name;
+  // Edge case for E and B are excluded by eligible
+  return base + '#' + oct;
+}
+
+function ensureAudioContext() {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(()=>{});
+  }
+}
+
+function noteToFreq(n) {
+  // Parse like C#4, Db4, etc.
+  const A4 = 440;
+  const map = { C:0, 'C#':1, Db:1, D:2, 'D#':3, Eb:3, E:4, F:5, 'F#':6, Gb:6, G:7, 'G#':8, Ab:8, A:9, 'A#':10, Bb:10, B:11 };
+  const m = n.match(/^([A-G](?:#|b)?)(\d)$/);
+  if (!m) return 440;
+  const [, pc, octStr] = m;
+  const octave = parseInt(octStr,10);
+  const semitone = map[pc];
+  const midi = (octave + 1) * 12 + semitone; // MIDI note number
+  const midiA4 = 69;
+  return A4 * Math.pow(2, (midi - midiA4) / 12);
+}
+
+async function loadSamplesForInstrument(instKey) {
+  const inst = instruments[instKey];
+  const bufs = buffersByInstrument[instKey];
+  for (let i = 0; i < inst.notes.length; i++) {
+    const name = inst.notes[i];
+    const path = inst.pathPrefix + name + '.wav';
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error('Missing sample');
+      const ab = await res.arrayBuffer();
+      const buf = await audioCtx.decodeAudioData(ab);
+      bufs[name] = buf;
+    } catch (e) {
+      bufs[name] = undefined; // fallback to synth
+    }
+  }
+}
+
+async function loadKeymap() {
+  // If opened from file://, avoid fetch due to CORS and use embedded default
+  if (location.protocol === 'file:') {
+    keymapJson = DEFAULT_KEYMAP;
+    return;
+  }
+  try {
+    const res = await fetch('keymap.json');
+    if (!res.ok) throw new Error('missing keymap.json');
+    keymapJson = await res.json();
+  } catch (_) {
+    keymapJson = DEFAULT_KEYMAP;
+  }
+}
+
+function makeKeyButton(k, mappedNote, available) {
+  const btn = document.createElement('div');
+  btn.className = 'key';
+  btn.setAttribute('data-key', k);
+  const labelNote = toSharpIfNeeded(mappedNote, shiftHeld);
+  btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${labelNote || '-'}</div>`;
+  if (!available && mappedNote) btn.classList.add('unavailable');
+  btn.addEventListener('pointerdown', ()=> {
+    ensureAudioContext();
+    btn.classList.add('active');
+    const playName = toSharpIfNeeded(mappedNote, shiftHeld);
+    if (playName && available) playNote(playName);
+  });
+  btn.addEventListener('pointerup', ()=> { btn.classList.remove('active'); });
+  btn.addEventListener('pointerleave', ()=> { btn.classList.remove('active'); });
+  return btn;
+}
+
+function playNote(name) {
+  // Validate against song if any
+  handleNotePlayed(name);
+  if (currentInstrument === 'piano' && window.tonePiano) {
+    window.tonePiano.play(name);
+    return;
+  }
+  const bufs = buffersByInstrument[currentInstrument] || {};
+  const buf = bufs[name];
+  (window._playing = window._playing || []);
+  if (buf) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 1.0;
+    src.connect(gain).connect(audioCtx.destination);
+    src.start();
+    window._playing.push({ stop: () => { try { src.stop(); } catch(_){} }, node: src });
+    src.onended = ()=> {
+      const idx = window._playing.findIndex(o=>o.node===src);
+      if (idx>=0) window._playing.splice(idx,1);
+    };
+    return;
+  }
+  const freq = noteToFreq(name);
+  if (instruments[currentInstrument].synth === 'percussive') {
+    // Tank drum-like percussive hit
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq * 2; // add harmonic
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = freq * 1.5;
+    filter.Q.value = 6;
+    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    const now = audioCtx.currentTime;
+    gain.gain.exponentialRampToValueAtTime(0.8, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain).connect(audioCtx.destination);
+    osc1.start();
+    osc2.start();
+    const stopAt = now + 1.05;
+    osc1.stop(stopAt);
+    osc2.stop(stopAt);
+    const playingObj = { stop: () => { try { osc1.stop(); } catch(_){} try { osc2.stop(); } catch(_){} }, node: osc1 };
+    window._playing.push(playingObj);
+    osc1.onended = () => {
+      const idx = window._playing.indexOf(playingObj);
+      if (idx>=0) window._playing.splice(idx,1);
+    };
+  } else {
+    // Sáo-like sustained tone with light vibrato
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    lfo.frequency.value = 5; // 5 Hz vibrato
+    lfoGain.gain.value = 15; // cents
+    lfo.connect(lfoGain).connect(osc.detune);
+    const gain = audioCtx.createGain();
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    // Gentle attack and decay
+    gain.gain.exponentialRampToValueAtTime(0.6, now + 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    lfo.start();
+    const stopAt = now + 1.25;
+    osc.stop(stopAt);
+    lfo.stop(stopAt);
+    const playingObj = { stop: () => { try { osc.stop(); } catch(_){} try { lfo.stop(); } catch(_){} }, node: osc };
+    window._playing.push(playingObj);
+    osc.onended = () => {
+      const idx = window._playing.indexOf(playingObj);
+      if (idx>=0) window._playing.splice(idx,1);
+    };
+  }
+}
+
+function stopAll() {
+  if (!window._playing) return;
+  window._playing.forEach(o=>{ try{ o.stop(); } catch(e){} });
+  window._playing = [];
+}
+
+document.getElementById('stopAll').addEventListener('click', stopAll);
+
+function rebuildUI() {
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  const inst = instruments[currentInstrument];
+  const currentMap = keymapJson[currentInstrument] || {};
+  keyRows.forEach((rowKeys, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'row ' + (idx===0?'r1':idx===1?'r2':'r3');
+    rowKeys.forEach(k=>{
+      const note = currentMap[k] || '';
+      const available = currentInstrument === 'piano' ? !!note : (!!note && inst.notes.includes(note));
+      row.appendChild(makeKeyButton(k, note, available));
+    });
+    kb.appendChild(row);
+  });
+}
+
+function refreshLabelsForShift() {
+  const currentMap = keymapJson[currentInstrument] || {};
+  for (const k of keyRows.flat()) {
+    const note = currentMap[k] || '';
+    const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
+    if (el) el.textContent = toSharpIfNeeded(note, shiftHeld) || '-';
+  }
+}
+
+// --- Song parsing and rendering ---
+function parseSong(text) {
+  const lines = text.split(/\r?\n/);
+  const seq = [];
+  const tokenRe = /([^{}\s]+|\[[^\]]+\])((?:\{[A-G](?:#|b)?\d\})+)/g;
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    let m;
+    let matched = false;
+    tokenRe.lastIndex = 0;
+    while ((m = tokenRe.exec(line)) !== null) {
+      matched = true;
+      const textPart = m[1];
+      const notesPart = m[2];
+      const noteMatches = Array.from(notesPart.matchAll(/\{([A-G](?:#|b)?\d)\}/g)).map(x=>x[1]);
+      seq.push({ text: textPart, notes: noteMatches, doneSteps: 0 });
+    }
+    if (!matched && line.trim()) {
+      const words = line.trim().split(/\s+/);
+      for (const w of words) seq.push({ text: w, notes: [], doneSteps: 0 });
+    }
+    if (li < lines.length - 1) seq.push({ text: '\n', notes: [], doneSteps: 0 });
+  }
+  return seq;
+}
+
+function renderSong() {
+  const area = document.getElementById('songArea');
+  area.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  songTokens.forEach((t, idx)=>{
+    if (t.text === '\n') { frag.appendChild(document.createElement('br')); return; }
+    const span = document.createElement('span');
+    span.className = 'token' + (idx === songPos ? ' current' : '') + (t.notes.length>0 && t.doneSteps >= t.notes.length ? ' done' : '');
+    span.setAttribute('data-idx', String(idx));
+    const textEl = document.createElement('span');
+    textEl.textContent = t.text;
+    span.appendChild(textEl);
+    if (showSongNotes) {
+      const hints = document.createElement('span');
+      hints.className = 'hints';
+      if (t.notes.length) {
+        const parts = t.notes.map((n,i)=> i < t.doneSteps ? `<span class="doneStep">${n}</span>` : n);
+        hints.innerHTML = parts.join(', ');
+      } else {
+        hints.textContent = '-';
+      }
+      span.appendChild(hints);
+    }
+    frag.appendChild(span);
+  });
+  area.appendChild(frag);
+}
+
+function updateSongHighlight() {
+  const tokens = document.querySelectorAll('#songArea .token');
+  tokens.forEach(el=> el.classList.remove('current','done'));
+  if (songPos < songTokens.length) {
+    const el = document.querySelector(`#songArea .token[data-idx="${songPos}"]`);
+    if (el) el.classList.add('current');
+  }
+  songTokens.forEach((t, idx)=>{
+    if (t.notes.length>0 && t.doneSteps >= t.notes.length) {
+      const el = document.querySelector(`#songArea .token[data-idx="${idx}"]`);
+      if (el) el.classList.add('done');
+    }
+    if (showSongNotes) {
+      const el = document.querySelector(`#songArea .token[data-idx="${idx}"] .hints`);
+      if (el) {
+        if (t.notes.length) el.innerHTML = t.notes.map((n,i)=> i < t.doneSteps ? `<span class="doneStep">${n}</span>` : n).join(', ');
+        else el.textContent = '-';
+      }
+    }
+  });
+  updateKeyboardGuideHighlight();
+}
+
+function handleNotePlayed(note) {
+  if (!songTokens.length) return;
+  // Skip non-note tokens
+  while (songPos < songTokens.length && songTokens[songPos].notes.length === 0) songPos++;
+  if (songPos >= songTokens.length) return;
+  const cur = songTokens[songPos];
+  const expected = cur.notes[cur.doneSteps];
+  if (!expected) { songPos++; updateSongHighlight(); return; }
+  if (note === expected) {
+    cur.doneSteps++;
+    if (cur.doneSteps >= cur.notes.length) songPos++;
+    updateSongHighlight();
+  }
+}
+
+function updateKeyboardGuideHighlight() {
+  // Clear previous guide highlights
+  document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
+  if (!highlightKeyboardGuide) return;
+  if (!songTokens.length) return;
+  // Find next token needing a note
+  let pos = songPos;
+  while (pos < songTokens.length && songTokens[pos].notes.length === 0) pos++;
+  if (pos >= songTokens.length) return;
+  const cur = songTokens[pos];
+  const expected = cur.notes[cur.doneSteps];
+  if (!expected) return;
+  // Find keys that map to expected note for current instrument
+  const currentMap = keymapJson[currentInstrument] || {};
+  for (const [k, v] of Object.entries(currentMap)) {
+    // Match either direct mapping or sharped form
+    if (v === expected || toSharpIfNeeded(v, true) === expected) {
+      const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+      if (keyEl) keyEl.classList.add('guide');
+    }
+  }
+}
+
+(async ()=>{
+  await loadKeymap();
+  rebuildUI();
+  await loadSamplesForInstrument(currentInstrument);
+  console.log('Samples loaded for', currentInstrument);
+})();
+
+document.getElementById('instrumentSelect').addEventListener('change', async (e)=>{
+  currentInstrument = e.target.value;
+  rebuildUI();
+  if (currentInstrument !== 'piano') {
+    await loadSamplesForInstrument(currentInstrument);
+  }
+  updateKeyboardGuideHighlight();
+});
+
+window.addEventListener('keydown', (e)=>{
+  if (!document.getElementById('keydownToggle').checked) return;
+  const k = e.key.toLowerCase();
+  if (k === 'shift') { if (!shiftHeld) { shiftHeld = true; refreshLabelsForShift(); } return; }
+  if (pressedKeys.has(k)) return; // avoid repeats until keyup
+  pressedKeys.add(k);
+  const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+  if (btn) btn.classList.add('active');
+  const currentMap = keymapJson[currentInstrument] || {};
+  let name = currentMap[k];
+  name = toSharpIfNeeded(name, e.shiftKey || shiftHeld);
+  const inst = instruments[currentInstrument];
+  const available = currentInstrument === 'piano' ? !!name : (!!name && inst.notes.includes(name));
+  if (name && available) { ensureAudioContext(); playNote(name); }
+});
+
+window.addEventListener('keyup', (e)=>{
+  const k = e.key.toLowerCase();
+  if (k === 'shift') { shiftHeld = false; refreshLabelsForShift(); return; }
+  pressedKeys.delete(k);
+  const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+  if (btn) btn.classList.remove('active');
+});
+
+// Song UI handlers
+document.getElementById('loadSongBtn').addEventListener('click', async ()=>{
+  const inp = document.getElementById('songFile');
+  const file = inp.files && inp.files[0];
+  if (!file) return;
+  const txt = await file.text();
+  songTokens = parseSong(txt);
+  songPos = 0;
+  renderSong();
+  updateSongHighlight();
+});
+
+document.getElementById('resetSongBtn').addEventListener('click', ()=>{
+  songTokens.forEach(t=> t.doneSteps = 0);
+  songPos = 0;
+  updateSongHighlight();
+});
+
+// Toggle handlers
+document.getElementById('toggleShowNotes').addEventListener('change', (e)=>{
+  showSongNotes = !!e.target.checked;
+  renderSong();
+  updateSongHighlight();
+});
+document.getElementById('toggleHighlightKeys').addEventListener('change', (e)=>{
+  highlightKeyboardGuide = !!e.target.checked;
+  updateKeyboardGuideHighlight();
+});
+</script>
+<!-- Tone.js and piano layer -->
+<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+<script src="./tone.js"></script>
+</body>
+</html>
