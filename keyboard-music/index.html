@@ -7,21 +7,29 @@
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="%23fff3e6"/><path d="M44 10v28.5c0 4.418-5.373 8-12 8s-12-3.582-12-8 5.373-8 12-8c2.21 0 4.245.43 6 .118V10h6z" fill="%23ff7a00"/></svg>' />
 <style>
   body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; display:flex; flex-direction:column; align-items:center; padding:24px; background: #faf7f3; color:#222; }
-  h1 { margin-bottom:8px; }
+  h1 { width:100%; max-width:820px; box-sizing:border-box; margin:0 auto 8px; text-align:left; }
+  .ver { display:inline-block; margin-left:8px; font-size:12px; color:#666; border:1px solid #ddd; padding:2px 6px; border-radius:999px; background:#fff; }
   p { margin-top:0; color:#444; }
-  .keyboard { display:flex; flex-direction:column; gap:8px; margin-top:18px; }
-  .row { display:flex; gap:8px; }
-  .row.r2 { margin-left: 28px; }
-  .row.r3 { margin-left: 56px; }
-  .key { width:52px; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(180deg,#fff 0%,#f0efe8 100%); border:1px solid #ddd; border-radius:8px; box-shadow: 0 6px 18px rgba(30,30,30,0.06); cursor:pointer; user-select:none; }
+  .keyboard { width:100%; max-width:820px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; margin-top:18px; 
+    /* Responsive sizing vars */
+    --cols: 10; /* longest row */
+    --gap: 6px; /* horizontal gap */
+    --pad: 48px; /* body padding left+right (24*2) */
+    --keyRaw: calc((100vw - var(--pad) - (var(--cols) - 1)*var(--gap)) / var(--cols));
+    --key: min(52px, var(--keyRaw));
+  }
+  .row { display:flex; gap: var(--gap); }
+  .row.r2 { margin-left: calc(var(--key)/2 + var(--gap)); }
+  .row.r3 { margin-left: calc(var(--key) + 2*var(--gap)); }
+  .key { width: clamp(34px, var(--key), 52px); height: clamp(34px, var(--key), 52px); display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(180deg,#fff 0%,#f0efe8 100%); border:1px solid #ddd; border-radius:8px; box-shadow: 0 6px 18px rgba(30,30,30,0.06); cursor:pointer; user-select:none; }
   .key .k { font-weight:600; }
   .key .n { font-size:11px; color:#666; margin-top:2px; }
   .key:active { transform: translateY(2px) scale(.995); box-shadow:none; }
   .key.active { outline:2px solid #0a66c2; outline-offset:-2px; }
   .key.unavailable { opacity: .45; filter: grayscale(25%); cursor: default; }
-  .controls { margin-top:18px; }
+  .controls { width:100%; max-width:820px; box-sizing:border-box; margin-top:18px; margin-left:auto; margin-right:auto; }
   label { margin-right:8px; }
-  .song { margin-top:18px; max-width: 820px; line-height: 2; }
+  .song { width:100%; max-width:820px; box-sizing:border-box; margin-top:18px; margin-left:auto; margin-right:auto; line-height: 2; }
   .token { display:inline-block; padding:2px 4px; border-radius:6px; margin:2px 3px; background:#fff; border:1px solid #eee; }
   .token .hints { display:block; font-size:10px; color:#777; margin-top:1px; }
   .token.current { outline:2px solid #0a66c2; outline-offset:1px; background:#eef5ff; }
@@ -31,11 +39,22 @@
   .key.guide { outline:2px dashed #ff7a00; outline-offset:-2px; }
   .key.guide-sharp { outline:3px solid #d61f1f; outline-offset:-2px; }
   .song-controls textarea { display:block; width:100%; max-width:820px; height:96px; margin-top:8px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:12px; padding:8px; }
+  /* Paste modal */
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .modal { width: min(820px, 94vw); background:#fff; border-radius:10px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding:16px; }
+  .modal h3 { margin:0 0 8px 0; }
+  .modal textarea { width:100%; height:180px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:12px; padding:8px; }
+  .modal .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .token.editing { outline:2px solid #d97706; outline-offset:1px; }
+  @media (max-width: 420px) {
+    body { padding: 16px; }
+    .keyboard { --pad: 32px; }
+  }
   
 </style>
 </head>
 <body>
-<h1>Keyboard Music</h1>
+<h1>Keyboard Music <span class="ver">v1.0</span></h1>
 <div class="keyboard" id="keyboard"></div>
 <div class="controls">
   <label>Nhạc cụ:
@@ -50,6 +69,7 @@
   </label>
   <label><input type="checkbox" id="toggleSolfege"> Hiển thị do re mi</label>
   <label style="margin-left:8px;"><input type="checkbox" id="toggleSongMode"> Chơi theo bài hát</label>
+  <label style="margin-left:8px;"><input type="checkbox" id="toggleComposer"> Soạn nhạc</label>
 </div>
 
 <div class="song-controls">
@@ -58,10 +78,28 @@
   <button id="resetSongBtn">Reset bài</button>
   <label><input type="checkbox" id="toggleShowNotes" checked> Hiển thị nốt nhạc</label>
   <label><input type="checkbox" id="toggleHighlightKeys" checked> Highlight bàn phím</label>
-  <textarea id="songPaste" placeholder="Dán bài hát ở đây theo định dạng: word{C4} ..."></textarea>
   <button id="pasteSongBtn">Dán & Hiển thị</button>
+  <div class="composer-controls" id="composerControls" style="margin-top:8px; display:none;">
+    <span id="composerStatus">Chọn một chữ để thêm nốt...</span>
+    <button id="composerClearBtn" style="margin-left:8px;">Xóa nốt của chữ</button>
+    <input id="composerFileName" placeholder="tên file (vd: bai-hat.txt)" style="margin-left:8px; width:220px;" />
+    <button id="composerSaveBtn" style="margin-left:8px;">Lưu bài hát (.txt)</button>
+  </div>
 </div>
 <div class="song" id="songArea"></div>
+
+<!-- Paste modal -->
+<div id="pasteModal" class="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <h3>Dán bài hát</h3>
+    <p style="margin-top:0;color:#666;font-size:13px;">Dán nội dung theo định dạng: <code>word{C4}</code> hoặc chỉ lời không có nốt.</p>
+    <textarea id="songPasteModal" placeholder="hap{C4}py{C4} ..."></textarea>
+    <div class="actions">
+      <button id="pasteCancel">Hủy</button>
+      <button id="pasteApply">Hiển thị</button>
+    </div>
+  </div>
+  </div>
 
 <script src="./keymap.js"></script>
 <script>
@@ -167,6 +205,8 @@ let showSongNotes = true;
 let highlightKeyboardGuide = true;
 let showSolfege = false;
 let songMode = false;
+let composerMode = false;
+let composerSelectedIndex = null; // selected token index for composing
 
 function getCurrentMap(inst = currentInstrument) {
   const fromFile = (keymapJson && keymapJson[inst]) || null;
@@ -337,7 +377,17 @@ function makeKeyButton(k, mappedNote, available) {
       window.tonePiano.release(btn.dataset.activeNote);
       delete btn.dataset.activeNote;
     } else if (currentInstrument === 'sao' && btn._fluteStop) {
-      try { btn._fluteStop(); } catch(_){}
+      try { btn._fluteStop(); } catch(_){ }
+      delete btn._fluteStop;
+    }
+  });
+  btn.addEventListener('pointercancel', ()=> {
+    btn.classList.remove('active');
+    if (currentInstrument === 'piano' && window.tonePiano && btn.dataset.activeNote) {
+      window.tonePiano.release(btn.dataset.activeNote);
+      delete btn.dataset.activeNote;
+    } else if (currentInstrument === 'sao' && btn._fluteStop) {
+      try { btn._fluteStop(); } catch(_){ }
       delete btn._fluteStop;
     }
   });
@@ -515,8 +565,9 @@ function updateSongModeUI() {
   const sc = document.querySelector('.song-controls');
   const sa = document.getElementById('songArea');
   if (!sc || !sa) return;
-  sc.style.display = songMode ? '' : 'none';
-  sa.style.display = songMode ? '' : 'none';
+  const show = songMode || composerMode;
+  sc.style.display = show ? '' : 'none';
+  sa.style.display = show ? '' : 'none';
   if (!songMode) {
     // Clear any guide highlights when hiding
     document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
@@ -524,6 +575,9 @@ function updateSongModeUI() {
   } else {
     updateKeyboardGuideHighlight();
   }
+  // Composer controls visibility
+  const cc = document.getElementById('composerControls');
+  if (cc) cc.style.display = composerMode ? '' : 'none';
 }
 
 function rebuildUI() {
@@ -581,29 +635,35 @@ function parseSong(text) {
 function renderSong() {
   const area = document.getElementById('songArea');
   area.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  songTokens.forEach((t, idx)=>{
-    if (t.text === '\n') { frag.appendChild(document.createElement('br')); return; }
+  let line = document.createElement('div');
+  area.appendChild(line);
+  for (let i = 0; i < songTokens.length; i++) {
+    const tok = songTokens[i];
+    if (tok.text === '\n') { line = document.createElement('div'); area.appendChild(line); continue; }
     const span = document.createElement('span');
-    span.className = 'token' + (idx === songPos ? ' current' : '') + (t.notes.length>0 && t.doneSteps >= t.notes.length ? ' done' : '');
-    span.setAttribute('data-idx', String(idx));
-    const textEl = document.createElement('span');
-    textEl.textContent = t.text;
-    span.appendChild(textEl);
-    if (showSongNotes) {
-      const hints = document.createElement('span');
-      hints.className = 'hints';
-      if (t.notes.length) {
-        const parts = t.notes.map((n,i)=> i < t.doneSteps ? `<span class="doneStep">${n}</span>` : n);
-        hints.innerHTML = parts.join(', ');
-      } else {
-        hints.textContent = '-';
-      }
-      span.appendChild(hints);
+    span.className = 'token';
+    if (i === songPos) span.classList.add('current');
+    if (composerMode && i === composerSelectedIndex) span.classList.add('editing');
+    span.textContent = tok.text;
+    const hints = document.createElement('span');
+    hints.className = 'hints';
+    if (showSongNotes && tok.notes && tok.notes.length) {
+      hints.textContent = tok.notes.join(' ');
+    } else {
+      hints.textContent = '';
     }
-    frag.appendChild(span);
-  });
-  area.appendChild(frag);
+    span.appendChild(hints);
+    span.setAttribute('data-index', String(i));
+    span.style.cursor = composerMode ? 'pointer' : 'default';
+    span.addEventListener('click', ()=>{
+      if (!composerMode) return;
+      composerSelectedIndex = i;
+      updateComposerStatus();
+      renderSong();
+    });
+    line.appendChild(span);
+  }
+  updateKeyboardGuideHighlight();
 }
 
 function updateSongHighlight() {
@@ -613,19 +673,19 @@ function updateSongHighlight() {
   let visIdx = songPos;
   while (visIdx < songTokens.length && songTokens[visIdx].text === '\n') visIdx++;
   if (visIdx < songTokens.length) {
-    const el = document.querySelector(`#songArea .token[data-idx="${visIdx}"]`);
+    const el = document.querySelector(`#songArea .token[data-index="${visIdx}"]`);
     if (el) el.classList.add('current');
   }
   songTokens.forEach((t, idx)=>{
     if (t.notes.length>0 && t.doneSteps >= t.notes.length) {
-      const el = document.querySelector(`#songArea .token[data-idx="${idx}"]`);
+      const el = document.querySelector(`#songArea .token[data-index="${idx}"]`);
       if (el) el.classList.add('done');
     }
     if (showSongNotes) {
-      const el = document.querySelector(`#songArea .token[data-idx="${idx}"] .hints`);
+      const el = document.querySelector(`#songArea .token[data-index="${idx}"] .hints`);
       if (el) {
-        if (t.notes.length) el.innerHTML = t.notes.map((n,i)=> i < t.doneSteps ? `<span class="doneStep">${n}</span>` : n).join(', ');
-        else el.textContent = '-';
+        if (t.notes.length) el.textContent = t.notes.join(' ');
+        else el.textContent = '';
       }
     }
   });
@@ -686,6 +746,10 @@ function updateKeyboardGuideHighlight() {
   updateSongModeUI();
 })();
 
+// Safety: stop all sustained sounds on tab hide or window blur
+window.addEventListener('blur', stopAll);
+document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopAll(); });
+
 document.getElementById('instrumentSelect').addEventListener('change', async (e)=>{
   currentInstrument = e.target.value;
   rebuildUI();
@@ -695,14 +759,29 @@ document.getElementById('instrumentSelect').addEventListener('change', async (e)
   updateKeyboardGuideHighlight();
 });
 
-// Paste song handler
+// Paste song handlers (modal)
+function showPasteModal(show) {
+  const el = document.getElementById('pasteModal');
+  if (!el) return;
+  el.style.display = show ? '' : 'none';
+  if (show) setTimeout(()=>{ const ta = document.getElementById('songPasteModal'); if (ta) ta.focus(); }, 0);
+}
 document.getElementById('pasteSongBtn').addEventListener('click', ()=>{
-  const txt = (document.getElementById('songPaste') || { value: '' }).value.trim();
-  if (!txt) return;
+  showPasteModal(true);
+});
+document.getElementById('pasteCancel').addEventListener('click', ()=>{
+  showPasteModal(false);
+});
+document.getElementById('pasteApply').addEventListener('click', ()=>{
+  const ta = document.getElementById('songPasteModal');
+  const txt = (ta && ta.value || '').trim();
+  if (!txt) { showPasteModal(false); return; }
   songTokens = parseSong(txt);
   songPos = 0;
   renderSong();
   updateSongHighlight();
+  updateComposerStatus();
+  showPasteModal(false);
 });
 
 window.addEventListener('keydown', (e)=>{
@@ -720,18 +799,28 @@ window.addEventListener('keydown', (e)=>{
   if (name && available) {
     ensureAudioContext();
     if (currentInstrument === 'piano' && window.tonePiano) {
-      // Ensure song guidance advances even for piano
-      handleNotePlayed(name);
+      // Song guidance advances only in song mode
+      if (songMode) handleNotePlayed(name);
       window.tonePiano.attack(name);
       // store mapping for release
       (window._pianoActiveByKey = window._pianoActiveByKey || {})[k] = name;
     } else if (currentInstrument === 'sao') {
       // Sáo sustain while key is held
-      handleNotePlayed(name);
+      if (songMode) handleNotePlayed(name);
       const stop = startFluteSustain(name);
       (window._fluteActiveByKey = window._fluteActiveByKey || {})[k] = stop;
+      if (btn) btn._fluteStop = stop;
     } else {
       playNote(name);
+    }
+    // Composer capture
+    if (composerMode && composerSelectedIndex !== null) {
+      const tok = songTokens[composerSelectedIndex];
+      if (tok && tok.text !== '\n') {
+        tok.notes = tok.notes || [];
+        tok.notes.push(name);
+        renderSong();
+      }
     }
   }
 });
@@ -748,8 +837,12 @@ window.addEventListener('keyup', (e)=>{
     delete window._pianoActiveByKey[k];
   } else if (currentInstrument === 'sao' && window._fluteActiveByKey && window._fluteActiveByKey[k]) {
     const stop = window._fluteActiveByKey[k];
-    try { stop(); } catch(_){}
+    try { stop(); } catch(_){ }
     delete window._fluteActiveByKey[k];
+  } else if (currentInstrument === 'sao' && btn && btn._fluteStop) {
+    // Fallback in case the global map missed this key
+    try { btn._fluteStop(); } catch(_){ }
+    delete btn._fluteStop;
   }
 });
 
@@ -788,6 +881,61 @@ document.getElementById('toggleSolfege').addEventListener('change', (e)=>{
 document.getElementById('toggleSongMode').addEventListener('change', (e)=>{
   songMode = !!e.target.checked;
   updateSongModeUI();
+});
+document.getElementById('toggleComposer').addEventListener('change', (e)=>{
+  composerMode = !!e.target.checked;
+  if (!composerMode) composerSelectedIndex = null;
+  updateComposerStatus();
+  renderSong();
+  updateSongModeUI();
+});
+
+function updateComposerStatus() {
+  const el = document.getElementById('composerStatus');
+  if (!el) return;
+  if (!composerMode) { el.textContent = 'Soạn nhạc đang tắt'; return; }
+  if (composerSelectedIndex === null) { el.textContent = 'Chọn một chữ để thêm nốt...'; return; }
+  const tok = songTokens[composerSelectedIndex];
+  if (!tok) { el.textContent = 'Không có chữ được chọn'; return; }
+  const notes = (tok.notes && tok.notes.length) ? tok.notes.join(' ') : '(chưa có nốt)';
+  el.textContent = `Đang chọn: "${tok.text}"  |  Nốt: ${notes}`;
+}
+
+document.getElementById('composerClearBtn').addEventListener('click', ()=>{
+  if (!composerMode || composerSelectedIndex === null) return;
+  const tok = songTokens[composerSelectedIndex];
+  if (!tok || tok.text === '\n') return;
+  tok.notes = [];
+  renderSong();
+  updateComposerStatus();
+});
+
+function serializeSongToTxt() {
+  const parts = [];
+  for (let i = 0; i < songTokens.length; i++) {
+    const tok = songTokens[i];
+    if (tok.text === '\n') { parts.push('\n'); continue; }
+    const notes = (tok.notes || []).map(n=>`{${n}}`).join('');
+    parts.push(tok.text + notes + ' ');
+  }
+  return parts.join('').replace(/[ ]+\n/g, '\n').trim();
+}
+
+document.getElementById('composerSaveBtn').addEventListener('click', ()=>{
+  const txt = serializeSongToTxt();
+  const nameInput = document.getElementById('composerFileName');
+  let filename = (nameInput && nameInput.value || '').trim();
+  if (!filename) filename = 'bai-hat.txt';
+  if (!/\.txt$/i.test(filename)) filename += '.txt';
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 </script>
 <!-- Tone.js and piano layer -->
