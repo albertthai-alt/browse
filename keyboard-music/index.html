@@ -10,17 +10,19 @@
   h1 { width:100%; max-width:820px; box-sizing:border-box; margin:0 auto 8px; text-align:left; }
   .ver { display:inline-block; margin-left:8px; font-size:12px; color:#666; border:1px solid #ddd; padding:2px 6px; border-radius:999px; background:#fff; }
   p { margin-top:0; color:#444; }
-  .keyboard { width:100%; max-width:820px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; margin-top:18px; 
-    /* Responsive sizing vars */
+  .keyboard { width:100%; max-width:820px; box-sizing:border-box; display:flex; flex-direction:column; gap:8px; margin:18px auto 0;
+    /* Responsive sizing based on container width (not viewport) */
     --cols: 10; /* longest row */
     --gap: 6px; /* horizontal gap */
-    --pad: 48px; /* body padding left+right (24*2) */
-    --keyRaw: calc((100vw - var(--pad) - (var(--cols) - 1)*var(--gap)) / var(--cols));
+    --keyRaw: calc((100% - (var(--cols) - 1)*var(--gap)) / var(--cols));
     --key: min(52px, var(--keyRaw));
   }
-  .row { display:flex; gap: var(--gap); }
-  .row.r2 { margin-left: calc(var(--key)/2 + var(--gap)); }
-  .row.r3 { margin-left: calc(var(--key) + 2*var(--gap)); }
+  .row { display:flex; gap: var(--gap); justify-content: flex-start; }
+  /* Stagger rows using flex spacer to retain centering */
+  .row.r2::before { content: ""; display:block; width: calc(var(--key)/2 - var(--gap)/2); flex: 0 0 auto; }
+  .row.r3::before { content: ""; display:block; width: var(--key); flex: 0 0 auto; }
+  /* Trailing spacer to make each row total width equal to full columns, avoiding right drift */
+  .row::after { content: ""; display:block; flex: 0 0 auto; width: calc((var(--cols) - var(--len, 0)) * (var(--key) + var(--gap)) - var(--gap)); }
   .key { width: clamp(34px, var(--key), 52px); height: clamp(34px, var(--key), 52px); display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(180deg,#fff 0%,#f0efe8 100%); border:1px solid #ddd; border-radius:8px; box-shadow: 0 6px 18px rgba(30,30,30,0.06); cursor:pointer; user-select:none; }
   .key .k { font-weight:600; }
   .key .n { font-size:11px; color:#666; margin-top:2px; }
@@ -48,7 +50,6 @@
   .token.editing { outline:2px solid #d97706; outline-offset:1px; }
   @media (max-width: 420px) {
     body { padding: 16px; }
-    .keyboard { --pad: 32px; }
   }
   
 </style>
@@ -346,6 +347,15 @@ function makeKeyButton(k, mappedNote, available) {
     ensureAudioContext();
     btn.classList.add('active');
     const playName = toSharpIfNeeded(mappedNote, shiftHeld);
+    // Composer capture first (even if not playable)
+    if (composerMode && composerSelectedIndex !== null && playName) {
+      const tok = songTokens[composerSelectedIndex];
+      if (tok && tok.text !== '\n') {
+        tok.notes = tok.notes || [];
+        tok.notes.push(playName);
+        renderSong();
+      }
+    }
     if (playName && available) {
       if (currentInstrument === 'piano' && window.tonePiano) {
         // Song guidance advances only in song mode
@@ -585,9 +595,16 @@ function rebuildUI() {
   kb.innerHTML = '';
   const inst = instruments[currentInstrument];
   const currentMap = getCurrentMap();
+  // Ensure CSS --cols matches the longest row for perfect centering
+  try {
+    const maxLen = Math.max(...keyRows.map(r=> r.length));
+    kb.style.setProperty('--cols', String(maxLen));
+  } catch(_){}
   keyRows.forEach((rowKeys, idx)=>{
     const row = document.createElement('div');
     row.className = 'row ' + (idx===0?'r1':idx===1?'r2':'r3');
+    // Inform CSS about how many keys this row has for trailing spacer calc
+    try { row.style.setProperty('--len', String(rowKeys.length)); } catch(_){}
     rowKeys.forEach(k=>{
       const note = currentMap[k] || '';
       const available = !!note && (inst.notes.length === 0 || inst.notes.includes(note));
@@ -796,6 +813,15 @@ window.addEventListener('keydown', (e)=>{
   name = toSharpIfNeeded(name, e.shiftKey || shiftHeld);
   const inst = instruments[currentInstrument];
   const available = !!name && (inst.notes.length === 0 || inst.notes.includes(name));
+  // Composer capture first (even if not playable)
+  if (composerMode && composerSelectedIndex !== null && name) {
+    const tok = songTokens[composerSelectedIndex];
+    if (tok && tok.text !== '\n') {
+      tok.notes = tok.notes || [];
+      tok.notes.push(name);
+      renderSong();
+    }
+  }
   if (name && available) {
     ensureAudioContext();
     if (currentInstrument === 'piano' && window.tonePiano) {
@@ -812,15 +838,6 @@ window.addEventListener('keydown', (e)=>{
       if (btn) btn._fluteStop = stop;
     } else {
       playNote(name);
-    }
-    // Composer capture
-    if (composerMode && composerSelectedIndex !== null) {
-      const tok = songTokens[composerSelectedIndex];
-      if (tok && tok.text !== '\n') {
-        tok.notes = tok.notes || [];
-        tok.notes.push(name);
-        renderSong();
-      }
     }
   }
 });
