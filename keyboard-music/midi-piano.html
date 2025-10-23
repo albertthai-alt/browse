@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MIDI Piano</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#faf7f3; color:#222; margin:0; }
+    .page { max-width: 820px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 8px 0; }
+    .ver { display:inline-block; margin-left:8px; font-size:12px; color:#666; border:1px solid #ddd; padding:2px 6px; border-radius:999px; background:#fff; }
+    .card { background:#fff; border:1px solid #eee; border-radius:12px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .row { display:flex; gap: 12px; align-items:center; flex-wrap: wrap; }
+    button { padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    button:active { transform: translateY(1px); }
+    .status { font-size:14px; color:#555; }
+    .list { margin-top:12px; }
+    .pill { display:inline-block; margin:4px 6px 0 0; padding:4px 8px; border-radius:999px; background:#eef5ff; border:1px solid #cfe3ff; color:#0a66c2; font-weight:600; }
+    .big { font-size:64px; font-weight:800; letter-spacing:1px; margin: 8px 0; }
+    .muted { color:#777; font-size:13px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    /* Piano UI */
+    .piano-wrap { margin-top:16px; }
+    .tools { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .piano { position:relative; width:100%; max-width:800px; aspect-ratio: 10 / 2; background:#ddd; border-radius:8px; overflow:hidden; border:1px solid #ccc; }
+    .whites { position:absolute; inset:0; display:flex; z-index:1; }
+    .white { flex:1; background: linear-gradient(#fff,#f0efe8); border-right:1px solid #ddd; position:relative; display:flex; align-items:flex-end; justify-content:center; }
+    .white:last-child { border-right:none; }
+    .black { position:absolute; top:0; width: 60%; height: 62%; background:linear-gradient(#222,#000); border:1px solid #222; border-radius: 0 0 6px 6px; transform: translateX(-50%); z-index:3; display:flex; align-items:flex-end; justify-content:center; pointer-events: auto; cursor: pointer; }
+    .label { font-size:10px; color:#444; background:rgba(255,255,255,0.85); border:1px solid #e5e5e5; padding:2px 4px; border-radius:6px; margin-bottom:6px; }
+    .black .label { background:rgba(255,255,255,0.12); color:#f0f0f0; border-color:rgba(255,255,255,0.18); }
+    .key.active .label { outline:2px solid #0a66c2; outline-offset:2px; }
+    .legend { font-size:12px; color:#555; }
+    /* Song area */
+    .song { margin-top:16px; line-height: 1.6; }
+    .token { display:inline-flex; flex-direction:column; align-items:center; padding:4px 6px; border-radius:6px; margin:2px 3px; background:#fff; border:1px solid #eee; line-height:1.2; }
+    .token .hints { display:block; width:100%; font-size:11px; color:#777; margin-top:4px; line-height:1.35; white-space: normal; text-align:center; }
+    .token.current { outline:2px solid #0a66c2; outline-offset:1px; background:#eef5ff; }
+    .token.done { background:#e9f9ee; border-color:#bdebd0; }
+    .key.guide .label { outline:2px dashed #ff7a00; outline-offset:2px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>MIDI Piano <span class="ver">v1.0</span></h1>
+    <div class="card">
+      <div class="row">
+        <button id="enableBtn">Bật MIDI</button>
+        <span class="status" id="status">Chưa kết nối MIDI</span>
+      </div>
+      <div class="list mono" id="devices"></div>
+      
+      <div class="piano-wrap">
+        <div class="tools">
+          <label class="legend"><input type="checkbox" id="toggleSolfege" /> Hiển thị do re mi</label>
+          <span class="legend">Bàn phím 49 phím (C2 → C6)</span>
+        </div>
+        <div class="piano" id="piano">
+          <div class="whites" id="whites"></div>
+          <!-- blacks will be absolutely positioned -->
+        </div>
+      </div>
+      <div class="tools" style="margin-top:12px;">
+        <label class="legend"><input type="checkbox" id="toggleGuide" /> Chơi theo bài hát (highlight phím)</label>
+        <span id="songControls" style="display:none;">
+          <input type="file" id="songFile" accept=".txt" />
+          <button id="resetSongBtn" style="margin-left:8px;">Chơi lại từ đầu</button>
+        </span>
+      </div>
+      <div class="song" id="songArea" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Utility: MIDI note number -> name like C4, D#4
+    function midiToName(n) {
+      const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      const pc = names[n % 12];
+      const oct = Math.floor(n / 12) - 1; // MIDI standard
+      return pc + oct;
+    }
+
+    function noteToSolfege(name) {
+      const m = name.match(/^([A-G])(#|b)?(\d)$/);
+      if (!m) return name;
+      const syl = { C:'do', D:'re', E:'mi', F:'fa', G:'sol', A:'la', B:'si' }[m[1]] || m[1].toLowerCase();
+      const acc = m[2] ? (m[2]==='#' ? '#' : 'b') : '';
+      return syl + acc + ' ' + m[3];
+    }
+
+    const state = { access: null, inputs: [] };
+
+    const $status = document.getElementById('status');
+    const $devices = document.getElementById('devices');
+    
+    const $piano = document.getElementById('piano');
+    const $whites = document.getElementById('whites');
+    const $toggleSolfege = document.getElementById('toggleSolfege');
+    let showSolfege = false;
+
+    // --- Audio (Web Audio) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    const activeVoices = new Map(); // midi -> { osc1, osc2, gain }
+    function startPianoVoice(midi) {
+      const now = audioCtx.currentTime;
+      const f = midiToFreq(midi);
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc1.type = 'triangle';
+      osc2.type = 'sine';
+      osc1.frequency.value = f;
+      osc2.frequency.value = f * 2; // subtle overtone
+      const mix = audioCtx.createGain();
+      const lp = audioCtx.createBiquadFilter();
+      mix.gain.value = 0.5;
+      lp.type = 'lowpass';
+      lp.frequency.value = 5200;
+      osc1.connect(mix);
+      osc2.connect(mix);
+      mix.connect(gain).connect(lp).connect(audioCtx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.6, now + 0.01);
+      // natural decay
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      osc1.start(now);
+      osc2.start(now);
+      activeVoices.set(midi, { osc1, osc2, gain, startedAt: now });
+    }
+    function stopPianoVoice(midi) {
+      const v = activeVoices.get(midi);
+      if (!v) return;
+      const t = audioCtx.currentTime;
+      try {
+        v.gain.gain.cancelScheduledValues(t);
+        v.gain.gain.setValueAtTime(v.gain.gain.value, t);
+        v.gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+      } catch(_){}
+      try { v.osc1.stop(t + 0.09); v.osc2.stop(t + 0.09); } catch(_){}
+      activeVoices.delete(midi);
+    }
+
+    function renderDevices() {
+      const arr = state.inputs.map(i => `${i.manufacturer || ''} ${i.name || 'MIDI In'} (id=${i.id})`).filter(Boolean);
+      $devices.textContent = arr.length ? ('Thiết bị: ' + arr.join(' | ')) : '';
+    }
+
+    
+
+    function formatLabel(name) {
+      return showSolfege ? noteToSolfege(name) : name;
+    }
+
+    // Build 49-key piano UI for MIDI 36 (C2) to 84 (C6)
+    const START = 36, END = 84;
+    function isBlack(pc) { return pc.includes('#'); }
+    function pcOf(n) { return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n % 12]; }
+    function nameToMidi(name){
+      const m = name.match(/^([A-G])(#|b)?(\d)$/i); if(!m) return null;
+      const order = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      let pc = m[1].toUpperCase();
+      if (m[2]) pc += (m[2]==='b'? 'b':'#');
+      const idx = order.indexOf(pc); if (idx<0) return null;
+      const oct = parseInt(m[3],10);
+      return (oct + 1) * 12 + idx;
+    }
+
+    function rebuildPiano() {
+      $whites.innerHTML = '';
+      // remove any old blacks
+      Array.from($piano.querySelectorAll('.black')).forEach(el=> el.remove());
+      // Count whites
+      const whites = [];
+      for (let n=START; n<=END; n++) { if (!isBlack(pcOf(n))) whites.push(n); }
+      // Create whites flex
+      whites.forEach(n=>{
+        const name = midiToName(n);
+        const el = document.createElement('div');
+        el.className = 'key white';
+        el.dataset.note = String(n);
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = formatLabel(name);
+        el.appendChild(label);
+        // click to play
+        el.addEventListener('pointerdown', ()=>{ highlightKey(n, true); startPianoVoice(n); onNoteInput(n); });
+        const stop = ()=>{ highlightKey(n, false); stopPianoVoice(n); };
+        el.addEventListener('pointerup', stop);
+        el.addEventListener('pointerleave', stop);
+        el.addEventListener('pointercancel', stop);
+        $whites.appendChild(el);
+      });
+      // Map from MIDI note to white index
+      const whiteIndexByNote = new Map();
+      let idx=0;
+      for (let n=START; n<=END; n++) {
+        if (!isBlack(pcOf(n))) { whiteIndexByNote.set(n, idx); idx++; }
+      }
+      const whiteCount = whites.length;
+      // Create blacks by checking each white's next semitone
+      for (let n=START; n<END; n++) {
+        if (isBlack(pcOf(n))) continue; // skip if this is black (shouldn't happen)
+        const next = n + 1;
+        if (!isBlack(pcOf(next))) continue; // only add if next semitone is sharp
+        const wi = whiteIndexByNote.get(n);
+        if (wi == null) continue;
+        const el = document.createElement('div');
+        el.className = 'key black';
+        el.dataset.note = String(next);
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = formatLabel(midiToName(next));
+        el.appendChild(label);
+        // position black key exactly between this white and the next white
+        const whiteW = 100 / whiteCount; // percent width of one white key
+        const BLACK_RATIO = 0.6; // black width is 60% of one white
+        const midpoint = (wi + 1) * whiteW; // center between white index wi and wi+1
+        // Because .black has transform:translateX(-50%), set left to the midpoint directly
+        el.style.left = midpoint + '%';
+        // make each black key width proportional to a white key width
+        el.style.width = (whiteW * BLACK_RATIO) + '%';
+        // click to play
+        el.addEventListener('pointerdown', ()=>{ highlightKey(next, true); startPianoVoice(next); onNoteInput(next); });
+        const stopB = ()=>{ highlightKey(next, false); stopPianoVoice(next); };
+        el.addEventListener('pointerup', stopB);
+        el.addEventListener('pointerleave', stopB);
+        el.addEventListener('pointercancel', stopB);
+        $piano.appendChild(el);
+      }
+    }
+
+    function onMIDIMessage(e) {
+      const [status, d1, d2] = e.data;
+      const cmd = status & 0xF0;
+      if (cmd === 0x90) { // note on
+        const note = d1, vel = d2;
+        if (vel > 0) {
+          highlightKey(note, true);
+          onNoteInput(note);
+        } else {
+          highlightKey(note, false);
+        }
+        
+      } else if (cmd === 0x80) { // note off
+        const note = d1;
+        highlightKey(note, false);
+      }
+    }
+
+    function highlightKey(midi, on) {
+      if (midi < START || midi > END) return;
+      const el = $piano.querySelector(`.key[data-note="${midi}"]`);
+      if (!el) return;
+      el.classList.toggle('active', !!on);
+    }
+
+    function attachInputs() {
+      state.inputs.forEach(inp => inp.onmidimessage = null);
+      state.inputs = [];
+      if (!state.access) return;
+      const inputs = Array.from(state.access.inputs.values());
+      inputs.forEach(inp => {
+        inp.onmidimessage = onMIDIMessage;
+        state.inputs.push(inp);
+      });
+      renderDevices();
+      $status.textContent = inputs.length ? 'Đang nhận MIDI...' : 'Không tìm thấy thiết bị MIDI';
+    }
+
+    async function enableMIDI() {
+      if (!('requestMIDIAccess' in navigator)) {
+        $status.textContent = 'Trình duyệt không hỗ trợ Web MIDI';
+        return;
+      }
+      try {
+        $status.textContent = 'Đang xin quyền MIDI...';
+        const access = await navigator.requestMIDIAccess({ sysex: false });
+        state.access = access;
+        access.onstatechange = () => attachInputs();
+        attachInputs();
+      } catch (err) {
+        $status.textContent = 'Không thể bật MIDI: ' + err;
+      }
+    }
+
+    document.getElementById('enableBtn').addEventListener('click', enableMIDI);
+
+    // Build UI
+    rebuildPiano();
+    $toggleSolfege.addEventListener('change', ()=>{
+      showSolfege = !!$toggleSolfege.checked;
+      // update all labels
+      $piano.querySelectorAll('.key').forEach(el=>{
+        const n = parseInt(el.dataset.note,10);
+        const label = el.querySelector('.label');
+        if (label) label.textContent = formatLabel(midiToName(n));
+      });
+    });
+
+    // Optional: try auto-enable if permissions already granted
+    if ('requestMIDIAccess' in navigator) {
+      navigator.requestMIDIAccess({ sysex: false }).then(access => {
+        state.access = access;
+        access.onstatechange = () => attachInputs();
+        attachInputs();
+      }).catch(()=>{});
+    }
+
+    // --- Song Mode ---
+    let songTokens = []; // [{type:'word', text:'Happy', notes:['C4','C4']}, {type:'newline'}]
+    let songPos = 0; // index of current token
+    let noteStep = 0; // step within notes array for current token
+    const $songArea = document.getElementById('songArea');
+    const $songFile = document.getElementById('songFile');
+    const $toggleGuide = document.getElementById('toggleGuide');
+    const $songControls = document.getElementById('songControls');
+    const $resetSongBtn = document.getElementById('resetSongBtn');
+
+    function parseSong(text){
+      const raw = [];
+      const re = /(\r?\n)|([^\s{}]+)(\{([^}]*)\})?/g;
+      let m;
+      while ((m = re.exec(text))){
+        if (m[1]) { raw.push({type:'newline'}); continue; }
+        const word = m[2];
+        const notesStr = m[4] || '';
+        const notes = notesStr.trim()? notesStr.trim().split(/\s+/): [];
+        raw.push({type:'word', text: word, notes});
+      }
+      // Merge loose note tokens into previous lyric word (to stack notes under same word)
+      const out = [];
+      const noteNameRe = /^[A-G](#|b)?\d$/i;
+      let lastLyricIdx = -1;
+      for (const t of raw){
+        if (t.type === 'newline') { out.push(t); lastLyricIdx = -1; continue; }
+        const txt = (t.text || '').replace(/[.,;:!?]+$/,'');
+        const isNoteWord = noteNameRe.test(txt);
+        if (!isNoteWord) {
+          out.push({ type:'word', text: t.text, notes: Array.isArray(t.notes)? t.notes.slice(): [] });
+          lastLyricIdx = out.length - 1;
+        } else {
+          if (lastLyricIdx >= 0) {
+            out[lastLyricIdx].notes = out[lastLyricIdx].notes || [];
+            if (t.notes && t.notes.length) {
+              out[lastLyricIdx].notes.push(...t.notes);
+            } else {
+              out[lastLyricIdx].notes.push(txt.toUpperCase());
+            }
+          } else {
+            // No previous lyric word; keep as its own token
+            out.push({ type:'word', text: txt, notes: t.notes || [] });
+            lastLyricIdx = out.length - 1;
+          }
+        }
+      }
+      // Post-pass: ensure any stray note-only tokens are folded into the previous lyric
+      const merged = [];
+      for (const t of out){
+        const ttxt = (t.text||'').replace(/[.,;:!?]+$/,'');
+        if (t.type==='word' && noteNameRe.test(ttxt) && merged.length && merged[merged.length-1].type==='word' && !noteNameRe.test(merged[merged.length-1].text)){
+          const prev = merged[merged.length-1];
+          prev.notes = prev.notes || [];
+          if (t.notes && t.notes.length) prev.notes.push(...t.notes);
+          else prev.notes.push(ttxt.toUpperCase());
+          continue;
+        }
+        merged.push(t);
+      }
+      return merged;
+    }
+
+    function renderSong(){
+      if (!$songArea) return;
+      $songArea.innerHTML = '';
+      // Determine effective current word index (skip newlines/non-words)
+      let curIdx = songPos;
+      while (curIdx < songTokens.length && songTokens[curIdx].type !== 'word') curIdx++;
+      for (let i=0;i<songTokens.length;i++){
+        const t = songTokens[i];
+        if (t.type==='newline'){ $songArea.appendChild(document.createElement('br')); continue; }
+        const span = document.createElement('span');
+        span.className = 'token' + (i===curIdx? ' current':'');
+        if (i < curIdx) span.classList.add('done');
+        span.textContent = t.text;
+        if (t.notes && t.notes.length){
+          const hints = document.createElement('span');
+          hints.className = 'hints';
+          hints.textContent = t.notes.join(' ');
+          span.appendChild(hints);
+        }
+        span.addEventListener('click', ()=>{ songPos = i; noteStep = 0; updateGuide(); renderSong(); });
+        $songArea.appendChild(span);
+      }
+    }
+
+    function nextExpectedNote(){
+      for (let i=songPos;i<songTokens.length;i++){
+        const t = songTokens[i];
+        if (t.type==='word' && t.notes && t.notes.length){
+          const step = (i===songPos? noteStep: 0);
+          if (step < t.notes.length) return {index:i, step, name:t.notes[step]};
+        }
+        if (t.type==='word' && (!t.notes || !t.notes.length)){
+          // skip words without notes but keep current pointer on them
+          if (i===songPos) { songPos++; i--; }
+        }
+      }
+      return null;
+    }
+
+    function clearGuide(){
+      $piano.querySelectorAll('.key.guide').forEach(k=> k.classList.remove('guide'));
+    }
+
+    function updateGuide(){
+      clearGuide();
+      if (!$toggleGuide.checked) return;
+      const nx = nextExpectedNote();
+      if (!nx) return;
+      const midi = nameToMidi(nx.name);
+      if (midi==null) return;
+      const key = $piano.querySelector(`.key[data-note="${midi}"]`);
+      if (key) key.classList.add('guide');
+    }
+
+    function onNoteInput(midi){
+      if (!$toggleGuide.checked) return;
+      const nx = nextExpectedNote();
+      if (!nx) return;
+      const want = nameToMidi(nx.name);
+      if (want==null) return;
+      if (midi === want){
+        // advance
+        if (nx.index === songPos){
+          noteStep++;
+        } else {
+          songPos = nx.index;
+          noteStep = nx.step + 1;
+        }
+        const t = songTokens[songPos];
+        if (t && t.notes && noteStep >= t.notes.length){
+          songPos++;
+          // Skip any non-word tokens (e.g., newline) to ensure next word highlights
+          while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
+          noteStep = 0;
+        }
+        renderSong();
+        updateGuide();
+      }
+    }
+
+    $songFile.addEventListener('change', async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const txt = await f.text();
+      songTokens = parseSong(txt);
+      // Initialize songPos at the first word token
+      songPos = 0; while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
+      noteStep = 0;
+      renderSong();
+      updateGuide();
+    });
+
+    function setSongModeUI(on){
+      if (on){
+        if ($songControls) $songControls.style.display = '';
+        if ($songArea) $songArea.style.display = '';
+        renderSong();
+        updateGuide();
+      } else {
+        // turn off guidance, hide UI, and clear previously shown song
+        clearGuide();
+        if ($songControls) $songControls.style.display = 'none';
+        if ($songArea) { $songArea.style.display = 'none'; $songArea.innerHTML = ''; }
+        songTokens = [];
+        songPos = 0;
+        noteStep = 0;
+      }
+    }
+
+    $toggleGuide.addEventListener('change', ()=>{
+      setSongModeUI(!!$toggleGuide.checked);
+    });
+
+    if ($resetSongBtn){
+      $resetSongBtn.addEventListener('click', ()=>{
+        // restart from first word
+        songPos = 0; while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
+        noteStep = 0;
+        renderSong();
+        updateGuide();
+      });
+    }
+
+    // Initial render
+    setSongModeUI(false);
+  </script>
+</body>
+</html>
