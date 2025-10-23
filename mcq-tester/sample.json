@@ -1,0 +1,55 @@
+{
+  "title": "Mẫu kiểm tra kiến thức cơ bản",
+  "questions": [
+    {
+      "text": "Trong JavaScript, từ khoá const có ý nghĩa gì?",
+      "choices": [
+        {
+          "text": "Khai báo biến không thể thay đổi tham chiếu",
+          "explanation": "Giá trị tham chiếu (đối với object/array) không thể gán lại biến khác; nhưng nội dung bên trong object/array vẫn có thể thay đổi.",
+          "correct": true
+        },
+        {
+          "text": "Khai báo hằng số, mọi thuộc tính bên trong object cũng bị đóng băng",
+          "explanation": "Sai. const không tự động đóng băng object. Cần Object.freeze nếu muốn bất biến sâu.",
+          "correct": false
+        },
+        {
+          "text": "Biến có thể gán lại nhiều lần",
+          "explanation": "Sai. const không cho phép gán lại biến sau khi khởi tạo.",
+          "correct": false
+        },
+        {
+          "text": "Chỉ dùng được trong Node.js, không dùng được trên trình duyệt",
+          "explanation": "Sai. const là một phần của ES6 và được hỗ trợ rộng rãi trên trình duyệt.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "HTTP status code 404 có ý nghĩa gì?",
+      "choices": [
+        {
+          "text": "Máy chủ lỗi nội bộ",
+          "explanation": "Sai. 500 mới là lỗi nội bộ máy chủ (Internal Server Error).",
+          "correct": false
+        },
+        {
+          "text": "Không được phép truy cập tài nguyên",
+          "explanation": "Sai. 403 Forbidden mới chỉ tình trạng không được phép.",
+          "correct": false
+        },
+        {
+          "text": "Tài nguyên không được tìm thấy",
+          "explanation": "Đúng. 404 Not Found nghĩa là URL/ tài nguyên không tồn tại.",
+          "correct": true
+        },
+        {
+          "text": "Yêu cầu thành công",
+          "explanation": "Sai. 200 OK mới biểu thị yêu cầu thành công.",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}

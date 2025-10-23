@@ -1,0 +1,77 @@
+/* Basic layout */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #0b1020; color: #e6ecff; }
+
+.container { max-width: 980px; margin: 0 auto; padding: 16px; }
+.header { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 0 16px; border-bottom: 1px solid #263055; }
+.brand-title { font-weight: 700; font-size: 20px; }
+.brand-sub { color: #9fb0ff; font-size: 12px; }
+.nav { display: flex; gap: 8px; }
+.tab { background: #172042; color: #dbe4ff; border: 1px solid #2a3564; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.tab.active { background: #2a3564; }
+.tab:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.view { padding-top: 16px; }
+.hidden { display: none; }
+
+.toolbar, .footbar { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.spacer { flex: 1; }
+
+.btn { background: #172042; color: #e6ecff; border: 1px solid #2a3564; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.btn.primary { background: #3b5bfd; border-color: #3b5bfd; color: #fff; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.title-input { width: 50%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3564; background: #0f1734; color: #e6ecff; }
+
+.status { color: #9fb0ff; font-size: 13px; }
+
+/* Editor */
+.editor { display: flex; flex-direction: column; gap: 16px; }
+.q-card { background: #0f1734; border: 1px solid #263055; border-radius: 10px; padding: 12px; }
+.q-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.q-title { font-weight: 700; color: #cfd9ff; }
+.q-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.input, .textarea { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3564; background: #0b1330; color: #e6ecff; }
+.textarea { min-height: 60px; resize: vertical; }
+
+.choice-row { display: grid; grid-template-columns: 24px 1fr; gap: 8px; align-items: start; margin-top: 8px; }
+.choice-main { display: flex; gap: 8px; align-items: center; }
+.badge { background: #263055; color: #cfd9ff; border-radius: 6px; padding: 2px 6px; font-size: 12px; }
+.small { font-size: 12px; color: #9fb0ff; }
+
+.divider { height: 1px; background: #263055; margin: 8px 0; }
+
+/* Test */
+.test-title { font-size: 16px; color: #cfd9ff; }
+.test-stage { background: #0f1734; border: 1px solid #263055; border-radius: 10px; padding: 12px; }
+.progress { color: #9fb0ff; margin-bottom: 8px; }
+.question { font-weight: 600; margin: 8px 0; }
+.choices { display: grid; gap: 8px; }
+.choice-btn { text-align: left; border: 1px solid #2a3564; background: #0b1330; color: #e6ecff; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+.choice-btn.selected { outline: 2px solid #3b5bfd; }
+
+.controls { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Result */
+.summary-title { font-size: 16px; color: #cfd9ff; }
+.result-summary { background: #0f1734; border: 1px solid #263055; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.result-detail { display: flex; flex-direction: column; gap: 12px; }
+.detail-card { background: #0f1734; border: 1px solid #263055; border-radius: 10px; padding: 12px; }
+.correct { color: #7bff95; }
+.incorrect { color: #ff7b88; }
+.exp { color: #9fb0ff; font-size: 13px; margin-top: 4px; }
+
+.footer { margin-top: 18px; color: #9fb0ff; font-size: 12px; text-align: center; }
+
+/* Result answer lines - clearer distinction */
+.ans-line { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px solid #2a3564; border-radius: 8px; background: #0b1330; }
+.ans-head { display: flex; align-items: center; gap: 8px; }
+.ans-text { flex: 1; }
+.pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; }
+.pill-correct { background: rgba(30, 180, 120, 0.15); color: #7bff95; border-color: rgba(30, 180, 120, 0.35); }
+.pill-picked { background: rgba(59, 91, 253, 0.15); color: #b9c6ff; border-color: rgba(59, 91, 253, 0.35); }
+.pill-wrong { background: rgba(255, 60, 60, 0.15); color: #ff9aa5; border-color: rgba(255, 60, 60, 0.35); }
+.ans-line.is-correct { border-color: rgba(30, 180, 120, 0.6); background: rgba(20, 80, 60, 0.15); }
+.ans-line.is-picked:not(.is-correct) { border-color: rgba(255, 60, 60, 0.6); background: rgba(80, 20, 30, 0.18); }

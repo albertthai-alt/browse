@@ -1,0 +1,47 @@
+{
+  "title": "Mẫu kiểm tra kiến thức cơ bản",
+  "questions": [
+    {
+      "text": "Trong JavaScript, từ khoá const có ý nghĩa gì?",
+      "choices": [
+        {
+          "text": "Khai báo biến không thể thay đổi tham chiếu",
+          "correct": true
+        },
+        {
+          "text": "Khai báo hằng số, mọi thuộc tính bên trong object cũng bị đóng băng",
+          "correct": false
+        },
+        {
+          "text": "Biến có thể gán lại nhiều lần",
+          "correct": false
+        },
+        {
+          "text": "Chỉ dùng được trong Node.js, không dùng được trên trình duyệt",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "HTTP status code 404 có ý nghĩa gì?",
+      "choices": [
+        {
+          "text": "Máy chủ lỗi nội bộ",
+          "correct": false
+        },
+        {
+          "text": "Không được phép truy cập tài nguyên",
+          "correct": false
+        },
+        {
+          "text": "Tài nguyên không được tìm thấy",
+          "correct": true
+        },
+        {
+          "text": "Yêu cầu thành công",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}
