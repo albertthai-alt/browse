@@ -2,12 +2,11 @@
 // Exposes window.SHARED_KEYMAP
 (function(){
   window.SHARED_KEYMAP = {
-    // Top row (only sharps on selected keys)
-    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
-    // Middle row
-    a:'F3', s:'G3', d:'A3', f:'B3',
-    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
-    // Bottom row
-    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
+    // Top row sharps (others intentionally omitted)
+    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    // Natural keys in order ZXCVASDFGHJKLBNM,. mapped F3..B5
+    z:'F3', x:'G3', c:'A3', v:'B3',
+    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
+    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   };
 })();

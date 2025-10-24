@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Đàn Bầu (C4 → C5) — WebAudio</title>
+<style>
+  :root{
+    --bg1:#fffaf0;
+    --bg2:#fff6e6;
+    --text:#1b2b3a;
+    --card:#fff;
+  }
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    padding:22px;
+  }
+  h1{margin:8px 0 0;font-size:1.3rem;}
+  p{margin:0;color:#314556}
+  .keyboard{
+    display:grid;
+    grid-template-columns:repeat(13,1fr);
+    gap:8px;
+    width:100%;
+    max-width:980px;
+    margin-top:14px;
+  }
+  .note-btn{
+    background:var(--card);
+    border-radius:12px;
+    padding:12px 8px;
+    box-shadow:0 8px 20px rgba(30,40,50,0.06);
+    border:1px solid rgba(27,43,58,0.06);
+    cursor:pointer;
+    user-select:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:64px;
+    transition:transform .06s ease, box-shadow .08s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .note-btn:active,.note-btn.playing{ transform:translateY(2px) scale(.995); box-shadow:0 4px 12px rgba(30,40,50,0.05);}
+  .lbl{font-weight:700}
+  .sub{font-size:.78rem;color:#55677f;margin-top:6px}
+  .cents{position:absolute;right:8px;top:8px;font-size:.72rem;color:#6b7b91}
+  footer{font-size:.85rem;color:#6b7b91;margin-top:12px;}
+  .hint{font-size:.85rem;color:#41586f}
+  .controls{display:flex;gap:14px;align-items:center;margin-top:6px}
+  .range{display:flex;gap:6px;align-items:center}
+  .small{font-size:.85rem;color:#4b5b78}
+</style>
+</head>
+<body>
+  <h1>Đàn bầu (C4 → C5)</h1>
+  <p>Nhấn giữ một nút để pluck (kéo dây) — kéo chuột/trượt ngón trên nút để uốn pitch (pitch-bend).</p>
+
+  <div class="controls">
+    <div class="range small">Pitch-bend range (cents):
+      <input id="bendRange" type="range" min="100" max="1200" value="600" style="margin-left:8px">
+      <span id="bendVal" class="small">±600</span>
+    </div>
+    <div class="small" style="margin-left:8px">Vibrato depth:
+      <input id="vibDepth" type="range" min="0" max="50" value="6" style="margin-left:8px">
+      <span id="vibVal" class="small">6¢</span>
+    </div>
+  </div>
+
+  <div class="keyboard" id="keyboard"></div>
+
+  <div class="hint">Gợi ý: bấm một lần để chơi ngắn; nhấn giữ + kéo ngang để uốn cao / thấp. Mở Console (F12) để xem debug.</div>
+  <footer>WebAudio — additive partials + bandpass — mô phỏng tiếng đàn bầu</footer>
+
+<script>
+/* ======= NOTES ======= */
+const NOTES = [
+  {name:'C4', freq:261.6255653005986},
+  {name:'C#4',freq:277.1826309768721},
+  {name:'D4', freq:293.6647679174076},
+  {name:'D#4',freq:311.1269837220809},
+  {name:'E4', freq:329.6275569128699},
+  {name:'F4', freq:349.2282314330039},
+  {name:'F#4',freq:369.9944227116344},
+  {name:'G4', freq:391.99543598174927},
+  {name:'G#4',freq:415.3046975799451},
+  {name:'A4', freq:440.0},
+  {name:'A#4',freq:466.1637615180899},
+  {name:'B4', freq:493.8833012561241},
+  {name:'C5', freq:523.2511306011972}
+];
+
+/* ======= UI BUILD ======= */
+const keyboard = document.getElementById('keyboard');
+NOTES.forEach((n, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'note-btn';
+  btn.innerHTML = `<span class="lbl">${n.name}</span><span class="sub">${n.freq.toFixed(2)} Hz</span><span class="cents" aria-hidden>0¢</span>`;
+  btn.dataset.index = idx;
+  keyboard.appendChild(btn);
+});
+
+/* ======= AUDIO SETUP ======= */
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    console.log('AudioContext created, sampleRate=', audioCtx.sampleRate);
+  }
+}
+
+/* PeriodicWave with weighted harmonics to mimic đàn bầu partials
+   We'll build imaginary (sine) coefficients since we want sine partials.
+*/
+function makeDanBauWave(harmonics = 12) {
+  // imag[0]=0, imag[n]=amplitude for nth harmonic (n>=1)
+  const imag = new Float32Array(harmonics + 1);
+  const real = new Float32Array(harmonics + 1); // leave zeros
+  // amplitudes chosen to create nasal/metallic tone similar to đàn bầu (strong odd partials)
+  // you can tune these numbers for timbre
+  const amps = [0, 1.00, 0.55, 0.45, 0.32, 0.24, 0.18, 0.14, 0.10, 0.08, 0.06, 0.04, 0.03];
+  for (let i = 1; i <= harmonics; i++) imag[i] = amps[i] || 0.01;
+  return {real, imag};
+}
+
+/* Cache a single PeriodicWave per audio context (created lazily) */
+let cachedWave = null;
+function getWave() {
+  ensureAudio();
+  if (!cachedWave) {
+    const {real, imag} = makeDanBauWave(20);
+    cachedWave = audioCtx.createPeriodicWave(real, imag, {disableNormalization:false});
+  }
+  return cachedWave;
+}
+
+/* ======= SYNTH: create node graph per note play ======= */
+function createDanBauVoice(baseFreq, settings = {}) {
+  ensureAudio();
+  const ctx = audioCtx;
+  const wave = getWave();
+
+  // Nodes:
+  // oscillator -> bandpass -> waveshaper (light) -> gain -> destination
+  const osc = ctx.createOscillator();
+  osc.setPeriodicWave(wave);
+  osc.frequency.value = baseFreq;
+  // We'll control fine pitch via oscillator.detune (in cents)
+
+  // Bandpass to focus on main partials (đàn bầu có âm khá 'sáng' trên partials)
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = baseFreq * 2.5; // center a bit above fundamental to emphasize harmonics
+  bp.Q.value = 6; // moderate Q for nasal sound
+
+  // A subtle waveshaper to add harshness (like metallic pluck)
+  const shaper = ctx.createWaveShaper();
+  // soft waveshaper curve
+  function makeCurve(amount=0.4){
+    const k = typeof amount === 'number' ? amount : 0.4;
+    const samples = 1024;
+    const curve = new Float32Array(samples);
+    for (let i=0;i<samples;i++){
+      const x = (i*2)/(samples-1)-1;
+      curve[i] = Math.tanh(x * (1 + k*3)); // tanh(distortion)
+    }
+    return curve;
+  }
+  shaper.curve = makeCurve(0.25);
+  shaper.oversample = '2x';
+
+  const gainNode = ctx.createGain();
+  gainNode.gain.value = 0.0001; // start silent
+
+  // slight stereo spread via StereoPannerNode
+  const pan = ctx.createStereoPanner();
+  pan.pan.value = (Math.random()*2 - 1) * 0.25;
+
+  // connect graph
+  osc.connect(bp);
+  bp.connect(shaper);
+  shaper.connect(gainNode);
+  gainNode.connect(pan);
+  pan.connect(ctx.destination);
+
+  // vibrato LFO (small) controlled by settings.vibratoDepth (in cents)
+  const vibOsc = ctx.createOscillator();
+  vibOsc.type = 'sine';
+  vibOsc.frequency.value = 5.5; // vibrato rate
+  const vibGain = ctx.createGain();
+  vibGain.gain.value = (settings.vibratoDepth||6) / 1200 * baseFreq; // convert cents->Hz approx
+  vibOsc.connect(vibGain);
+  // vibGain modulates frequency via AudioParam automation (connect to detune not frequency for stability)
+  // Many browsers don't support connecting to detune directly from AudioNode; we'll use setValueAtTime in JS updates
+  // as fallback we'll keep vibGain unused for direct connection but keep vibOsc for possible future use.
+  vibOsc.start();
+
+  return {
+    osc, bp, shaper, gainNode, pan, vibOsc,
+    start(time=0, options={}) {
+      const now = ctx.currentTime + time;
+      // envelope
+      const A = 0.006;
+      const D = options.decay || 2.4; // long sustain -> decay (đàn bầu sustains)
+      const S = 0.08; // sustain level (low)
+      const R = options.release || 1.0;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(0.0001, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.9, now + A);
+      gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0001, S), now + A + D);
+
+      osc.start(now);
+      // schedule a stop if not held (option.short=true => short note)
+      if (options.autoStop) {
+        const total = A + D + R + 0.02;
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + total);
+        setTimeout(()=>{
+          try { osc.stop(); vibOsc.stop(); } catch(e){}
+        }, (total+0.1)*1000);
+      }
+    },
+    setDetune(cents) {
+      // apply to oscillator detune param
+      if (osc.detune) {
+        osc.detune.setValueAtTime(cents, audioCtx.currentTime);
+      } else {
+        // fallback: adjust frequency multiplicatively (approx)
+        osc.frequency.setValueAtTime(baseFreq * Math.pow(2, cents/1200), audioCtx.currentTime);
+      }
+    },
+    release() {
+      const now = audioCtx.currentTime;
+      const R = 0.9;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value || 0.001, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + R);
+      try {
+        setTimeout(()=>{ osc.stop(); vibOsc.stop(); }, (R+0.1)*1000);
+      } catch(e){}
+    }
+  };
+}
+
+/* ======= INTERACTION LOGIC (pointer-based pitch bend) ======= */
+const bendRangeInput = document.getElementById('bendRange');
+const bendValSpan = document.getElementById('bendVal');
+bendRangeInput.addEventListener('input', ()=> bendValSpan.textContent = '±' + bendRangeInput.value);
+
+const vibDepthInput = document.getElementById('vibDepth');
+const vibValSpan = document.getElementById('vibVal');
+vibDepthInput.addEventListener('input', ()=> vibValSpan.textContent = vibDepthInput.value + '¢');
+
+/* Active voices map by button */
+const activeVoices = new Map();
+
+function pointerStartHandler(e) {
+  e.preventDefault();
+  ensureAudio();
+  const btn = e.currentTarget;
+  const idx = Number(btn.dataset.index);
+  const note = NOTES[idx];
+  const startX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
+  const startY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY) || 0;
+
+  // create voice
+  const vibDepth = Number(vibDepthInput.value);
+  const voice = createDanBauVoice(note.freq, {vibratoDepth: vibDepth});
+  // initial detune 0
+  voice.setDetune(0);
+  voice.start(0, {autoStop:false}); // sustain until release
+
+  btn.classList.add('playing');
+
+  // record active
+  activeVoices.set(btn, {voice, startX, startY, lastCents:0});
+
+  // update centroid display
+  const centsEl = btn.querySelector('.cents');
+  if (centsEl) centsEl.textContent = '0¢';
+
+  // capture pointer for move/up events
+  btn.setPointerCapture && btn.setPointerCapture(e.pointerId);
+}
+
+function pointerMoveHandler(e) {
+  const btn = e.currentTarget;
+  const info = activeVoices.get(btn);
+  if (!info) return;
+  const idx = Number(btn.dataset.index);
+  const note = NOTES[idx];
+  const currentX = e.clientX;
+  // map horizontal delta to cents: left = negative, right = positive
+  const dx = currentX - info.startX;
+  // interpret width: large bend range when move across button width*2
+  const sliderRange = Number(bendRangeInput.value); // in cents max
+  // We'll map dx in pixels to cents using a sensitivity factor
+  const sens = sliderRange / 120; // move 120px => full range
+  const cents = Math.max(-sliderRange, Math.min(sliderRange, Math.round(dx * sens)));
+  info.voice.setDetune(cents);
+  info.lastCents = cents;
+  const centsEl = btn.querySelector('.cents');
+  if (centsEl) centsEl.textContent = (cents>0?'+':'') + cents + '¢';
+}
+
+function pointerEndHandler(e) {
+  const btn = e.currentTarget;
+  const info = activeVoices.get(btn);
+  if (!info) return;
+  // release voice
+  info.voice.release();
+  activeVoices.delete(btn);
+  btn.classList.remove('playing');
+  const centsEl = btn.querySelector('.cents');
+  if (centsEl) centsEl.textContent = '0¢';
+  try { btn.releasePointerCapture && btn.releasePointerCapture(e.pointerId); } catch(e){}
+}
+
+/* For simple click (without hold) we also play short pluck */
+function clickHandler(e) {
+  // prevent double creation if pointerdown already started
+  // this handler will create a short autoStop voice if click originates without pointerdown hold
+  // But to avoid duplicate on pointerdown, check if activeVoices already has btn
+  const btn = e.currentTarget;
+  if (activeVoices.has(btn)) return;
+  ensureAudio();
+  const idx = Number(btn.dataset.index);
+  const note = NOTES[idx];
+  const voice = createDanBauVoice(note.freq, {vibratoDepth: Number(vibDepthInput.value)});
+  voice.setDetune(0);
+  voice.start(0, {autoStop:true});
+  // flash UI
+  btn.classList.add('playing');
+  setTimeout(()=> btn.classList.remove('playing'), 400);
+}
+
+/* Attach handlers */
+document.querySelectorAll('.note-btn').forEach(btn => {
+  // pointer events for press+drag
+  btn.addEventListener('pointerdown', pointerStartHandler);
+  btn.addEventListener('pointermove', pointerMoveHandler);
+  btn.addEventListener('pointerup', pointerEndHandler);
+  btn.addEventListener('pointercancel', pointerEndHandler);
+  btn.addEventListener('pointerleave', (e)=>{
+    // if pointer leaves while still pressed, we still handle (optional)
+    // do not auto-end because user may re-enter; keep behavior simple: if active and pointerup outside, release
+    const info = activeVoices.get(e.currentTarget);
+    if (info && e.buttons === 0) { pointerEndHandler(e); }
+  });
+
+  // also support simple click (tap)
+  btn.addEventListener('click', clickHandler);
+});
+
+/* Lazy init on first user click anywhere */
+document.addEventListener('click', function initOnce(){
+  ensureAudio();
+  document.removeEventListener('click', initOnce);
+});
+
+/* Keyboard mapping for convenience (q..m like before) */
+const KEYMAP = "q2w3er5t6y7u"; // map 13 keys
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.target && (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA' || e.target.isContentEditable)) return;
+  const k = e.key.toLowerCase();
+  const idx = KEYMAP.indexOf(k);
+  if (idx >= 0 && idx < NOTES.length) {
+    const btn = document.querySelector(`.note-btn[data-index="${idx}"]`);
+    // simulate click short
+    btn && btn.click();
+  }
+});
+
+/* Debug: log sample rate */
+console.log('Loaded Đàn bầu demo. Press a button to play.');
+</script>
+</body>
+</html>

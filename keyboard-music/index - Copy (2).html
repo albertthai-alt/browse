@@ -47,10 +47,6 @@
   /* Right-hand groups coloring */
   .key.rh-r2 { background: linear-gradient(180deg,#f8fbff 0%, #eef5ff 100%); border-color:#d8e7fb; }
   .key.rh-r3 { background: linear-gradient(180deg,#fff9f3 0%, #fff2e6 100%); border-color:#f5dec2; }
-  /* Middle-row group color for A..J (yellow tone to differ from sharps) */
-  .key.rh-mid { background: linear-gradient(180deg,#fff7e6 0%, #ffe6b3 100%); border-color:#f2d59a; }
-  /* Ensure sharp styling wins over group colors when both classes exist */
-  .key.sharp { background: linear-gradient(180deg,#ececec,#d9d9d9); border-color:#c7c7c7; }
   .controls { width:100%; max-width:820px; box-sizing:border-box; margin-top:18px; margin-left:auto; margin-right:auto; }
   label { margin-right:8px; }
   .song { width:100%; max-width:820px; box-sizing:border-box; margin-top:18px; margin-left:auto; margin-right:auto; line-height: 2; }
@@ -79,19 +75,13 @@
   .composer-staff .staff-line { stroke:#222; stroke-width:1.2; }
   .composer-staff .barline { stroke:#444; stroke-width:1.5; }
   .composer-staff .notehead { fill:#111; }
-  .composer-staff .note.active .notehead { fill:#0a66c2; }
-  .composer-staff .note.active .note-label { fill:#0a66c2; font-weight: 700; }
   .composer-staff .ledger { stroke:#222; stroke-width:1.1; }
   .composer-staff .note { cursor:pointer; }
   .composer-staff .note-label { font: 14px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; fill:#333; }
 </style>
 </head>
 <body>
-<h1>Keyboard Music <span class="ver">v2.1</span></h1>
-<!-- Composer staff is now always visible and placed above the keyboard -->
-<div id="composerStaff" class="composer-staff">
-  <svg id="composerStaffSvg" class="staff" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet"></svg>
-</div>
+<h1>Keyboard Music <span class="ver">v2.0</span></h1>
 <div class="kbd-wrap">
   <button id="octaveDownBtn" class="oct-btn" title="Giảm 1 quãng">◄</button>
   <div class="keyboard" id="keyboard"></div>
@@ -101,7 +91,6 @@
   <label>Nhạc cụ:
     <select id="instrumentSelect">
       <option value="piano" selected>Piano</option>
-      <option value="guitar">Guitar</option>
       <option value="tank-drum">Tank Drum</option>
       <option value="sao">Sáo</option>
       <option value="marimba">Marimba</option>
@@ -122,14 +111,16 @@
   <label><input type="checkbox" id="toggleShowNotes" checked> Hiển thị nốt nhạc</label>
   <label><input type="checkbox" id="toggleHighlightKeys" checked> Highlight bàn phím</label>
   <button id="pasteSongBtn">Dán & Hiển thị</button>
-  <!-- GitHub songs list will appear here when song mode is enabled -->
-  <div id="githubSongList" style="margin-top:8px; display:none; font-size:13px;"></div>
   <div class="composer-controls" id="composerControls" style="margin-top:8px; display:none;">
     <span id="composerStatus">Chọn một chữ để thêm nốt...</span>
     <button id="composerClearBtn" style="margin-left:8px;">Xóa nốt của chữ</button>
     <button id="composerSaveBtn" style="margin-left:8px;">Lưu bài hát (.txt)</button>
   </div>
 </div>
+<div id="composerStaff" class="composer-staff" style="display:none;">
+  <svg id="composerStaffSvg" class="staff" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
 <div class="song" id="songArea"></div>
 
 <!-- Paste modal -->
@@ -154,12 +145,6 @@ const instruments = {
     synth: 'tone-piano',
     pathPrefix: '',
     notes: [] // availability not restricted
-  },
-  'guitar': {
-    label: 'Guitar',
-    synth: 'guitar',
-    pathPrefix: '',
-    notes: []
   },
   'tank-drum': {
     label: 'Tank Drum',
@@ -203,55 +188,47 @@ let currentInstrument = 'piano';
 
 // Default keymap used when running from file:// or when fetching keymap.json fails
 const DEFAULT_KEYMAP = {
-  'guitar': {
-    // Sharps on top row
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    // Naturals ZXCVASDFGHJKLBNM,. -> F3..B5
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
-  },
   'tank-drum': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'marimba': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'sao': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'piano': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'handpan': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'dan-da': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   },
   'dan-bau': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
-    z:'F3', x:'G3', c:'A3', v:'B3',
-    a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
-    b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
+    w:'F#3', e:'G#3', r:'A#3', y:'C#4', u:'D#4', o:'F#4', p:'G#4',
+    a:'F3', s:'G3', d:'A3', f:'B3',
+    g:'C4', h:'D4', j:'E4', k:'F4', l:'G4',
+    z:'B2', x:'C3', c:'D3', v:'E3', b:'A4', n:'B4', m:'C5', ',':'D5', '.':'E5'
   }
 };
 
@@ -304,12 +281,11 @@ function getCurrentMap(inst = currentInstrument) {
 function getShiftOverride(key) {
   const k = String(key || '').toLowerCase();
   let base = null;
-  if (k === 's') base = 'F#3';
-  else if (k === 'd') base = 'G#3';
-  else if (k === 'f') base = 'A#3';
-  else if (k === 'j') base = 'F#5';
-  else if (k === 'k') base = 'G#5';
-  else if (k === 'l') base = 'A#5';
+  if (k === 'd') base = 'C#3';
+  else if (k === 'f') base = 'D#3';
+  else if (k === 'g') base = 'G#4';
+  else if (k === 'k') base = 'C#5';
+  else if (k === 'l') base = 'D#5';
   return base ? transposeNote(base, transposeOctaves) : null;
 }
 
@@ -393,43 +369,12 @@ function noteToFreq(n) {
   const map = { C:0, 'C#':1, Db:1, D:2, 'D#':3, Eb:3, E:4, F:5, 'F#':6, Gb:6, G:7, 'G#':8, Ab:8, A:9, 'A#':10, Bb:10, B:11 };
   const m = n.match(/^([A-G](?:#|b)?)(\d)$/);
   if (!m) return 440;
-  const semi = (parseInt(m[2],10) - 4) * 12 + (map[m[1]] - 9);
-  return A4 * Math.pow(2, semi/12);
-}
-
-// --- Guitar (Karplus–Strong) ---
-function playGuitarKS(name) {
-  const frequency = noteToFreq(name);
-  const sr = audioCtx.sampleRate;
-  const N = Math.max(2, Math.round(sr / frequency));
-  const duration = 2.2;
-  const outLen = Math.round(sr * duration);
-  const decay = 0.994;
-  const ring = new Float32Array(N);
-  for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
-  const buffer = audioCtx.createBuffer(1, outLen, sr);
-  const buf = buffer.getChannelData(0);
-  let ptr = 0;
-  for (let t = 0; t < outLen; t++) {
-    const cur = ring[ptr];
-    const nextIndex = (ptr + 1) % N;
-    const newVal = decay * 0.5 * (ring[ptr] + ring[nextIndex]);
-    buf[t] = cur;
-    ring[ptr] = newVal;
-    ptr = nextIndex;
-  }
-  const src = audioCtx.createBufferSource();
-  src.buffer = buffer;
-  const highFilter = audioCtx.createBiquadFilter();
-  highFilter.type = 'highshelf';
-  highFilter.frequency.value = 1200;
-  highFilter.gain.value = -3;
-  const gain = audioCtx.createGain();
-  gain.gain.value = 0.9;
-  src.connect(highFilter);
-  highFilter.connect(gain);
-  gain.connect(audioCtx.destination);
-  src.start();
+  const [, pc, octStr] = m;
+  const octave = parseInt(octStr,10);
+  const semitone = map[pc];
+  const midi = (octave + 1) * 12 + semitone; // MIDI note number
+  const midiA4 = 69;
+  return A4 * Math.pow(2, (midi - midiA4) / 12);
 }
 
 // --- Flute (Sáo) sustain helpers ---
@@ -679,15 +624,7 @@ function makeKeyButton(k, mappedNote, available) {
   btn.addEventListener('pointerdown', ()=> {
     ensureAudioContext();
     btn.classList.add('active');
-    // If song guide expects the shift-sharp for this key, play that even without Shift
-    const expected = getExpectedNextNote();
-    const shiftName = (!bottomRowKeys.has(k) ? getShiftOverride(k) : null);
-    const playName = (expected && shiftName === expected) ? shiftName : ((shiftHeld && !bottomRowKeys.has(k)) ? (shiftName || mappedNote) : mappedNote);
-    // Staff highlight
-    if (playName) {
-      setStaffNoteActive(playName, true);
-      btn.dataset.staffNote = playName;
-    }
+    const playName = (shiftHeld && !bottomRowKeys.has(k)) ? (getShiftOverride(k) || mappedNote) : mappedNote;
     // Composer capture first (even if not playable)
     if (composerMode && composerSelectedIndex !== null && playName) {
       const tok = songTokens[composerSelectedIndex];
@@ -743,7 +680,6 @@ function makeKeyButton(k, mappedNote, available) {
   });
   btn.addEventListener('pointercancel', ()=> {
     btn.classList.remove('active');
-    if (btn.dataset.staffNote) { setStaffNoteActive(btn.dataset.staffNote, false); delete btn.dataset.staffNote; }
     if (currentInstrument === 'piano' && window.tonePiano && btn.dataset.activeNote) {
       window.tonePiano.release(btn.dataset.activeNote);
       delete btn.dataset.activeNote;
@@ -762,7 +698,6 @@ function playNote(name) {
   // Validate against song if any
   if (songMode) handleNotePlayed(name);
   const synthType = instruments[currentInstrument].synth;
-  if (synthType === 'guitar') { playGuitarKS(name); return; }
   if (synthType === 'marimba') { playMarimba(name); return; }
   if (currentInstrument === 'piano' && window.tonePiano) {
     window.tonePiano.play(name);
@@ -910,84 +845,15 @@ function updateSongModeUI() {
     // Clear any guide highlights when hiding
     document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
     document.querySelectorAll('.key.guide-sharp').forEach(el=> el.classList.remove('guide-sharp'));
-    const gl = document.getElementById('githubSongList');
-    if (gl) gl.style.display = 'none';
   } else {
     updateKeyboardGuideHighlight();
-    // Show GitHub song list when in song mode
-    const gl = document.getElementById('githubSongList');
-    if (gl) {
-      gl.style.display = '';
-      // Lazy load only once per session
-      if (!gl.dataset.loaded) {
-        fetchGithubSongs().catch(()=>{
-          gl.innerHTML = '<em>Không tải được danh sách bài hát từ GitHub.</em>';
-        });
-      }
-    }
   }
   // Composer controls visibility
   const cc = document.getElementById('composerControls');
   if (cc) cc.style.display = composerMode ? '' : 'none';
   const cst = document.getElementById('composerStaff');
-  if (cst) cst.style.display = '';
-  renderComposerStaff();
-}
-
-// Fetch and render .txt songs from GitHub repo albertthai-alt/browse in folder /keyboard-music
-async function fetchGithubSongs() {
-  const gl = document.getElementById('githubSongList');
-  if (!gl) return;
-  gl.textContent = 'Đang tải danh sách bài hát từ GitHub...';
-  const api = 'https://api.github.com/repos/albertthai-alt/browse/contents/keyboard-music';
-  const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-  if (!res.ok) throw new Error('GitHub API error');
-  /** @type {{name:string,path:string,download_url:string,type:string}[]} */
-  const items = await res.json();
-  const txts = (Array.isArray(items) ? items : []).filter(it=> it && it.type === 'file' && /\.txt$/i.test(it.name));
-  if (txts.length === 0) { gl.innerHTML = '<em>Chưa có file .txt nào.</em>'; gl.dataset.loaded = '1'; return; }
-  const frag = document.createDocumentFragment();
-  const list = document.createElement('div');
-  list.style.display = 'flex';
-  list.style.flexWrap = 'wrap';
-  list.style.gap = '8px 12px';
-  for (const f of txts) {
-    const a = document.createElement('a');
-    a.href = '#';
-    a.textContent = f.name;
-    a.dataset.downloadUrl = f.download_url || '';
-    a.style.textDecoration = 'none';
-    a.style.padding = '4px 8px';
-    a.style.border = '1px solid #eee';
-    a.style.borderRadius = '6px';
-    a.style.background = '#fff';
-    a.style.color = '#0b2545';
-    a.addEventListener('click', async (ev)=>{
-      ev.preventDefault();
-      const url = a.dataset.downloadUrl;
-      if (!url) return;
-      a.textContent = f.name + ' (đang tải...)';
-      try {
-        const r = await fetch(url);
-        const txt = await r.text();
-        songTokens = parseSong(txt);
-        songPos = 0;
-        renderSong();
-        updateSongHighlight();
-        updateComposerStatus();
-      } catch (e) {
-        console.error(e);
-        alert('Không đọc được file từ GitHub: ' + f.name);
-      } finally {
-        a.textContent = f.name;
-      }
-    });
-    list.appendChild(a);
-  }
-  frag.appendChild(list);
-  gl.innerHTML = '';
-  gl.appendChild(frag);
-  gl.dataset.loaded = '1';
+  if (cst) cst.style.display = composerMode ? '' : 'none';
+  if (composerMode) renderComposerStaff();
 }
 
 function rebuildUI() {
@@ -1010,12 +876,10 @@ function rebuildUI() {
       const available = !!note && (inst.notes.length === 0 || inst.notes.includes(note));
       const el = makeKeyButton(k, note, available);
       // Right-hand coloring groups
-      // Middle row: A..J use rh-mid; K,L share rh-r3 like B group
-      if (idx === 1 && ['a','s','d','f','g','h','j'].includes(k)) el.classList.add('rh-mid');
-      if (idx === 1 && ['k','l'].includes(k)) el.classList.add('rh-r3');
-      // Bottom row groupings
-      // Black keys on top row sharps (W,E,T,Y,U,O,P)
-      if (idx === 0 && ['w','e','t','y','u','o','p'].includes(k) && note) el.classList.add('sharp');
+      // Revert G H J K L ; to default (no special class)
+      // Apply the previous right-hand color to Z X C V
+      // Black keys on top row sharps
+      if (idx === 0 && ['w','e','r','y','u','o','p'].includes(k) && note) el.classList.add('sharp');
       if (idx === 2 && ['z','x','c','v'].includes(k)) el.classList.add('rh-r2');
       if (idx === 2 && ['b','n','m',',','.'].includes(k)) el.classList.add('rh-r3');
       row.appendChild(el);
@@ -1031,11 +895,11 @@ function refreshLabelsForShift() {
     const note = (shiftHeld && !bottom ? (getShiftOverride(k) || currentMap[k]) : currentMap[k]) || '';
     const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
     if (el) el.textContent = formatKeyLabel(note);
-    // Toggle sharp styling for shift-based sharp keys (S,D,F,J,K,L) when Shift is held
+    // Toggle sharp styling for shift-based sharp keys (D,F,G,K,L) when Shift is held
     const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
     if (keyEl) {
-      if (shiftHeld && (k === 's' || k === 'd' || k === 'f' || k === 'j' || k === 'k' || k === 'l')) keyEl.classList.add('sharp');
-      else if (!(k === 'w' || k === 'e' || k === 't' || k === 'y' || k === 'u' || k === 'o' || k === 'p')) keyEl.classList.remove('sharp');
+      if (shiftHeld && (k === 'd' || k === 'f' || k === 'g' || k === 'k' || k === 'l')) keyEl.classList.add('sharp');
+      else if (!(k === 'w' || k === 'e' || k === 'r' || k === 'y' || k === 'u' || k === 'o' || k === 'p')) keyEl.classList.remove('sharp');
     }
   }
 }
@@ -1173,7 +1037,7 @@ function updateKeyboardGuideHighlight() {
   const isSharp = expected.includes('#');
   // Find keys that map to expected note for current instrument
   const currentMap = getCurrentMap();
-  const topSharpKeys = new Set(['w','e','t','y','u','o','p']);
+  const topSharpKeys = new Set(['w','e','r','y','u','o','p']);
   for (const [k, v] of Object.entries(currentMap)) {
     if (v === expected) {
       const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
@@ -1184,11 +1048,8 @@ function updateKeyboardGuideHighlight() {
       if (keyEl) keyEl.classList.add('guide');
     }
   }
-  // Also consider SHIFT-based sharp overrides (S,D,F and J,K,L)
-  const pairs = [
-    ['s','F#3'], ['d','G#3'], ['f','A#3'],
-    ['j','F#5'], ['k','G#5'], ['l','A#5']
-  ];
+  // Also consider SHIFT-based sharp overrides (D,F,G,K,L)
+  const pairs = [ ['d','C#3'], ['f','D#3'], ['g','G#4'], ['k','C#5'], ['l','D#5'] ];
   for (const [k, base] of pairs) {
     const n = transposeNote(base, transposeOctaves);
     if (n === expected) {
@@ -1199,19 +1060,13 @@ function updateKeyboardGuideHighlight() {
 }
 
 (async ()=>{
-  // Draw staff immediately so it's visible on first paint
-  try { renderComposerStaff(); } catch(_) {}
   await loadKeymap();
+  rebuildUI();
   await loadSamplesForInstrument(currentInstrument);
   console.log('Samples loaded for', currentInstrument);
-  // Build keyboard UI on first load
-  rebuildUI();
   // Initialize song mode UI (default hidden)
   updateSongModeUI();
 })();
-
-// Keep staff responsive
-window.addEventListener('resize', ()=> { try { renderComposerStaff(); } catch(_) {} });
 
 // Safety: stop all sustained sounds on tab hide or window blur
 window.addEventListener('blur', stopAll);
@@ -1289,15 +1144,6 @@ window.addEventListener('keydown', (e)=>{
     : currentMap[k];
   // Do not auto-sharpify here; explicit sharps are encoded in maps/overrides
   name = toSharpIfNeeded(name, false);
-  // If song guide expects the shift-sharp for this key, play that even without Shift
-  const expected = getExpectedNextNote();
-  const shiftName = (!_bottomRow.has(k) ? getShiftOverride(k) : null);
-  if (!e.shiftKey && !shiftHeld && expected && shiftName === expected) name = shiftName;
-  // Staff highlight
-  if (name) {
-    setStaffNoteActive(name, true);
-    (window._staffNoteByKey = window._staffNoteByKey || {})[k] = name;
-  }
   const inst = instruments[currentInstrument];
   const available = !!name && (inst.notes.length === 0 || inst.notes.includes(name));
   // Composer capture first (even if not playable)
@@ -1340,10 +1186,6 @@ window.addEventListener('keyup', (e)=>{
   pressedKeys.delete(k);
   const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
   if (btn) btn.classList.remove('active');
-  if (window._staffNoteByKey && window._staffNoteByKey[k]) {
-    setStaffNoteActive(window._staffNoteByKey[k], false);
-    delete window._staffNoteByKey[k];
-  }
   if (currentInstrument === 'piano' && window.tonePiano && window._pianoActiveByKey && window._pianoActiveByKey[k]) {
     const note = window._pianoActiveByKey[k];
     window.tonePiano.release(note);
@@ -1503,27 +1345,6 @@ document.getElementById('composerSaveBtn').addEventListener('click', ()=>{
   }
   function _csBuildFromC(o){ const o2=parseInt(o,10); return [`C${o2}`,`D${o2}`,`E${o2}`,`F${o2}`,`G${o2}`,`A${o2}`,`B${o2}`,`C${o2+1}`]; }
   function renderComposerStaff(){ const wrap=document.getElementById('composerStaff'); if (!wrap || wrap.style.display==='none') return; const svg=document.getElementById('composerStaffSvg'); let arr=[..._csBuildFromC(3),..._csBuildFromC(4),..._csBuildFromC(5)]; const seen=new Set(); arr=arr.filter(n=>{ const m=_csNameToMidi(n); if(m==null||seen.has(m)) return false; seen.add(m); return true; }).sort((a,b)=>(_csNameToMidi(a)||0)-(_csNameToMidi(b)||0)); const left=40; const startX=left+70; const spacing=52; const tail=90; const width = startX + spacing * Math.max(0, arr.length-1) + tail; const met=_csDrawStaff(svg, width); let x=startX; for(const n of arr){ _csDrawNote(svg,x,n,met); x+=spacing; }
-  }
-  // Draw once after function definition to ensure initial render
-  try { renderComposerStaff(); } catch(_) {}
-  // Helper: highlight note on staff
-  function setStaffNoteActive(name, on) {
-    const nn = String(name||'').toUpperCase();
-    const el = document.querySelector(`.composer-staff .note[data-name="${CSS.escape(nn)}"]`);
-    if (el) el.classList[on ? 'add' : 'remove']('active');
-  }
-  // Helper: expected next note in song mode (or null)
-  function getExpectedNextNote() {
-    if (!songMode || !Array.isArray(songTokens) || songTokens.length === 0) return null;
-    let pos = songPos || 0;
-    while (pos < songTokens.length) {
-      const tok = songTokens[pos];
-      const notes = tok && tok.notes || [];
-      const done = tok && tok.doneSteps || 0;
-      if (notes.length > 0 && done < notes.length) return notes[done];
-      pos++;
-    }
-    return null;
   }
 </script>
 </body>
