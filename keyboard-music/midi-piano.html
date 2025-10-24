@@ -309,9 +309,10 @@
     }
 
     // --- Song Mode ---
-    let songTokens = []; // [{type:'word', text:'Happy', notes:['C4','C4']}, {type:'newline'}]
+    let songTokens = []; // [{type:'word', text:'Happy', notes:[ 'C4', ['C4','E5'] ]}, {type:'newline'}]
     let songPos = 0; // index of current token
     let noteStep = 0; // step within notes array for current token
+    let chordProgress = new Set(); // track pressed notes for current chord step
     const $songArea = document.getElementById('songArea');
     const $songFile = document.getElementById('songFile');
     const $toggleGuide = document.getElementById('toggleGuide');
@@ -326,7 +327,13 @@
         if (m[1]) { raw.push({type:'newline'}); continue; }
         const word = m[2];
         const notesStr = m[4] || '';
-        const notes = notesStr.trim()? notesStr.trim().split(/\s+/): [];
+        let notes = [];
+        if (notesStr.trim()){
+          // Extract note tokens and group contiguous as a single chord step
+          const all = notesStr.match(/[A-G](#|b)?\d/gi) || [];
+          if (all.length > 1) notes.push(all.map(s=>s.toUpperCase()));
+          else if (all.length === 1) notes.push(all[0].toUpperCase());
+        }
         raw.push({type:'word', text: word, notes});
       }
       // Merge loose note tokens into previous lyric word (to stack notes under same word)
@@ -387,7 +394,7 @@
         if (t.notes && t.notes.length){
           const hints = document.createElement('span');
           hints.className = 'hints';
-          hints.textContent = t.notes.join(' ');
+          hints.textContent = t.notes.map(step => Array.isArray(step) ? step.join('') : step).join(' ');
           span.appendChild(hints);
         }
         span.addEventListener('click', ()=>{ songPos = i; noteStep = 0; updateGuide(); renderSong(); });
@@ -400,7 +407,7 @@
         const t = songTokens[i];
         if (t.type==='word' && t.notes && t.notes.length){
           const step = (i===songPos? noteStep: 0);
-          if (step < t.notes.length) return {index:i, step, name:t.notes[step]};
+          if (step < t.notes.length) return {index:i, step, want:t.notes[step]};
         }
         if (t.type==='word' && (!t.notes || !t.notes.length)){
           // skip words without notes but keep current pointer on them
@@ -419,35 +426,43 @@
       if (!$toggleGuide.checked) return;
       const nx = nextExpectedNote();
       if (!nx) return;
-      const midi = nameToMidi(nx.name);
-      if (midi==null) return;
-      const key = $piano.querySelector(`.key[data-note="${midi}"]`);
-      if (key) key.classList.add('guide');
+      const steps = Array.isArray(nx.want)? nx.want : [nx.want];
+      for (const nm of steps){
+        const midi = nameToMidi(nm);
+        if (midi==null) continue;
+        const key = $piano.querySelector(`.key[data-note="${midi}"]`);
+        if (key) key.classList.add('guide');
+      }
     }
 
     function onNoteInput(midi){
       if (!$toggleGuide.checked) return;
       const nx = nextExpectedNote();
       if (!nx) return;
-      const want = nameToMidi(nx.name);
-      if (want==null) return;
-      if (midi === want){
-        // advance
-        if (nx.index === songPos){
-          noteStep++;
-        } else {
-          songPos = nx.index;
-          noteStep = nx.step + 1;
+      const wantSteps = Array.isArray(nx.want) ? nx.want : [nx.want];
+      const wantMidis = wantSteps.map(nameToMidi).filter(n=> n!=null);
+      if (wantMidis.includes(midi)) {
+        // record chord progress
+        chordProgress.add(midi);
+        const allHit = wantMidis.every(n => chordProgress.has(n));
+        if (allHit) {
+          chordProgress.clear();
+          // advance
+          if (nx.index === songPos){
+            noteStep++;
+          } else {
+            songPos = nx.index;
+            noteStep = nx.step + 1;
+          }
+          const t = songTokens[songPos];
+          if (t && t.notes && noteStep >= t.notes.length){
+            songPos++;
+            while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
+            noteStep = 0;
+          }
+          renderSong();
+          updateGuide();
         }
-        const t = songTokens[songPos];
-        if (t && t.notes && noteStep >= t.notes.length){
-          songPos++;
-          // Skip any non-word tokens (e.g., newline) to ensure next word highlights
-          while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
-          noteStep = 0;
-        }
-        renderSong();
-        updateGuide();
       }
     }
 
@@ -467,6 +482,7 @@
       if (on){
         if ($songControls) $songControls.style.display = '';
         if ($songArea) $songArea.style.display = '';
+        chordProgress.clear();
         renderSong();
         updateGuide();
       } else {
@@ -477,6 +493,7 @@
         songTokens = [];
         songPos = 0;
         noteStep = 0;
+        chordProgress.clear();
       }
     }
 
@@ -489,6 +506,7 @@
         // restart from first word
         songPos = 0; while (songPos < songTokens.length && songTokens[songPos].type !== 'word') songPos++;
         noteStep = 0;
+        chordProgress.clear();
         renderSong();
         updateGuide();
       });
