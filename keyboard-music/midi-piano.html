@@ -72,6 +72,8 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+  <script src="./tone.js"></script>
   <script>
     // Utility: MIDI note number -> name like C4, D#4
     function midiToName(n) {
@@ -99,47 +101,24 @@
     const $toggleSolfege = document.getElementById('toggleSolfege');
     let showSolfege = false;
 
-    // --- Audio (Web Audio) ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-    const activeVoices = new Map(); // midi -> { osc1, osc2, gain }
+    // --- Audio routed to Tone.js piano like index.html ---
+    const activeVoices = new Map(); // midi -> noteName
+    async function ensureTone() {
+      try { if (window.Tone && Tone.context && Tone.context.state !== 'running') await Tone.start(); } catch(_){}
+    }
     function startPianoVoice(midi) {
-      const now = audioCtx.currentTime;
-      const f = midiToFreq(midi);
-      const osc1 = audioCtx.createOscillator();
-      const osc2 = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc1.type = 'triangle';
-      osc2.type = 'sine';
-      osc1.frequency.value = f;
-      osc2.frequency.value = f * 2; // subtle overtone
-      const mix = audioCtx.createGain();
-      const lp = audioCtx.createBiquadFilter();
-      mix.gain.value = 0.5;
-      lp.type = 'lowpass';
-      lp.frequency.value = 5200;
-      osc1.connect(mix);
-      osc2.connect(mix);
-      mix.connect(gain).connect(lp).connect(audioCtx.destination);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.6, now + 0.01);
-      // natural decay
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-      osc1.start(now);
-      osc2.start(now);
-      activeVoices.set(midi, { osc1, osc2, gain, startedAt: now });
+      const name = midiToName(midi);
+      if (window.tonePiano) {
+        window.tonePiano.attack(name);
+        activeVoices.set(midi, name);
+      }
     }
     function stopPianoVoice(midi) {
-      const v = activeVoices.get(midi);
-      if (!v) return;
-      const t = audioCtx.currentTime;
-      try {
-        v.gain.gain.cancelScheduledValues(t);
-        v.gain.gain.setValueAtTime(v.gain.gain.value, t);
-        v.gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-      } catch(_){}
-      try { v.osc1.stop(t + 0.09); v.osc2.stop(t + 0.09); } catch(_){}
-      activeVoices.delete(midi);
+      const name = activeVoices.get(midi) || midiToName(midi);
+      if (window.tonePiano && name) {
+        window.tonePiano.release(name);
+        activeVoices.delete(midi);
+      }
     }
 
     function renderDevices() {
@@ -185,7 +164,7 @@
         label.textContent = formatLabel(name);
         el.appendChild(label);
         // click to play
-        el.addEventListener('pointerdown', ()=>{ highlightKey(n, true); startPianoVoice(n); onNoteInput(n); });
+        el.addEventListener('pointerdown', async ()=>{ await ensureTone(); highlightKey(n, true); startPianoVoice(n); onNoteInput(n); });
         const stop = ()=>{ highlightKey(n, false); stopPianoVoice(n); };
         el.addEventListener('pointerup', stop);
         el.addEventListener('pointerleave', stop);
@@ -222,7 +201,7 @@
         // make each black key width proportional to a white key width
         el.style.width = (whiteW * BLACK_RATIO) + '%';
         // click to play
-        el.addEventListener('pointerdown', ()=>{ highlightKey(next, true); startPianoVoice(next); onNoteInput(next); });
+        el.addEventListener('pointerdown', async ()=>{ await ensureTone(); highlightKey(next, true); startPianoVoice(next); onNoteInput(next); });
         const stopB = ()=>{ highlightKey(next, false); stopPianoVoice(next); };
         el.addEventListener('pointerup', stopB);
         el.addEventListener('pointerleave', stopB);
@@ -237,15 +216,19 @@
       if (cmd === 0x90) { // note on
         const note = d1, vel = d2;
         if (vel > 0) {
+          ensureTone();
           highlightKey(note, true);
+          startPianoVoice(note);
           onNoteInput(note);
         } else {
           highlightKey(note, false);
+          stopPianoVoice(note);
         }
         
       } else if (cmd === 0x80) { // note off
         const note = d1;
         highlightKey(note, false);
+        stopPianoVoice(note);
       }
     }
 

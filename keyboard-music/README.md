@@ -41,6 +41,7 @@ Switch instruments via the dropdown in the page header.
 1. Use the "Tải bài hát (.txt)" picker → "Tải & Hiển thị".
 2. Play by keyboard or clicking keys.
 3. Correct notes advance and complete tokens; line breaks auto-advance to the next line's first token.
+4. You can click any word to start playing from that word (v2.2).
 4. Use "Reset bài" to restart.
 
 ### Song File Format
@@ -79,6 +80,9 @@ keyboard-music/
 - Opening via `file://`: still works using default keymaps if fetching is blocked.
 - For best compatibility, serve via a local server or use Chromium-based browsers for audio unlock.
 - Guidance compares exact note names; ensure song notes match octave/accidentals.
+
+## Changelog
+- v2.2: In song mode, clicking any word jumps playback to that word.
 
 ## License
 MIT (or your preferred license; update as needed).

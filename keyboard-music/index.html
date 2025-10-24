@@ -87,7 +87,7 @@
 </style>
 </head>
 <body>
-<h1>Keyboard Music <span class="ver">v2.1</span></h1>
+<h1>Keyboard Music <span class="ver">v2.2</span></h1>
 <!-- Composer staff is now always visible and placed above the keyboard -->
 <div id="composerStaff" class="composer-staff">
   <svg id="composerStaffSvg" class="staff" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet"></svg>
@@ -1094,15 +1094,22 @@ function renderSong() {
     span.setAttribute('data-index', String(i));
     span.style.cursor = composerMode ? 'pointer' : 'default';
     span.addEventListener('click', ()=>{
-      if (!composerMode) return;
-      composerSelectedIndex = i;
-      updateComposerStatus();
-      renderSong();
-      // If this word already has notes, play them immediately
-      const tokNow = songTokens[i];
-      if (tokNow && tokNow.notes && tokNow.notes.length) {
-        try { ensureAudioContext(); } catch(_){ }
-        tokNow.notes.forEach((nn, idx)=> setTimeout(()=>{ try { playNote(nn); } catch(_){ } }, idx * 180));
+      if (composerMode) {
+        composerSelectedIndex = i;
+        updateComposerStatus();
+        renderSong();
+        // If this word already has notes, play them immediately
+        const tokNow = songTokens[i];
+        if (tokNow && tokNow.notes && tokNow.notes.length) {
+          try { ensureAudioContext(); } catch(_){ }
+          tokNow.notes.forEach((nn, idx)=> setTimeout(()=>{ try { playNote(nn); } catch(_){ } }, idx * 180));
+        }
+        return;
+      }
+      if (songMode) {
+        songPos = i;
+        if (songTokens[i]) songTokens[i].doneSteps = 0;
+        updateSongHighlight();
       }
     });
     line.appendChild(span);
