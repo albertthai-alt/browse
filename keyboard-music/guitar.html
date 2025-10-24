@@ -1,91 +1,207 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Guitar Test C4–C5</title>
-<style>
-  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#faf7f3; color:#222; margin:0; padding:24px; display:flex; flex-direction:column; align-items:center; }
-  h1 { margin:0 0 16px; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; }
-  .key { width:64px; height:64px; border-radius:10px; border:1px solid #ddd; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.06); user-select:none; }
-  .key:active { transform: translateY(1px); box-shadow:none; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Guitar - C4 to C5</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      padding: 28px;
+      background: linear-gradient(180deg, #f7f9fc, #eef6ff);
+      color: #0b2545;
+    }
+    h1 { margin: 0; font-size: 1.4rem; }
+    p { margin: 0; color: #3b4b66; }
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 8px;
+      max-width: 980px;
+      width: 100%;
+      margin-top: 18px;
+    }
+
+    .note-btn {
+      background: #fff;
+      border: 1px solid rgba(11,37,69,0.08);
+      box-shadow: 0 6px 18px rgba(11,37,69,0.04);
+      padding: 14px 8px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .06s ease, box-shadow .08s ease;
+      font-weight: 600;
+    }
+    .note-btn:active,
+    .note-btn.playing {
+      transform: translateY(2px) scale(0.995);
+      box-shadow: 0 3px 10px rgba(11,37,69,0.06);
+      background: linear-gradient(180deg,#fff,#f3fbff);
+    }
+
+    .lbl {
+      display:block;
+      font-size: .85rem;
+      color: #0b2545;
+    }
+    .sub {
+      display:block;
+      font-size: .75rem;
+      color: #55677f;
+      font-weight: 500;
+      margin-top: 6px;
+    }
+
+    footer { margin-top: 18px; font-size: .85rem; color: #6b7b91; }
+    .hint { font-size: .82rem; color:#4b5b78; margin-top: 6px; }
+  </style>
 </head>
 <body>
-<h1>Guitar Test C4–C5</h1>
-<div class="row" id="keys"></div>
-<script>
-  let audioCtx;
-  function ensureAudioContext(){
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-  function noteToFreq(name){
-    const m = String(name).trim().match(/^([A-G])(#|b)?(\d)$/i); if(!m) return 440;
-    const l = m[1].toUpperCase(); const a = m[2]||''; const o = parseInt(m[3],10);
-    const map = {C:0, D:2, E:4, F:5, G:7, A:9, B:11}; let semi = map[l];
-    if (a === '#') semi += 1; else if (a === 'b') semi -= 1;
-    const midi = (o+1)*12 + semi; return 440 * Math.pow(2, (midi-69)/12);
-  }
-  // --- Guitar (plucked string, Karplus–Strong style) copied from index.html (refined)
-  function playGuitar(noteName){
-    ensureAudioContext();
-    const f = noteToFreq(noteName);
-    const now = audioCtx.currentTime;
-    const sr = audioCtx.sampleRate;
-    const period = 1 / Math.max(40, Math.min(2000, f));
-    // Excitation burst (pick) – slightly brighter, short
-    const excLen = Math.max(1, Math.floor(sr * 0.012));
-    const buf = audioCtx.createBuffer(1, excLen, sr);
-    const ch = buf.getChannelData(0);
-    for (let i=0;i<excLen;i++) ch[i] = (Math.random()*2-1) * (1 - i/excLen);
-    const src = audioCtx.createBufferSource(); src.buffer = buf; src.loop = false;
-    // Pick-position feedforward comb (src - delayed(src)) to shape notch pattern
-    const pickDelay = audioCtx.createDelay(0.01);
-    // Pick position approx 20–25% of string length
-    pickDelay.delayTime.value = Math.min(0.008, period * 0.23);
-    const inv = audioCtx.createGain(); inv.gain.value = -0.8;
-    const pickMix = audioCtx.createGain(); pickMix.gain.value = 1.0;
-    src.connect(pickMix);
-    src.connect(pickDelay).connect(inv);
-    inv.connect(pickMix);
-    // Loop with dual damping (lowpass to remove highs, highpass to remove DC)
-    const loopDelay = audioCtx.createDelay(1.0); loopDelay.delayTime.value = period;
-    const fb = audioCtx.createGain(); fb.gain.value = 0.6; // sustain
-    const lpDamp = audioCtx.createBiquadFilter(); lpDamp.type='lowpass'; lpDamp.frequency.value = 3000; lpDamp.Q.value = 0.25;
-    const hpDamp = audioCtx.createBiquadFilter(); hpDamp.type='highpass'; hpDamp.frequency.value = 60; hpDamp.Q.value = 0.7;
-    loopDelay.connect(lpDamp).connect(hpDamp).connect(fb).connect(loopDelay);
-    // Body resonances (two bands)
-    const body1 = audioCtx.createBiquadFilter(); body1.type='bandpass'; body1.frequency.value = Math.max(180, Math.min(260, f*0.8)); body1.Q.value = 1.0;
-    const body2 = audioCtx.createBiquadFilter(); body2.type='bandpass'; body2.frequency.value = Math.max(300, Math.min(420, f*1.1)); body2.Q.value = 0.8;
-    // Output envelope and tone
-    const out = audioCtx.createGain();
-    out.gain.setValueAtTime(0.0001, now);
-    out.gain.exponentialRampToValueAtTime(0.9, now + 0.005);
-    out.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
-    const outLP = audioCtx.createBiquadFilter(); outLP.type='lowpass'; outLP.frequency.value = 3600; outLP.Q.value = 0.5;
-    const postGain = audioCtx.createGain(); postGain.gain.value = 1.3;
-    // Wire graph
-    pickMix.connect(loopDelay);
-    loopDelay.connect(body1).connect(body2).connect(out).connect(outLP).connect(postGain).connect(audioCtx.destination);
-    src.start(now); src.stop(now + 0.02);
-  }
+  <h1>Guitar (C4 → C5)</h1>
+  <p>Nhấn một nút để chơi nốt đàn. Mô phỏng âm dây đàn bằng Karplus–Strong.</p>
 
-  // Build keys C4..C5 (chromatic)
-  const NOTES = [
-    'C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5'
-  ];
-  const keysEl = document.getElementById('keys');
-  NOTES.forEach(n=>{
-    const btn = document.createElement('div');
-    btn.className = 'key';
-    btn.textContent = n;
-    btn.addEventListener('pointerdown', ()=>{ playGuitar(n); });
-    keysEl.appendChild(btn);
-  });
-</script>
+  <div class="keyboard" id="keyboard"></div>
+
+  <div class="hint">Gợi ý: Mở console (F12) nếu muốn xem tần số nốt khi chơi.</div>
+  <footer>Made with WebAudio — Karplus–Strong string synthesis</footer>
+
+  <script>
+    // Danh sách note từ C4 đến C5 (bao gồm cả nửa cung)
+    const NOTES = [
+      {name: 'C4',  freq: 261.6255653005986},
+      {name: 'C#4', freq: 277.1826309768721}, // hoặc Db4
+      {name: 'D4',  freq: 293.6647679174076},
+      {name: 'D#4', freq: 311.1269837220809},
+      {name: 'E4',  freq: 329.6275569128699},
+      {name: 'F4',  freq: 349.2282314330039},
+      {name: 'F#4', freq: 369.9944227116344},
+      {name: 'G4',  freq: 391.99543598174927},
+      {name: 'G#4', freq: 415.3046975799451},
+      {name: 'A4',  freq: 440.0},
+      {name: 'A#4', freq: 466.1637615180899},
+      {name: 'B4',  freq: 493.8833012561241},
+      {name: 'C5',  freq: 523.2511306011972}
+    ];
+
+    // Tạo giao diện nút
+    const keyboard = document.getElementById('keyboard');
+    NOTES.forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'note-btn';
+      btn.innerHTML = `<span class="lbl">${n.name}</span><span class="sub">${n.freq.toFixed(2)} Hz</span>`;
+      btn.addEventListener('click', () => playNote(n.freq, btn));
+      keyboard.appendChild(btn);
+    });
+
+    // WebAudio context
+    let audioCtx = null;
+
+    // Hàm chơi nốt dùng Karplus-Strong (tạo AudioBuffer + AudioBufferSourceNode)
+    // duration: giây
+    function playNote(frequency, btnEl = null, duration = 2.2) {
+      // tạo context khi cần (để tránh autoplay block)
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      const sr = audioCtx.sampleRate;
+      const N = Math.max(2, Math.round(sr / frequency)); // độ dài ring buffer
+      const outLen = Math.round(sr * duration);
+      const decay = 0.994; // decay factor (thay đổi để âm sáng/tắt nhanh hay chậm)
+
+      // khởi tạo ring buffer với noise
+      const ring = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        ring[i] = Math.random() * 2 - 1;
+      }
+
+      // tạo buffer output
+      const buffer = audioCtx.createBuffer(1, outLen, sr);
+      const buf = buffer.getChannelData(0);
+
+      let ptr = 0;
+      for (let t = 0; t < outLen; t++) {
+        const cur = ring[ptr];
+        // trung bình thông thường giữa current và next (simple lowpass)
+        const nextIndex = (ptr + 1) % N;
+        const newVal = decay * 0.5 * (ring[ptr] + ring[nextIndex]);
+        buf[t] = cur;
+        // cập nhật ring buffer
+        ring[ptr] = newVal;
+        ptr = nextIndex;
+      }
+
+      // tạo nguồn và phát
+      const src = audioCtx.createBufferSource();
+      src.buffer = buffer;
+
+      // thêm EQ nhẹ để âm nghe giống guitar hơn: high-shelf + gain via BiquadFilterNode
+      const highFilter = audioCtx.createBiquadFilter();
+      highFilter.type = 'highshelf';
+      highFilter.frequency.value = 1200;
+      highFilter.gain.value = -3;
+
+      // gain node để điều chỉnh volume
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.9;
+
+      src.connect(highFilter);
+      highFilter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      src.start();
+
+      // Anim nút khi đang chơi
+      if (btnEl) {
+        btnEl.classList.add('playing');
+        setTimeout(() => btnEl.classList.remove('playing'), Math.max(200, duration * 1000 * 0.6));
+      }
+
+      // log tần số (debug)
+      console.log('Playing', frequency, 'Hz');
+    }
+
+    // Tùy chọn: map keyboard (Q..M) to notes (bắt đầu từ C4)
+    // Gợi ý cho người dùng: bấm Space để kích hoạt audio context nếu trình duyệt chặn
+    const KEYMAP = "q2w3er5t6y7u"; // simple layout for 13 notes (some are sharps)
+    // We'll map characters to index 0..12
+    window.addEventListener('keydown', (e) => {
+      // tránh khi nhập text
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+      const k = e.key.toLowerCase();
+      const idx = KEYMAP.indexOf(k);
+      if (idx >= 0 && idx < NOTES.length) {
+        const btn = keyboard.children[idx];
+        playNote(NOTES[idx].freq, btn);
+        // small visual flash
+        btn.classList.add('playing');
+        setTimeout(() => btn.classList.remove('playing'), 160);
+      }
+    });
+
+    // Tự động hướng dẫn người dùng cách kích hoạt sound nếu context chưa sẵn sàng
+    document.addEventListener('click', function ensureCtx() {
+      if (!audioCtx) {
+        // lazy init when user interacts anywhere
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          // suspend immediately so no sound until a note is explicitly played
+          audioCtx.suspend && audioCtx.suspend();
+        } catch (e) {
+          // ignore
+        }
+      }
+      // remove this handler after first click
+      document.removeEventListener('click', ensureCtx);
+    });
+
+  </script>
 </body>
 </html>
