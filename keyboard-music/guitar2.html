@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Guitar (SoundFont) — C4..C5</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+<style>
+  :root{
+    --bg:#fbfaf8; --card:#fff; --muted:#6b6b6b; --accent:#0a66c2;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial; margin:0; padding:28px; background:var(--bg); color:#111; display:flex; justify-content:center;}
+  .wrap{max-width:920px; width:100%;}
+  header{display:flex; align-items:center; gap:16px; margin-bottom:18px;}
+  h1{font-size:20px; margin:0;}
+  p.lead{margin:0; color:var(--muted); font-size:13px;}
+  .controls{display:flex; gap:12px; align-items:center; margin:14px 0;}
+  .btn{background:linear-gradient(180deg,#fff,#f3f6fb); border:1px solid #e1e6ee; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;}
+  .status{color:var(--muted); font-size:13px;}
+  .grid{display:grid; grid-template-columns:repeat(7,1fr); gap:10px; margin-top:12px;}
+  .key{background:var(--card); border-radius:10px; height:74px; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(20,30,50,0.06); cursor:pointer; user-select:none; border:1px solid #e9edf2;}
+  .key strong{font-size:18px;}
+  .key small{color:var(--muted); font-size:12px;}
+  .footer{margin-top:18px; color:var(--muted); font-size:13px;}
+  .range{display:flex; gap:8px; align-items:center;}
+  input[type=range]{width:160px;}
+  .kbd{display:inline-block; background:#111; color:#fff; padding:2px 6px; border-radius:6px; font-size:12px; margin-left:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Guitar (SoundFont) — acoustic_guitar_nylon</h1>
+      <p class="lead">Nhấn nút hoặc phím (z x c v b n m , . /) để chơi nốt C4 → C5. Tải soundfont từ CDN.</p>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button id="initBtn" class="btn">Bật âm (Init)</button>
+    <div class="status" id="status">Chưa tải</div>
+    <div style="margin-left:auto" class="range">
+      <label class="status">Âm lượng</label>
+      <input id="vol" type="range" min="0" max="1" step="0.01" value="0.85">
+    </div>
+  </div>
+
+  <div class="grid" id="keys"></div>
+
+  <div class="footer">
+    Phím tắt: <span class="kbd">z</span> <span class="kbd">x</span> <span class="kbd">c</span> <span class="kbd">v</span> <span class="kbd">b</span> <span class="kbd">n</span> <span class="kbd">m</span> <span class="kbd">,</span> <span class="kbd">.</span> <span class="kbd">/</span> <br>
+    Nếu trình duyệt hỏi quyền âm thanh — hãy cho phép. (Tốt nhất dùng Chrome/Edge.)
+  </div>
+</div>
+
+<!-- Soundfont player -->
+<script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.15.7/dist/soundfont-player.min.js"></script>
+<script>
+/*
+  Guitar SoundFont demo
+  - Uses SoundfontPlayer to load 'acoustic_guitar_nylon'
+  - Plays C4..C5 (chromatic)
+  - Map keyboard keys to the notes
+*/
+
+const NOTES = ['C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5'];
+const KEYMAP = ['z','s','x','d','c','v','g','b','h','n','j','m',',']; // chromatic map (including sharps via second keys)
+const keysEl = document.getElementById('keys');
+const statusEl = document.getElementById('status');
+const volControl = document.getElementById('vol');
+const initBtn = document.getElementById('initBtn');
+
+let audioCtx = null;
+let guitar = null;    // Soundfont instrument player
+let masterGain = null;
+let sustainNodes = {}; // store active players by note
+
+// build UI keys
+NOTES.forEach((n,i)=>{
+  const el = document.createElement('div');
+  el.className = 'key';
+  el.innerHTML = `<strong>${n}</strong><small>${noteToSolfege(n)}</small>`;
+  el.dataset.note = n;
+  el.addEventListener('pointerdown', ()=> playNoteUI(n));
+  keysEl.appendChild(el);
+});
+
+// helper: convert note name to solfege (Do Re Mi...)
+function noteToSolfege(note) {
+  const base = note.replace(/[0-9]/g,'');
+  const map = {C:'Do', 'C#':'Do#','D':'Re','D#':'Re#','E':'Mi','F':'Fa','F#':'Fa#','G':'Sol','G#':'Sol#','A':'La','A#':'La#','B':'Si'};
+  return map[base] || base;
+}
+
+// init on user gesture
+initBtn.addEventListener('click', async ()=>{
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = parseFloat(volControl.value);
+    masterGain.connect(audioCtx.destination);
+    statusEl.textContent = 'Đang tải soundfont...';
+    try {
+      // load instrument
+      guitar = await Soundfont.instrument(audioCtx, 'acoustic_guitar_nylon', { gain: 1.0 });
+      statusEl.textContent = 'Soundfont loaded: acoustic_guitar_nylon';
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = 'Không tải được soundfont — kiểm tra mạng / CDN';
+    }
+  } else {
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+  }
+});
+
+// volume control
+volControl.addEventListener('input', ()=> {
+  if (masterGain) masterGain.gain.value = parseFloat(volControl.value);
+});
+
+// play note (UI click)
+function playNoteUI(note){
+  if (!guitar || !audioCtx) {
+    // encourage user to initialize first
+    statusEl.textContent = 'Nhấn "Bật âm (Init)" trước để tải soundfont.';
+    return;
+  }
+  playNote(note);
+}
+
+// play function using soundfont-player; returns node to stop if needed
+function playNote(note){
+  const when = 0;
+  const opts = { gain: 1.0, duration: 3.5 }; // duration in seconds
+  const player = guitar.play(note, audioCtx.currentTime + when, opts);
+  // route to master gain by replacing player's internal destination if possible
+  try {
+    if (player && player._node && masterGain) {
+      // connect convolver via node; soundfont-player attaches nodes differently across versions
+      // if possible, connect to masterGain
+      if (player._node.output) {
+        player._node.output.disconnect();
+        player._node.output.connect(masterGain);
+      } else {
+        player._node.disconnect();
+        player._node.connect(masterGain);
+      }
+    }
+  } catch(e){}
+  // store briefly (optional stop)
+  sustainNodes[note] = player;
+  // cleanup after duration
+  setTimeout(()=> { try{ if (sustainNodes[note]) sustainNodes[note].stop(); sustainNodes[note]=null; } catch(e){} }, (opts.duration+0.1)*1000);
+  highlightKey(note);
+  return player;
+}
+
+function highlightKey(note){
+  // flash key visually
+  const el = [...keysEl.children].find(k=>k.dataset.note===note);
+  if (!el) return;
+  el.style.transform = 'translateY(2px) scale(.995)';
+  el.style.boxShadow = 'inset 0 0 0 2px rgba(10,102,194,0.12)';
+  setTimeout(()=>{ el.style.transform=''; el.style.boxShadow=''; }, 120);
+}
+
+// keyboard handling
+const keyToNote = {};
+KEYMAP.forEach((k,i)=> keyToNote[k] = NOTES[i]);
+
+window.addEventListener('keydown', (e)=>{
+  const k = e.key.toLowerCase();
+  if (keyToNote[k] && !e.repeat) {
+    // ensure audio context created
+    if (!audioCtx) initBtn.click();
+    const note = keyToNote[k];
+    playNote(note);
+  }
+});
+
+// optional: stop all on blur
+window.addEventListener('blur', ()=> {
+  Object.values(sustainNodes).forEach(p => { try{ p && p.stop(); } catch(e){} });
+  sustainNodes = {};
+});
+
+// helper for note parsing if needed (not used in soundfont)
+function noteToFreq(name){
+  const m = String(name).trim().match(/^([A-G])(#|b)?(\d)$/i); if(!m) return 440;
+  const l = m[1].toUpperCase(); const a = m[2]||''; const o = parseInt(m[3],10);
+  const map = {C:0, D:2, E:4, F:5, G:7, A:9, B:11}; let semi = map[l];
+  if (a === '#') semi += 1; else if (a === 'b') semi -= 1;
+  const midi = (o+1)*12 + semi; return 440 * Math.pow(2, (midi-69)/12);
+}
+</script>
+</body>
+</html>

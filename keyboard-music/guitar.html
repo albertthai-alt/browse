@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Guitar Test C4–C5</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#faf7f3; color:#222; margin:0; padding:24px; display:flex; flex-direction:column; align-items:center; }
+  h1 { margin:0 0 16px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .key { width:64px; height:64px; border-radius:10px; border:1px solid #ddd; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.06); user-select:none; }
+  .key:active { transform: translateY(1px); box-shadow:none; }
+</style>
+</head>
+<body>
+<h1>Guitar Test C4–C5</h1>
+<div class="row" id="keys"></div>
+<script>
+  let audioCtx;
+  function ensureAudioContext(){
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function noteToFreq(name){
+    const m = String(name).trim().match(/^([A-G])(#|b)?(\d)$/i); if(!m) return 440;
+    const l = m[1].toUpperCase(); const a = m[2]||''; const o = parseInt(m[3],10);
+    const map = {C:0, D:2, E:4, F:5, G:7, A:9, B:11}; let semi = map[l];
+    if (a === '#') semi += 1; else if (a === 'b') semi -= 1;
+    const midi = (o+1)*12 + semi; return 440 * Math.pow(2, (midi-69)/12);
+  }
+  // --- Guitar (plucked string, Karplus–Strong style) copied from index.html (refined)
+  function playGuitar(noteName){
+    ensureAudioContext();
+    const f = noteToFreq(noteName);
+    const now = audioCtx.currentTime;
+    const sr = audioCtx.sampleRate;
+    const period = 1 / Math.max(40, Math.min(2000, f));
+    // Excitation burst (pick) – slightly brighter, short
+    const excLen = Math.max(1, Math.floor(sr * 0.012));
+    const buf = audioCtx.createBuffer(1, excLen, sr);
+    const ch = buf.getChannelData(0);
+    for (let i=0;i<excLen;i++) ch[i] = (Math.random()*2-1) * (1 - i/excLen);
+    const src = audioCtx.createBufferSource(); src.buffer = buf; src.loop = false;
+    // Pick-position feedforward comb (src - delayed(src)) to shape notch pattern
+    const pickDelay = audioCtx.createDelay(0.01);
+    // Pick position approx 20–25% of string length
+    pickDelay.delayTime.value = Math.min(0.008, period * 0.23);
+    const inv = audioCtx.createGain(); inv.gain.value = -0.8;
+    const pickMix = audioCtx.createGain(); pickMix.gain.value = 1.0;
+    src.connect(pickMix);
+    src.connect(pickDelay).connect(inv);
+    inv.connect(pickMix);
+    // Loop with dual damping (lowpass to remove highs, highpass to remove DC)
+    const loopDelay = audioCtx.createDelay(1.0); loopDelay.delayTime.value = period;
+    const fb = audioCtx.createGain(); fb.gain.value = 0.6; // sustain
+    const lpDamp = audioCtx.createBiquadFilter(); lpDamp.type='lowpass'; lpDamp.frequency.value = 3000; lpDamp.Q.value = 0.25;
+    const hpDamp = audioCtx.createBiquadFilter(); hpDamp.type='highpass'; hpDamp.frequency.value = 60; hpDamp.Q.value = 0.7;
+    loopDelay.connect(lpDamp).connect(hpDamp).connect(fb).connect(loopDelay);
+    // Body resonances (two bands)
+    const body1 = audioCtx.createBiquadFilter(); body1.type='bandpass'; body1.frequency.value = Math.max(180, Math.min(260, f*0.8)); body1.Q.value = 1.0;
+    const body2 = audioCtx.createBiquadFilter(); body2.type='bandpass'; body2.frequency.value = Math.max(300, Math.min(420, f*1.1)); body2.Q.value = 0.8;
+    // Output envelope and tone
+    const out = audioCtx.createGain();
+    out.gain.setValueAtTime(0.0001, now);
+    out.gain.exponentialRampToValueAtTime(0.9, now + 0.005);
+    out.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
+    const outLP = audioCtx.createBiquadFilter(); outLP.type='lowpass'; outLP.frequency.value = 3600; outLP.Q.value = 0.5;
+    const postGain = audioCtx.createGain(); postGain.gain.value = 1.3;
+    // Wire graph
+    pickMix.connect(loopDelay);
+    loopDelay.connect(body1).connect(body2).connect(out).connect(outLP).connect(postGain).connect(audioCtx.destination);
+    src.start(now); src.stop(now + 0.02);
+  }
+
+  // Build keys C4..C5 (chromatic)
+  const NOTES = [
+    'C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4','C5'
+  ];
+  const keysEl = document.getElementById('keys');
+  NOTES.forEach(n=>{
+    const btn = document.createElement('div');
+    btn.className = 'key';
+    btn.textContent = n;
+    btn.addEventListener('pointerdown', ()=>{ playGuitar(n); });
+    keysEl.appendChild(btn);
+  });
+</script>
+</body>
+</html>

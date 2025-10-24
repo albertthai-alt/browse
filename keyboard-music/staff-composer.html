@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Staff Composer</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#faf7f3; color:#222; margin:0; }
+    .page { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 12px 0; }
+    .card { background:#fff; border:1px solid #eee; border-radius:12px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .muted { color:#777; font-size:13px; }
+
+    /* Staff */
+    .staff-wrap { margin-top: 16px; }
+    svg.staff { width:100%; height:auto; display:block; background:#fff; border:1px solid #e8e8e8; border-radius:10px; }
+    .staff-line { stroke:#222; stroke-width:1.2; }
+    .barline { stroke:#444; stroke-width:1.5; }
+    .notehead { fill:#111; }
+    .ledger { stroke:#222; stroke-width:1.1; }
+    .clef { font-family:"Bravura", "Noto Music", serif; font-size:48px; }
+    .note-label { font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill:#333; }
+    .note { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Staff Composer <span class="muted">(khởi tạo)</span></h1>
+    <div class="card">
+      <div class="row muted">Bản thử nghiệm: hiển thị khuông nhạc 5 dây và một vài nốt mẫu.</div>
+      <div class="staff-wrap">
+        <div class="muted">Gộp C3 → C6</div>
+        <svg id="staff" class="staff" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple SVG staff renderer (treble clef)
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    // Pitch helpers
+    // We'll map scientific pitch to staff positions relative to treble clef.
+    // Reference: line/space step = 1. One ledger step per semitone pair approx (simplified diatonic mapping by letter).
+    const STEPS = { C:0, D:1, E:2, F:3, G:4, A:5, B:6 };
+    function parseNoteName(name){
+      const m = String(name).trim().match(/^([A-G])(#|b)?(\d)$/i);
+      if (!m) return null;
+      const ltr = m[1].toUpperCase();
+      const acc = m[2] || '';
+      const oct = parseInt(m[3],10);
+      return { ltr, acc, oct };
+    }
+    function nameToMidi(name){
+      const p = parseNoteName(name); if (!p) return null;
+      const order = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      let pc = p.ltr + (p.acc || '');
+      // support flats
+      if (pc.endsWith('b')){
+        const flatMap = { 'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#' };
+        pc = flatMap[pc] || pc;
+      }
+      const idx = order.indexOf(pc);
+      if (idx < 0) return null;
+      return (p.oct + 1) * 12 + idx;
+    }
+    // Compute diatonic staff step from E4 as 0 (bottom line of treble)
+    function staffStepFromName(name){
+      const p = parseNoteName(name); if (!p) return 0;
+      // Diatonic steps: each letter step = 1
+      const base = (p.oct - 4) * 7 + (STEPS[p.ltr] - STEPS['E']);
+      // Accidentals do not move staff step (they alter pitch but stay on same line/space)
+      return base;
+    }
+
+    function createEl(tag, attrs={}){
+      const el = document.createElementNS(svgNS, tag);
+      for (const k in attrs){ el.setAttribute(k, attrs[k]); }
+      return el;
+    }
+
+    function drawStaff(svg){
+      svg.innerHTML = '';
+      const W = 1200, H = 220; svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const left = 40, right = W - 20; const top = 40; const gap = 14; // distance between lines
+      // Five lines
+      for (let i=0;i<5;i++){
+        const y = top + i*gap;
+        svg.appendChild(createEl('line', { x1:left, y1:y, x2:right, y2:y, class:'staff-line' }));
+      }
+      // Barline examples
+      svg.appendChild(createEl('line', { x1:right-10, y1:top, x2:right-10, y2:top+4*gap, class:'barline' }));
+
+      // (Optional) Clef (using text fallback if music font available)
+      const clef = createEl('text', { x:10, y:top+3.5*gap, class:'clef' });
+      clef.textContent = '\uD834\uDD1E'; // G clef if font supports SMuFL; else appears empty
+      svg.appendChild(clef);
+
+      return { left, top, gap };
+    }
+
+    function drawNote(svg, x, name, metrics){
+      // Compute y: E4 bottom line is metrics.top + 4*gap (line indexes 0..4)
+      const step = staffStepFromName(name); // E4=0
+      const yE4 = metrics.top + 4*metrics.gap;
+      const dy = - (metrics.gap/2) * step; // each step is half-gap (line/space)
+      const y = yE4 + dy;
+
+      // Container group for interactivity
+      const g = createEl('g', { class:'note', 'data-name': String(name).toUpperCase() });
+      svg.appendChild(g);
+
+      // Notehead ellipse
+      const ellipse = createEl('ellipse', { cx:x, cy:y, rx:8, ry:6, transform:`rotate(-20 ${x} ${y})`, class:'notehead' });
+      g.appendChild(ellipse);
+
+      // Simple stem up if below middle line
+      if (y > metrics.top + 2*metrics.gap){
+        g.appendChild(createEl('line', { x1:x+8, y1:y, x2:x+8, y2:y-30, class:'staff-line' }));
+      } else {
+        g.appendChild(createEl('line', { x1:x-8, y1:y, x2:x-8, y2:y+30, class:'staff-line' }));
+      }
+
+      // Ledger lines if out of 5-line range
+      const lowestY = metrics.top + 4*metrics.gap;
+      const highestY = metrics.top;
+      if (y > lowestY){
+        // downwards, add every second step
+        for (let yy = lowestY + metrics.gap; yy <= y; yy += metrics.gap){
+          g.appendChild(createEl('line', { x1:x-12, y1:yy, x2:x+12, y2:yy, class:'ledger' }));
+        }
+      }
+      if (y < highestY){
+        for (let yy = highestY - metrics.gap; yy >= y; yy -= metrics.gap){
+          g.appendChild(createEl('line', { x1:x-12, y1:yy, x2:x+12, y2:yy, class:'ledger' }));
+        }
+      }
+
+      // Accidental text (basic)
+      const p = parseNoteName(name);
+      if (p && p.acc){
+        const acc = createEl('text', { x:x-20, y:y+4, style:'font: 18px serif;' });
+        acc.textContent = p.acc === '#' ? '♯' : '♭';
+        g.appendChild(acc);
+      }
+
+      // International note name label (e.g., C4) next to the note
+      const label = createEl('text', { x: x + 16, y: y + 4, class: 'note-label' });
+      label.textContent = String(name).toUpperCase();
+      g.appendChild(label);
+
+      // Interactivity: click to play the note
+      g.addEventListener('pointerdown', ()=> playNoteByName(name));
+    }
+
+    // --- Audio (Web Audio) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    function playNoteByName(name){
+      const m = nameToMidi(name); if (m==null) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+      const now = audioCtx.currentTime;
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const f = midiToFreq(m);
+      osc1.type = 'triangle';
+      osc2.type = 'sine';
+      osc1.frequency.value = f;
+      osc2.frequency.value = f * 2;
+      const mix = audioCtx.createGain(); mix.gain.value = 0.5;
+      const lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+      osc1.connect(mix); osc2.connect(mix); mix.connect(gain).connect(lp).connect(audioCtx.destination);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.6, now + 0.01);
+      // one-shot decay
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+      osc1.start(now); osc2.start(now);
+      osc1.stop(now + 1.05); osc2.stop(now + 1.05);
+    }
+
+    function buildFromC(oct){
+      const o = parseInt(oct,10);
+      return [`C${o}`,`D${o}`,`E${o}`,`F${o}`,`G${o}`,`A${o}`,`B${o}`,`C${o+1}`];
+    }
+    // Build single combined staff
+    const svg = document.getElementById('staff');
+    const met = drawStaff(svg);
+    let combined = [
+      ...buildFromC(3),
+      ...buildFromC(4),
+      ...buildFromC(5)
+    ];
+    // sort ascending and de-duplicate
+    const seen = new Set();
+    combined = combined.filter(n=>{ const m = nameToMidi(n); if (m==null || seen.has(m)) return false; seen.add(m); return true; })
+                       .sort((a,b)=> (nameToMidi(a)||0) - (nameToMidi(b)||0));
+    let x = met.left + 70;
+    for (const n of combined){ drawNote(svg, x, n, met); x += 48; }
+  </script>
+</body>
+</html>
