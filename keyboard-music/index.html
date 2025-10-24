@@ -18,6 +18,14 @@
     --key: min(52px, var(--keyRaw));
   }
   .row { display:flex; gap: var(--gap); justify-content: flex-start; }
+  /* Keyboard wrapper with side buttons */
+  .kbd-wrap { width:100%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; gap:10px; }
+  .oct-btn { width:38px; height:52px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; box-shadow: 0 6px 18px rgba(30,30,30,0.06); }
+  .oct-btn:active { transform: translateY(2px) scale(.995); box-shadow:none; }
+  /* Keep full-size keys and let keyboard width match content so right button hugs keys */
+  .kbd-wrap .keyboard { margin: 18px 0 0; width: max-content; --key: 52px; }
+  /* Remove trailing row spacer inside wrapper so right button hugs the last key */
+  .kbd-wrap .row::after { display: none; }
   /* Stagger rows using flex spacer to retain centering */
   .row.r2::before { content: ""; display:block; width: calc(var(--key)/2 - var(--gap)/2); flex: 0 0 auto; }
   .row.r3::before { content: ""; display:block; width: var(--key); flex: 0 0 auto; }
@@ -32,6 +40,10 @@
   /* Sharp keys: slightly darker gray, keep normal text colors for readability */
   .key.sharp { background: linear-gradient(180deg,#ececec,#d9d9d9); color:#222; border-color:#c7c7c7; }
   .key.sharp .n { color:#666; }
+  /* Guide highlighting */
+  .key.guide { outline:2px dashed #0a66c2; outline-offset:-2px; }
+  .key.guide-sharp { outline:2px dashed #e58b0a; outline-offset:-2px; background-image: repeating-linear-gradient(45deg, rgba(229,139,10,0.06) 0 6px, transparent 6px 12px); }
+  .key.guide-shift { outline:2px dashed #d93c65; outline-offset:-2px; background-image: repeating-linear-gradient(45deg, rgba(217,60,101,0.06) 0 6px, transparent 6px 12px); }
   /* Right-hand groups coloring */
   .key.rh-r2 { background: linear-gradient(180deg,#f8fbff 0%, #eef5ff 100%); border-color:#d8e7fb; }
   .key.rh-r3 { background: linear-gradient(180deg,#fff9f3 0%, #fff2e6 100%); border-color:#f5dec2; }
@@ -70,7 +82,11 @@
 </head>
 <body>
 <h1>Keyboard Music <span class="ver">v2.0</span></h1>
-<div class="keyboard" id="keyboard"></div>
+<div class="kbd-wrap">
+  <button id="octaveDownBtn" class="oct-btn" title="Giảm 1 quãng">◄</button>
+  <div class="keyboard" id="keyboard"></div>
+  <button id="octaveUpBtn" class="oct-btn" title="Tăng 1 quãng">►</button>
+</div>
 <div class="controls">
   <label>Nhạc cụ:
     <select id="instrumentSelect">
@@ -98,7 +114,6 @@
   <div class="composer-controls" id="composerControls" style="margin-top:8px; display:none;">
     <span id="composerStatus">Chọn một chữ để thêm nốt...</span>
     <button id="composerClearBtn" style="margin-left:8px;">Xóa nốt của chữ</button>
-    <input id="composerFileName" placeholder="tên file (vd: bai-hat.txt)" style="margin-left:8px; width:220px;" />
     <button id="composerSaveBtn" style="margin-left:8px;">Lưu bài hát (.txt)</button>
   </div>
 </div>
@@ -229,6 +244,8 @@ const buffersByInstrument = {}; // instrument -> { name -> AudioBuffer|undefined
 let keymapJson = {}; // loaded from keymap.json
 let pressedKeys = new Set();
 let shiftHeld = false;
+let transposeOctaves = 0; // number of octaves to shift keymap (+ up, - down)
+let openedSongFilename = '';
 
 // Song state
 let songTokens = []; // [{text: string, notes: ["C4",...], doneSteps: number}]
@@ -240,10 +257,36 @@ let songMode = false;
 let composerMode = false;
 let composerSelectedIndex = null; // selected token index for composing
 
+function transposeNote(name, octs) {
+  if (!name || !octs) return name;
+  const m = String(name).trim().match(/^([A-G])(#|b)?(\d)$/i);
+  if (!m) return name;
+  const L = m[1].toUpperCase();
+  const acc = m[2] || '';
+  const o = parseInt(m[3], 10);
+  const o2 = o + octs;
+  return `${L}${acc}${o2}`;
+}
 function getCurrentMap(inst = currentInstrument) {
   const fromFile = (keymapJson && keymapJson[inst]) || null;
   const fromDefault = (DEFAULT_KEYMAP && DEFAULT_KEYMAP[inst]) || null;
-  return fromFile || fromDefault || {};
+  const base = fromFile || fromDefault || {};
+  if (!transposeOctaves) return base;
+  const shifted = {};
+  for (const k in base) shifted[k] = transposeNote(base[k], transposeOctaves);
+  return shifted;
+}
+
+// Shift-specific sharp overrides per key (then transposed by current octave shift)
+function getShiftOverride(key) {
+  const k = String(key || '').toLowerCase();
+  let base = null;
+  if (k === 'd') base = 'C#3';
+  else if (k === 'f') base = 'D#3';
+  else if (k === 'g') base = 'G#4';
+  else if (k === 'k') base = 'C#5';
+  else if (k === 'l') base = 'D#5';
+  return base ? transposeNote(base, transposeOctaves) : null;
 }
 
 function toSharpIfNeeded(name, useSharp) {
@@ -275,7 +318,7 @@ function noteToSolfege(name) {
 }
 
 function formatKeyLabel(note) {
-  const n = toSharpIfNeeded(note, shiftHeld);
+  const n = note;
   if (showSolfege) return noteToSolfege(n);
   return n || '-';
 }
@@ -574,13 +617,14 @@ function makeKeyButton(k, mappedNote, available) {
   const btn = document.createElement('div');
   btn.className = 'key';
   btn.setAttribute('data-key', k);
-  const labelNote = toSharpIfNeeded(mappedNote, shiftHeld);
-  btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${formatKeyLabel(mappedNote)}</div>`;
+  const bottomRowKeys = new Set(['x','c','b','m',',']);
+  const effNote = (shiftHeld && !bottomRowKeys.has(k)) ? (getShiftOverride(k) || mappedNote) : mappedNote;
+  btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${formatKeyLabel(effNote || '')}</div>`;
   if (!available && mappedNote) btn.classList.add('unavailable');
   btn.addEventListener('pointerdown', ()=> {
     ensureAudioContext();
     btn.classList.add('active');
-    const playName = toSharpIfNeeded(mappedNote, shiftHeld);
+    const playName = (shiftHeld && !bottomRowKeys.has(k)) ? (getShiftOverride(k) || mappedNote) : mappedNote;
     // Composer capture first (even if not playable)
     if (composerMode && composerSelectedIndex !== null && playName) {
       const tok = songTokens[composerSelectedIndex];
@@ -847,9 +891,16 @@ function rebuildUI() {
 function refreshLabelsForShift() {
   const currentMap = getCurrentMap();
   for (const k of keyRows.flat()) {
-    const note = currentMap[k] || '';
+    const bottom = (k === 'x' || k === 'c' || k === 'b' || k === 'm' || k === ',');
+    const note = (shiftHeld && !bottom ? (getShiftOverride(k) || currentMap[k]) : currentMap[k]) || '';
     const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
     if (el) el.textContent = formatKeyLabel(note);
+    // Toggle sharp styling for shift-based sharp keys (D,F,G,K,L) when Shift is held
+    const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+    if (keyEl) {
+      if (shiftHeld && (k === 'd' || k === 'f' || k === 'g' || k === 'k' || k === 'l')) keyEl.classList.add('sharp');
+      else if (!(k === 'w' || k === 'e' || k === 'r' || k === 'y' || k === 'u' || k === 'o' || k === 'p')) keyEl.classList.remove('sharp');
+    }
   }
 }
 
@@ -972,6 +1023,7 @@ function updateKeyboardGuideHighlight() {
   // Clear previous guide highlights
   document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
   document.querySelectorAll('.key.guide-sharp').forEach(el=> el.classList.remove('guide-sharp'));
+  document.querySelectorAll('.key.guide-shift').forEach(el=> el.classList.remove('guide-shift'));
   if (!songMode) return;
   if (!highlightKeyboardGuide) return;
   if (!songTokens.length) return;
@@ -985,11 +1037,24 @@ function updateKeyboardGuideHighlight() {
   const isSharp = expected.includes('#');
   // Find keys that map to expected note for current instrument
   const currentMap = getCurrentMap();
+  const topSharpKeys = new Set(['w','e','r','y','u','o','p']);
   for (const [k, v] of Object.entries(currentMap)) {
-    // Match either direct mapping or sharped form
-    if (v === expected || toSharpIfNeeded(v, true) === expected) {
+    if (v === expected) {
       const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
-      if (keyEl) keyEl.classList.add(isSharp ? 'guide-sharp' : 'guide');
+      if (keyEl) keyEl.classList.add('guide');
+    } else if (topSharpKeys.has(k) && toSharpIfNeeded(v, true) === expected) {
+      // Only top-row keys can satisfy implicit sharp matching
+      const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+      if (keyEl) keyEl.classList.add('guide');
+    }
+  }
+  // Also consider SHIFT-based sharp overrides (D,F,G,K,L)
+  const pairs = [ ['d','C#3'], ['f','D#3'], ['g','G#4'], ['k','C#5'], ['l','D#5'] ];
+  for (const [k, base] of pairs) {
+    const n = transposeNote(base, transposeOctaves);
+    if (n === expected) {
+      const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+      if (keyEl) keyEl.classList.add('guide-shift');
     }
   }
 }
@@ -1013,6 +1078,18 @@ document.getElementById('instrumentSelect').addEventListener('change', async (e)
   if (currentInstrument !== 'piano') {
     await loadSamplesForInstrument(currentInstrument);
   }
+  updateKeyboardGuideHighlight();
+});
+
+// Octave shift buttons
+document.getElementById('octaveUpBtn').addEventListener('click', ()=>{
+  transposeOctaves += 1;
+  rebuildUI();
+  updateKeyboardGuideHighlight();
+});
+document.getElementById('octaveDownBtn').addEventListener('click', ()=>{
+  transposeOctaves -= 1;
+  rebuildUI();
   updateKeyboardGuideHighlight();
 });
 
@@ -1060,8 +1137,13 @@ window.addEventListener('keydown', (e)=>{
   const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
   if (btn) btn.classList.add('active');
   const currentMap = getCurrentMap();
-  let name = currentMap[k];
-  name = toSharpIfNeeded(name, e.shiftKey || shiftHeld);
+  // Shift override takes precedence for specific keys
+  const _bottomRow = new Set(['x','c','b','m',',']);
+  let name = (e.shiftKey || shiftHeld)
+    ? (_bottomRow.has(k) ? currentMap[k] : (getShiftOverride(k) || currentMap[k]))
+    : currentMap[k];
+  // Do not auto-sharpify here; explicit sharps are encoded in maps/overrides
+  name = toSharpIfNeeded(name, false);
   const inst = instruments[currentInstrument];
   const available = !!name && (inst.notes.length === 0 || inst.notes.includes(name));
   // Composer capture first (even if not playable)
@@ -1136,6 +1218,8 @@ document.getElementById('loadSongBtn').addEventListener('click', async ()=>{
   songPos = 0;
   renderSong();
   updateSongHighlight();
+  // Remember opened filename for saving later
+  openedSongFilename = file.name || '';
 });
 
 document.getElementById('resetSongBtn').addEventListener('click', ()=>{
@@ -1203,8 +1287,7 @@ function serializeSongToTxt() {
 
 document.getElementById('composerSaveBtn').addEventListener('click', ()=>{
   const txt = serializeSongToTxt();
-  const nameInput = document.getElementById('composerFileName');
-  let filename = (nameInput && nameInput.value || '').trim();
+  let filename = (openedSongFilename || '').trim();
   if (!filename) filename = 'bai-hat.txt';
   if (!/\.txt$/i.test(filename)) filename += '.txt';
   const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
