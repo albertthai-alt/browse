@@ -88,8 +88,30 @@
 </head>
 <body>
 <h1>Keyboard Music <span class="ver">v2.2</span></h1>
+<!-- Song area fixed on top -->
+<div id="songTop" class="song-top" style="display:none;">
+  <div class="song" id="songArea"></div>
+  <style>
+    .song-top { 
+      margin:8px 0 12px; 
+      background:#fff; 
+      border:1px solid #eee; 
+      border-radius:12px; 
+      padding:8px 10px; 
+      max-height: 240px; 
+      overflow-y: auto; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    }
+    .song {
+      overflow: visible !important;
+    }
+    .song.scrollable {
+      overflow-y: visible !important;
+    }
+  </style>
+</div>
 <!-- Composer staff is now always visible and placed above the keyboard -->
-<div id="composerStaff" class="composer-staff">
+<div id="composerStaff" class="composer-staff" style="display:none;">
   <svg id="composerStaffSvg" class="staff" viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet"></svg>
 </div>
 <div class="kbd-wrap">
@@ -113,6 +135,7 @@
   <label><input type="checkbox" id="toggleSolfege"> Hiển thị do re mi</label>
   <label style="margin-left:8px;"><input type="checkbox" id="toggleSongMode"> Chơi theo bài hát</label>
   <label style="margin-left:8px;"><input type="checkbox" id="toggleComposer"> Soạn nhạc</label>
+  <label style="margin-left:8px;"><input type="checkbox" id="toggleStaff"> Hiện khuông nhạc</label>
 </div>
 
 <div class="song-controls">
@@ -130,7 +153,6 @@
     <button id="composerSaveBtn" style="margin-left:8px;">Lưu bài hát (.txt)</button>
   </div>
 </div>
-<div class="song" id="songArea"></div>
 
 <!-- Paste modal -->
 <div id="pasteModal" class="modal-backdrop" style="display:none;">
@@ -281,6 +303,7 @@ let composerMode = false;
 let composerSelectedIndex = null; // selected token index for composing
 let chordProgress = new Set(); // tracks notes hit for current chord step
 let ctrlHeld = false; // track CTRL for chord composing
+let spaceHeldGuide = false; // hold Space to temporarily show guide when highlight is off
 
 function transposeNote(name, octs) {
   if (!name || !octs) return name;
@@ -904,10 +927,12 @@ function stopAll() {
 function updateSongModeUI() {
   const sc = document.querySelector('.song-controls');
   const sa = document.getElementById('songArea');
+  const st = document.getElementById('songTop');
   if (!sc || !sa) return;
   const show = songMode || composerMode;
   sc.style.display = show ? '' : 'none';
   sa.style.display = show ? '' : 'none';
+  if (st) st.style.display = show ? '' : 'none';
   if (!songMode) {
     // Clear any guide highlights when hiding
     document.querySelectorAll('.key.guide').forEach(el=> el.classList.remove('guide'));
@@ -932,8 +957,9 @@ function updateSongModeUI() {
   const cc = document.getElementById('composerControls');
   if (cc) cc.style.display = composerMode ? '' : 'none';
   const cst = document.getElementById('composerStaff');
-  if (cst) cst.style.display = '';
-  renderComposerStaff();
+  const staffToggle = document.getElementById('toggleStaff');
+  if (cst) cst.style.display = (staffToggle && staffToggle.checked) ? '' : 'none';
+  try { renderComposerStaff(); } catch(_) {}
 }
 
 // Fetch and render .txt songs from GitHub repo albertthai-alt/browse in folder /keyboard-music
@@ -1108,7 +1134,11 @@ function renderSong() {
       }
       if (songMode) {
         songPos = i;
-        if (songTokens[i]) songTokens[i].doneSteps = 0;
+        // Reset progress for this and subsequent tokens to force replaying
+        for (let j = i; j < songTokens.length; j++) {
+          if (songTokens[j] && Array.isArray(songTokens[j].notes)) songTokens[j].doneSteps = 0;
+        }
+        try { chordProgress.clear(); } catch(_){ }
         updateSongHighlight();
       }
     });
@@ -1185,7 +1215,7 @@ function updateKeyboardGuideHighlight() {
   document.querySelectorAll('.key.guide-sharp').forEach(el=> el.classList.remove('guide-sharp'));
   document.querySelectorAll('.key.guide-shift').forEach(el=> el.classList.remove('guide-shift'));
   if (!songMode) return;
-  if (!highlightKeyboardGuide) return;
+  if (!(highlightKeyboardGuide || spaceHeldGuide)) return;
   if (!songTokens.length) return;
   // Find next token needing a note
   let pos = songPos;
@@ -1235,6 +1265,14 @@ function updateKeyboardGuideHighlight() {
 // Keep staff responsive
 window.addEventListener('resize', ()=> { try { renderComposerStaff(); } catch(_) {} });
 
+// Toggle staff visibility
+document.getElementById('toggleStaff')?.addEventListener('change', (e)=>{
+  const cst = document.getElementById('composerStaff');
+  if (!cst) return;
+  cst.style.display = e.target.checked ? '' : 'none';
+  try { if (e.target.checked) renderComposerStaff(); } catch(_){}
+});
+
 // Safety: stop all sustained sounds on tab hide or window blur
 window.addEventListener('blur', stopAll);
 document.addEventListener('visibilitychange', ()=>{ if (document.hidden) stopAll(); });
@@ -1260,12 +1298,27 @@ document.getElementById('octaveDownBtn').addEventListener('click', ()=>{
   updateKeyboardGuideHighlight();
 });
 
-// Disable instrument selection via keyboard to avoid conflicts with playing keys
+// Prevent controls from stealing focus so keyboard is always playable
 (()=>{
-  const sel = document.getElementById('instrumentSelect');
-  if (!sel) return;
-  const block = ev => { ev.preventDefault(); ev.stopPropagation(); };
-  ['keydown','keypress','keyup'].forEach(type=> sel.addEventListener(type, block));
+  const stop = ev => { ev.stopPropagation(); };
+  const blurAfter = el => setTimeout(()=>{ try { el.blur(); } catch(_){} }, 0);
+  const controls = Array.from(document.querySelectorAll('button, input, select, textarea'));
+  controls.forEach(el => {
+    // Don’t propagate key events from controls to global handlers
+    ['keydown','keypress','keyup'].forEach(t => el.addEventListener(t, stop));
+    // Blur on mouseup/change so focus returns to body
+    if (el.tagName === 'SELECT') {
+      // For selects, only blur after value actually changes to allow dropdown interaction
+      el.addEventListener('change', ()=> blurAfter(el));
+    } else {
+      el.addEventListener('mouseup', ()=> blurAfter(el));
+      el.addEventListener('change', ()=> blurAfter(el));
+    }
+    // Special case: selects need focus to open; just blur after interaction
+    if (el.tagName !== 'SELECT') {
+      el.addEventListener('focus', ()=> blurAfter(el));
+    }
+  });
 })();
 
 // Paste song handlers (modal)
@@ -1298,6 +1351,56 @@ window.addEventListener('keydown', (e)=>{
   const ae = document.activeElement;
   if (ae && ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(ae.tagName)) return;
   const k = e.key.toLowerCase();
+  // Number keys to switch instrument (1..8 => piano..đàn bầu)
+  {
+    let digit = null;
+    if (e.code && e.code.startsWith('Digit')) digit = e.code.slice(5);
+    else if (e.code && e.code.startsWith('Numpad')) digit = e.code.slice(6);
+    else if (/^[1-8]$/.test(k)) digit = k;
+    if (digit && /^[1-8]$/.test(digit)) {
+      const map = ['piano','guitar','tank-drum','sao','marimba','handpan','dan-da','dan-bau'];
+      const idx = parseInt(digit,10) - 1;
+      const sel = document.getElementById('instrumentSelect');
+      if (sel && map[idx]) {
+        sel.value = map[idx];
+        sel.dispatchEvent(new Event('change', { bubbles:true }));
+        // Blur after change so keyboard remains playable
+        setTimeout(()=>{ try { sel.blur(); } catch(_){} }, 0);
+      }
+      e.preventDefault();
+      return;
+    }
+  }
+  // Composer navigation with arrow keys
+  if (composerMode && (k === 'arrowleft' || k === 'arrowright')) {
+    e.preventDefault();
+    let idx = (composerSelectedIndex != null) ? composerSelectedIndex : (songPos || 0);
+    const isWord = (t) => t && t.text !== '\n';
+    if (k === 'arrowleft') {
+      for (let j = idx - 1; j >= 0; j--) { if (isWord(songTokens[j])) { idx = j; break; } }
+    } else {
+      for (let j = idx + 1; j < songTokens.length; j++) { if (isWord(songTokens[j])) { idx = j; break; } }
+    }
+    if (idx !== composerSelectedIndex) {
+      composerSelectedIndex = idx;
+      updateComposerStatus();
+      renderSong();
+      const tokNow = songTokens[idx];
+      if (tokNow && tokNow.notes && tokNow.notes.length) {
+        try { ensureAudioContext(); } catch(_){ }
+        tokNow.notes.forEach((nn, i2)=> setTimeout(()=>{ try { playNote(nn); } catch(_){ } }, i2 * 180));
+      }
+    }
+    return;
+  }
+  if (k === ' ' || e.code === 'Space') {
+    if (!spaceHeldGuide) {
+      spaceHeldGuide = true;
+      updateKeyboardGuideHighlight();
+    }
+    e.preventDefault();
+    return;
+  }
   if (k === 'shift') { if (!shiftHeld) { shiftHeld = true; refreshLabelsForShift(); } return; }
   if (k === 'control') { ctrlHeld = true; return; }
   if (pressedKeys.has(k)) return; // avoid repeats until keyup
@@ -1359,6 +1462,14 @@ window.addEventListener('keydown', (e)=>{
 
 window.addEventListener('keyup', (e)=>{
   const k = e.key.toLowerCase();
+  if (k === ' ' || e.code === 'Space') {
+    if (spaceHeldGuide) {
+      spaceHeldGuide = false;
+      updateKeyboardGuideHighlight();
+    }
+    e.preventDefault();
+    return;
+  }
   if (k === 'shift') { shiftHeld = false; refreshLabelsForShift(); return; }
   if (k === 'control') { ctrlHeld = false; return; }
   pressedKeys.delete(k);
