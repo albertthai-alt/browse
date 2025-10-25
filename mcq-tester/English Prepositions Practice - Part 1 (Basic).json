@@ -1,0 +1,505 @@
+{
+  "title": "English Prepositions Practice - Part 1 (Basic)",
+  "questions": [
+    {
+      "text": "He’s interested ___ music.",
+      "choices": [
+        {
+          "text": "on",
+          "explanation": "Incorrect. We say 'interested in' to express attraction to a topic.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct. 'Interested in' is the proper preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect. 'At' is not used after 'interested'.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect. 'For' does not fit this expression.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She was born ___ July.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Incorrect. 'At' is used for exact times, not months.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct. We use 'in' for months, years, and seasons.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect. 'On' is used for specific dates or days.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect. 'To' is not used for time expressions.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We arrived ___ the airport early.",
+      "choices": [
+        {
+          "text": "to",
+          "explanation": "Incorrect. We say 'arrive at' when referring to specific places.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'Arrive in' is used for countries or cities, not buildings.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Correct. 'Arrive at' is used for small places such as airports or stations.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect. 'On' is not used here.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "The cat is hiding ___ the table.",
+      "choices": [
+        {
+          "text": "under",
+          "explanation": "Correct. 'Under' describes something below another object.",
+          "correct": true
+        },
+        {
+          "text": "between",
+          "explanation": "Incorrect. 'Between' means in the middle of two objects.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect. 'On' means on top of.",
+          "correct": false
+        },
+        {
+          "text": "beside",
+          "explanation": "Incorrect. 'Beside' means next to.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He goes to school ___ bus.",
+      "choices": [
+        {
+          "text": "by",
+          "explanation": "Correct. We use 'by' for means of transport without 'the' or 'a'.",
+          "correct": true
+        },
+        {
+          "text": "with",
+          "explanation": "Incorrect. 'With' is not used for transport.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect. 'On bus' is wrong without 'the'.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'In' refers to inside a vehicle, not the general transport method.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She is good ___ singing.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "I’m waiting ___ my friend.",
+      "choices": [
+        {
+          "text": "for",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "with",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "There’s a picture ___ the wall.",
+      "choices": [
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "over",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He lives ___ London.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We’re going ___ vacation next week.",
+      "choices": [
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "Don’t sit ___ the floor.",
+      "choices": [
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "over",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She’s afraid ___ spiders.",
+      "choices": [
+        {
+          "text": "from",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "with",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He’s married ___ a teacher.",
+      "choices": [
+        {
+          "text": "with",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "by",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "The meeting is ___ Monday.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He’s looking ___ his keys.",
+      "choices": [
+        {
+          "text": "for",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "after",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "I’m thinking ___ moving abroad.",
+      "choices": [
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "They’re sitting ___ the garden.",
+      "choices": [
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "Please pay attention ___ the board.",
+      "choices": [
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She arrived ___ Paris yesterday.",
+      "choices": [
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "The children are playing ___ the park.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}

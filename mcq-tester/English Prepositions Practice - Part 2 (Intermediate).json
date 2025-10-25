@@ -1,0 +1,505 @@
+{
+  "title": "English Prepositions Practice - Part 2 (Intermediate)",
+  "questions": [
+    {
+      "text": "He insisted ___ paying for dinner.",
+      "choices": [
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'Insist' takes 'on'.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct. We say 'insist on doing something'.",
+          "correct": true
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect. 'At' is not used with 'insist'.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect. 'To' is wrong here.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She apologized ___ being late.",
+      "choices": [
+        {
+          "text": "to",
+          "explanation": "Incorrect. 'Apologize to someone' but 'for doing something'.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect. 'On' is wrong.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Correct. We say 'apologize for doing something'.",
+          "correct": true
+        },
+        {
+          "text": "of",
+          "explanation": "Incorrect. 'Of' does not work here.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We depend ___ our parents for support.",
+      "choices": [
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'Depend on' is the correct form.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct. 'Depend on' means to rely on someone.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect. 'To' is not used with 'depend'.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect. 'At' is wrong here.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He’s responsible ___ managing the team.",
+      "choices": [
+        {
+          "text": "of",
+          "explanation": "Incorrect. 'Responsible for' is correct, not 'of'.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Correct. 'Responsible for' means in charge of.",
+          "correct": true
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'In' is not used with 'responsible'.",
+          "correct": false
+        },
+        {
+          "text": "about",
+          "explanation": "Incorrect. 'About' is wrong.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "I’m tired ___ waiting for you.",
+      "choices": [
+        {
+          "text": "to",
+          "explanation": "Incorrect. 'Tired of' is correct, not 'tired to'.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect. 'In' is wrong.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Correct. 'Tired of' expresses boredom or frustration.",
+          "correct": true
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect. 'For' is wrong here.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She succeeded ___ passing the exam.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We laughed ___ his joke.",
+      "choices": [
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He complained ___ the noise.",
+      "choices": [
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "about",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "They are proud ___ their son.",
+      "choices": [
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "I’m worried ___ the test tomorrow.",
+      "choices": [
+        {
+          "text": "about",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She’s famous ___ her singing voice.",
+      "choices": [
+        {
+          "text": "of",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He congratulated me ___ my promotion.",
+      "choices": [
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We agreed ___ the new plan.",
+      "choices": [
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He apologized ___ her after the argument.",
+      "choices": [
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "I’m interested ___ learning Japanese.",
+      "choices": [
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "They decided ___ moving abroad.",
+      "choices": [
+        {
+          "text": "on",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "at",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She’s good ___ playing the piano.",
+      "choices": [
+        {
+          "text": "at",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "in",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "He blamed me ___ the mistake.",
+      "choices": [
+        {
+          "text": "of",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "She’s afraid ___ flying.",
+      "choices": [
+        {
+          "text": "about",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "of",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "text": "We apologized ___ being noisy.",
+      "choices": [
+        {
+          "text": "of",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "for",
+          "explanation": "Correct preposition.",
+          "correct": true
+        },
+        {
+          "text": "to",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        },
+        {
+          "text": "on",
+          "explanation": "Incorrect choice.",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}

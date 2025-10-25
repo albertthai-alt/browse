@@ -1,0 +1,185 @@
+{
+  "title": "English Prepositions Practice - Part 3 (Intermediate, Part 2)",
+  "questions": [
+    {
+      "text": "He’s angry ___ his brother for breaking the window.",
+      "choices": [
+        { "text": "about", "explanation": "Incorrect. 'Angry about' is used for situations, not people.", "correct": false },
+        { "text": "with", "explanation": "Correct. 'Angry with someone' means you are upset with that person.", "correct": true },
+        { "text": "at", "explanation": "Incorrect. 'At' can work but 'with' is more natural here.", "correct": false },
+        { "text": "for", "explanation": "Incorrect. 'For' does not fit here.", "correct": false }
+      ]
+    },
+    {
+      "text": "We’re short ___ time, so let’s hurry.",
+      "choices": [
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Correct. 'Short of' means lacking something.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She apologized ___ him for forgetting his birthday.",
+      "choices": [
+        { "text": "for", "explanation": "Incorrect. You 'apologize to someone for something'.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Correct. 'Apologize to someone for something.'", "correct": true },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He is very good ___ solving problems.",
+      "choices": [
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Correct. 'Good at' is the correct collocation.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s interested ___ modern art.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'Interested in' is the correct phrase.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "We complained ___ the manager about the food.",
+      "choices": [
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Correct. 'Complain to someone about something.'", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "I’m afraid ___ spiders.",
+      "choices": [
+        { "text": "from", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Correct. 'Afraid of' expresses fear.", "correct": true },
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "They congratulated him ___ winning the award.",
+      "choices": [
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect. It should be 'on'.", "correct": false },
+        { "text": "on", "explanation": "Correct. 'Congratulate someone on something.'", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He’s capable ___ finishing the job on time.",
+      "choices": [
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Correct. 'Capable of' means having the ability to do something.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s famous ___ her beauty and kindness.",
+      "choices": [
+        { "text": "of", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Correct. 'Famous for' is the right expression.", "correct": true },
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He is responsible ___ the safety of the workers.",
+      "choices": [
+        { "text": "for", "explanation": "Correct. 'Responsible for' means in charge of.", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "I’m really bad ___ remembering names.",
+      "choices": [
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Correct. 'Bad at' is the proper phrase.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s used ___ getting up early every day.",
+      "choices": [
+        { "text": "to", "explanation": "Correct. 'Used to doing something' means accustomed to it.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "They rely ___ their parents for financial help.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'Rely on' means depend on someone.", "correct": true },
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He’s proud ___ his achievements.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Proud of' means pleased with something or someone.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "We’re afraid ___ losing our jobs.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Afraid of' + -ing form is used for fear.", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "about", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s good ___ languages.",
+      "choices": [
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Correct. 'Good at' means skilled in.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He’s jealous ___ his brother’s success.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Jealous of' is the right preposition.", "correct": true },
+        { "text": "from", "explanation": "Incorrect.", "correct": false },
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s famous ___ her cooking skills.",
+      "choices": [
+        { "text": "for", "explanation": "Correct. 'Famous for' is used for reasons of fame.", "correct": true },
+        { "text": "of", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "They apologized ___ the delay in delivery.",
+      "choices": [
+        { "text": "for", "explanation": "Correct. 'Apologize for' + noun.", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false }
+      ]
+    }
+  ]
+}

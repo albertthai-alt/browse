@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCQ Tester - Local</title>
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Cpath d='M14 20h36v6H14zM14 30h24v6H14zM14 40h16v6H14z' fill='%23b9c6ff'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff9f43'/%3E%3Cpath d='M14 20h36v6H14zM14 30h24v6H14zM14 40h16v6H14z' fill='%23ffffff'/%3E%3C/svg%3E" />
 </head>
 <body>
   <div class="container">
@@ -19,13 +19,19 @@
         <button id="tabTest" class="tab">Kiểm tra</button>
         <button id="tabResult" class="tab" disabled>Kết quả</button>
       </nav>
-      <div class="brand-sub">v1.0</div>
+      <div class="brand-sub">v1.1</div>
     </header>
 
     <main id="viewEdit" class="view">
       <section class="toolbar">
         <input id="titleInput" type="text" class="title-input" placeholder="Tiêu đề bài test (tuỳ chọn)" />
         <div class="spacer"></div>
+        <label class="small">Nguồn:
+          <select id="sourceSelectEdit" class="btn" style="padding:6px 8px">
+            <option value="local" selected>Local</option>
+            <option value="github">GitHub</option>
+          </select>
+        </label>
         <button id="btnNewQuestion" class="btn">+ Thêm câu hỏi</button>
         <button id="btnLoadJson" class="btn">Mở JSON</button>
         <button id="btnAppendJson" class="btn">Mở thêm JSON</button>
@@ -33,6 +39,14 @@
         <input id="fileOpenAppend" type="file" accept="application/json,.json" hidden />
         <button id="btnSaveJson" class="btn">Lưu JSON</button>
         <button id="btnExportStandalone" class="btn primary">Xuất HTML</button>
+      </section>
+      <section id="ghPanelEdit" class="panel hidden">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+          <div class="small">GitHub repo: <code>albertthai-alt/browse</code>, thư mục: <code>/mcq-tester</code></div>
+          <div class="spacer"></div>
+          <button id="btnGhRefreshEdit" class="btn">Tải danh sách</button>
+        </div>
+        <div id="ghListEdit" class="editor"></div>
       </section>
       <section id="editor" class="editor"></section>
       <section class="panel" style="margin-top:8px;">
@@ -52,9 +66,20 @@
       <section class="toolbar">
         <div class="test-title" id="testTitle"></div>
         <div class="spacer"></div>
+        <label class="small">Nguồn:
+          <select id="sourceSelectTest" class="btn" style="padding:6px 8px">
+            <option value="local" selected>Local</option>
+            <option value="github">GitHub</option>
+          </select>
+        </label>
         <button id="btnLoadJsonTest" class="btn">Mở JSON</button>
         <button id="btnAppendJsonTest" class="btn">Mở thêm JSON</button>
+        <button id="btnGhRefreshTest" class="btn">Tải danh sách</button>
         <button id="btnStartTest" class="btn primary">Bắt đầu</button>
+      </section>
+      <section id="ghPanelTest" class="panel hidden">
+        <div class="small" style="margin-bottom:8px;">GitHub repo: <code>albertthai-alt/browse</code>, thư mục: <code>/mcq-tester</code></div>
+        <div id="ghListTest" class="editor"></div>
       </section>
       <section id="testStage" class="test-stage hidden">
         <div class="progress" id="testProgress"></div>

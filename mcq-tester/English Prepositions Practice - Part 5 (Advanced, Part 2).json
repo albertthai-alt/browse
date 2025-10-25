@@ -1,0 +1,194 @@
+{
+  "title": "English Prepositions Practice - Part 5 (Advanced, Part 2)",
+  "questions": [
+    {
+      "text": "The new law came into effect ___ January 1st.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'On' is used for specific dates.", "correct": true },
+        { "text": "in", "explanation": "Incorrect. 'In' is used for months or years.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He acted ___ behalf of the committee.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'On behalf of' means representing someone.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The project was completed ___ the expense of quality.",
+      "choices": [
+        { "text": "at", "explanation": "Correct. 'At the expense of' means with a negative cost or trade-off.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She succeeded ___ virtue of her determination.",
+      "choices": [
+        { "text": "by", "explanation": "Correct. 'By virtue of' means because of.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "through", "explanation": "Incorrect though similar in meaning.", "correct": false }
+      ]
+    },
+    {
+      "text": "The country is rich ___ natural resources.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'Rich in' means having a lot of something valuable.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The research was carried out ___ collaboration with other universities.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In collaboration with' means working together.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The company is divided ___ several departments.",
+      "choices": [
+        { "text": "into", "explanation": "Correct. 'Divided into' shows separation into parts.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He is eligible ___ the scholarship program.",
+      "choices": [
+        { "text": "for", "explanation": "Correct. 'Eligible for' means qualified to receive something.", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The judge ruled ___ favor of the defendant.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In favor of' means supporting or approving.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The success of the plan depends ___ careful execution.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'Depend on' means rely on something.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She was convicted ___ fraud last year.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Convicted of' is used in legal contexts.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The two companies merged ___ the purpose of expanding abroad.",
+      "choices": [
+        { "text": "for", "explanation": "Correct. 'For the purpose of' means with the aim of.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "We acted ___ accordance with the law.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In accordance with' means following or respecting.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "under", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The results are consistent ___ previous studies.",
+      "choices": [
+        { "text": "with", "explanation": "Correct. 'Consistent with' means in agreement with.", "correct": true },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He spoke ___ length about his experiences abroad.",
+      "choices": [
+        { "text": "at", "explanation": "Correct. 'At length' means in detail.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "Her actions were motivated ___ greed.",
+      "choices": [
+        { "text": "by", "explanation": "Correct. 'Motivated by' expresses the cause or reason.", "correct": true },
+        { "text": "from", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The company specializes ___ renewable energy.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'Specialize in' means focus on a particular area.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He succeeded ___ the help of his colleagues.",
+      "choices": [
+        { "text": "with", "explanation": "Correct. 'With the help of' means using assistance.", "correct": true },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "through", "explanation": "Incorrect though similar meaning.", "correct": false },
+        { "text": "under", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s confident ___ her ability to win the competition.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'Confident in' means having faith in.", "correct": true },
+        { "text": "of", "explanation": "Also possible, but 'confident in' fits better with 'ability'.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He’s aware ___ the potential risks involved.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Aware of' means having knowledge about.", "correct": true },
+        { "text": "about", "explanation": "Incorrect. 'About' is less formal and incorrect here.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The workers are engaged ___ improving production quality.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'Engaged in' means actively involved in something.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    }
+  ]
+}

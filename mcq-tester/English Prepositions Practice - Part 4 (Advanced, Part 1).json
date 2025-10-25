@@ -1,0 +1,185 @@
+{
+  "title": "English Prepositions Practice - Part 4 (Advanced, Part 1)",
+  "questions": [
+    {
+      "text": "He was accused ___ stealing company property.",
+      "choices": [
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Correct. 'Accused of' is the right phrase.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The report was written ___ reference to the new regulations.",
+      "choices": [
+        { "text": "with", "explanation": "Correct. 'With reference to' means concerning or about.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She acted ___ accordance with the company’s policy.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In accordance with' means following the rules or standards.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The project was delayed ___ account of bad weather.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'On account of' means because of.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She spoke ___ behalf of the entire team.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'On behalf of' means representing someone.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The new system was introduced ___ order to improve efficiency.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In order to' means for the purpose of.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The manager acted ___ response to customer complaints.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In response to' means as a reaction to.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The team succeeded ___ spite of many difficulties.",
+      "choices": [
+        { "text": "in", "explanation": "Incorrect. The phrase is 'in spite of'.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Correct. 'In spite of' means despite.", "correct": true },
+        { "text": "by", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "We finished the project ___ time.",
+      "choices": [
+        { "text": "on", "explanation": "Correct. 'On time' means punctual, not late.", "correct": true },
+        { "text": "in", "explanation": "Incorrect. 'In time' means before the deadline, slightly different meaning.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She worked hard ___ order that she could buy a house.",
+      "choices": [
+        { "text": "so", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Correct. 'In order that' expresses purpose.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The company is committed ___ reducing waste.",
+      "choices": [
+        { "text": "to", "explanation": "Correct. 'Committed to doing something' means dedicated to it.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He succeeded ___ virtue of hard work.",
+      "choices": [
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "through", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Correct. 'By virtue of' means because of.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The decision was made ___ regard to the company’s policy.",
+      "choices": [
+        { "text": "with", "explanation": "Correct. 'With regard to' means concerning or relating to.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The building was destroyed ___ fire.",
+      "choices": [
+        { "text": "by", "explanation": "Correct. 'Destroyed by fire' means the fire caused the destruction.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "from", "explanation": "Incorrect.", "correct": false },
+        { "text": "at", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He was praised ___ his honesty.",
+      "choices": [
+        { "text": "about", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Correct. 'Praised for' is the right phrase.", "correct": true },
+        { "text": "of", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "She’s been absent ___ work for two days.",
+      "choices": [
+        { "text": "at", "explanation": "Incorrect.", "correct": false },
+        { "text": "from", "explanation": "Correct. 'Absent from' is the proper expression.", "correct": true },
+        { "text": "in", "explanation": "Incorrect.", "correct": false },
+        { "text": "of", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The company operates ___ accordance with international standards.",
+      "choices": [
+        { "text": "in", "explanation": "Correct. 'In accordance with' means following the rules.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "by", "explanation": "Incorrect.", "correct": false },
+        { "text": "with", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The results were achieved ___ means of careful planning.",
+      "choices": [
+        { "text": "by", "explanation": "Correct. 'By means of' means through the use of.", "correct": true },
+        { "text": "with", "explanation": "Incorrect.", "correct": false },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "The event was cancelled ___ to bad weather.",
+      "choices": [
+        { "text": "because", "explanation": "Incorrect. The correct form is 'due to'.", "correct": false },
+        { "text": "due", "explanation": "Correct. 'Due to' expresses reason.", "correct": true },
+        { "text": "on", "explanation": "Incorrect.", "correct": false },
+        { "text": "for", "explanation": "Incorrect.", "correct": false }
+      ]
+    },
+    {
+      "text": "He was found guilty ___ theft.",
+      "choices": [
+        { "text": "of", "explanation": "Correct. 'Guilty of' is the right preposition.", "correct": true },
+        { "text": "for", "explanation": "Incorrect.", "correct": false },
+        { "text": "to", "explanation": "Incorrect.", "correct": false },
+        { "text": "in", "explanation": "Incorrect.", "correct": false }
+      ]
+    }
+  ]
+}

@@ -49,6 +49,16 @@
   const btnRetake = $('#btnRetake');
   const btnExportAnswers = $('#btnExportAnswers');
 
+  // GitHub source elements
+  const sourceSelectEdit = $('#sourceSelectEdit');
+  const sourceSelectTest = $('#sourceSelectTest');
+  const ghPanelEdit = $('#ghPanelEdit');
+  const ghPanelTest = $('#ghPanelTest');
+  const btnGhRefreshEdit = $('#btnGhRefreshEdit');
+  const btnGhRefreshTest = $('#btnGhRefreshTest');
+  const ghListEdit = $('#ghListEdit');
+  const ghListTest = $('#ghListTest');
+
   // Utilities
   function download(filename, dataStr) {
     const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
@@ -60,6 +70,10 @@
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  function setInfoStatus(msg){
+    try{ if(editStatus) editStatus.textContent = msg; }catch{}
   }
 
   function ensureAtLeastTwoChoices(q){
@@ -294,6 +308,16 @@
     });
   }
 
+  async function refreshGh(container){
+    container.innerHTML = '<div class="small">Đang tải danh sách...</div>';
+    try{
+      const items = await fetchGithubJsonList();
+      renderGhList(container, items);
+    }catch(e){
+      container.innerHTML = '<div class="small">Không tải được danh sách.</div>';
+    }
+  }
+
   function escapeHtml(str){
     return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
   }
@@ -408,6 +432,10 @@
         quiz = data;
         renderEditor();
         editStatus.textContent = `Đã mở: ${file.name}`;
+        // sync test view like local load behavior
+        testTitle.textContent = quiz.title || 'Bài kiểm tra';
+        testStage.classList.add('hidden');
+        testStatus.textContent = '';
       }catch(err){
         alert('Không đọc được JSON');
       }
@@ -472,6 +500,181 @@
     download('result.json', JSON.stringify({ title: quiz.title || '', ...r }, null, 2));
   };
 
+  // GitHub listing and open/append
+  const GH_OWNER = 'albertthai-alt';
+  const GH_REPO = 'browse';
+  const GH_PATH = 'mcq-tester';
+
+  async function fetchGithubJsonList(){
+    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+    if(!res.ok) throw new Error('Không tải được danh sách GitHub');
+    const data = await res.json();
+    return (Array.isArray(data) ? data : []).filter(item => item.type === 'file' && /\.json$/i.test(item.name));
+  }
+
+  function renderGhList(container, items){
+    container.innerHTML = '';
+    if(!items.length){
+      const empty = document.createElement('div');
+      empty.className = 'small';
+      empty.textContent = 'Không có file .json trong thư mục.';
+      container.appendChild(empty);
+      return;
+    }
+    items.forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'q-card';
+      const name = document.createElement('div');
+      name.className = 'q-title';
+      name.textContent = it.name;
+      const actions = document.createElement('div');
+      actions.className = 'q-actions';
+      const btnOpen = document.createElement('button');
+      btnOpen.className = 'btn';
+      btnOpen.textContent = 'Mở';
+      btnOpen.onclick = async () => {
+        setInfoStatus(`Đang mở từ GitHub: ${it.name} ...`);
+        await openFromGithubPath(it.path, it.name);
+      };
+      const btnAppend = document.createElement('button');
+      btnAppend.className = 'btn';
+      btnAppend.textContent = 'Mở thêm';
+      btnAppend.onclick = async () => {
+        setInfoStatus(`Đang thêm từ GitHub: ${it.name} ...`);
+        await appendFromGithubPath(it.path, it.name);
+      };
+      actions.append(btnOpen, btnAppend);
+      const head = document.createElement('div');
+      head.className = 'q-header';
+      head.append(name, actions);
+      row.append(head);
+      container.append(row);
+    });
+  }
+
+  // Backward-compatible raw URL open (not used by list now)
+  async function openFromUrl(url, displayName){
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Lỗi tải JSON');
+      const data = await res.json();
+      const err = validateQuiz(data);
+      if(err){ alert(err); return; }
+      quiz = data;
+      renderEditor();
+      editStatus.textContent = `Đã mở từ GitHub: ${displayName}`;
+      // sync test view like local load behavior
+      testTitle.textContent = quiz.title || 'Bài kiểm tra';
+      testStage.classList.add('hidden');
+      testStatus.textContent = '';
+      // switch to Edit view to reflect loaded data; keep current mode otherwise
+    }catch(e){ alert('Không mở được JSON từ GitHub'); }
+  }
+
+  // Backward-compatible raw URL append (not used by list now)
+  async function appendFromUrl(url, displayName){
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Lỗi tải JSON');
+      const data = await res.json();
+      const err = validateQuiz(data);
+      if(err){ alert(err); return; }
+      const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
+      if(addCount === 0){ alert('File không có câu hỏi để thêm'); return; }
+      quiz.questions.push(...data.questions);
+      renderEditor();
+      const msg = `Đã thêm ${addCount} câu từ GitHub: ${displayName}`;
+      editStatus.textContent = msg;
+      if(!testStage.classList.contains('hidden')){
+        testStatus.textContent = msg + '. Hãy bấm "Làm lại" để thi với đề mới.';
+      }
+    }catch(e){ alert('Không thêm được JSON từ GitHub'); }
+  }
+
+  // New: Fetch via GitHub Contents API to avoid CORS issues
+  async function fetchGithubFileContent(path){
+    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+    if(!res.ok){
+      const txt = await res.text().catch(()=> '');
+      throw new Error(`Không tải được file từ GitHub (HTTP ${res.status}). ${txt}`);
+    }
+    const meta = await res.json();
+    if(!meta || meta.encoding !== 'base64' || !meta.content) throw new Error('Nội dung file không hợp lệ');
+    const utf8 = base64ToUtf8(meta.content);
+    return JSON.parse(utf8);
+  }
+
+  function base64ToUtf8(b64){
+    // Remove possible newlines from GitHub content
+    const clean = b64.replace(/\n/g, '');
+    const bin = atob(clean);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for(let i=0;i<len;i++){ bytes[i] = bin.charCodeAt(i); }
+    const dec = new TextDecoder('utf-8');
+    return dec.decode(bytes);
+  }
+
+  async function openFromGithubPath(path, displayName){
+    try{
+      const data = await fetchGithubFileContent(path);
+      const err = validateQuiz(data);
+      if(err){ alert(err); return; }
+      quiz = data;
+      renderEditor();
+      editStatus.textContent = `Đã mở từ GitHub: ${displayName}`;
+      testTitle.textContent = quiz.title || 'Bài kiểm tra';
+      testStage.classList.add('hidden');
+      testStatus.textContent = '';
+      setInfoStatus(`Đã mở từ GitHub: ${displayName}`);
+    }catch(e){ alert('Không mở được JSON từ GitHub'); }
+  }
+
+  async function appendFromGithubPath(path, displayName){
+    try{
+      const data = await fetchGithubFileContent(path);
+      const err = validateQuiz(data);
+      if(err){ alert(err); return; }
+      const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
+      if(addCount === 0){ alert('File không có câu hỏi để thêm'); return; }
+      quiz.questions.push(...data.questions);
+      renderEditor();
+      const msg = `Đã thêm ${addCount} câu từ GitHub: ${displayName}`;
+      editStatus.textContent = msg;
+      if(!testStage.classList.contains('hidden')){
+        testStatus.textContent = msg + '. Hãy bấm "Làm lại" để thi với đề mới.';
+      }
+      setInfoStatus(msg);
+    }catch(e){ alert('Không thêm được JSON từ GitHub'); }
+  }
+
+  function toggleGhPanel(selectEl, panelEl){
+    if(!selectEl || !panelEl) return;
+    const val = selectEl.value;
+    if(val === 'github'){
+      panelEl.classList.remove('hidden');
+    } else {
+      panelEl.classList.add('hidden');
+    }
+  }
+
+  if(sourceSelectEdit){
+    sourceSelectEdit.addEventListener('change', ()=>{
+      toggleGhPanel(sourceSelectEdit, ghPanelEdit);
+      if(sourceSelectEdit.value === 'github' && ghListEdit){ refreshGh(ghListEdit); }
+    });
+  }
+  if(sourceSelectTest){
+    sourceSelectTest.addEventListener('change', ()=>{
+      toggleGhPanel(sourceSelectTest, ghPanelTest);
+      if(sourceSelectTest.value === 'github' && ghListTest){ refreshGh(ghListTest); }
+    });
+  }
+  if(btnGhRefreshEdit && ghListEdit){ btnGhRefreshEdit.onclick = ()=> refreshGh(ghListEdit); }
+  if(btnGhRefreshTest && ghListTest){ btnGhRefreshTest.onclick = ()=> refreshGh(ghListTest); }
+
   function slugify(s){
     return (s||'').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
   }
@@ -482,7 +685,7 @@
     const data = JSON.stringify(qz);
     const css = `*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1020;color:#e6ecff} .wrap{max-width:860px;margin:0 auto;padding:16px} .header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 16px;border-bottom:1px solid #263055} .brand{font-weight:700} .btn{background:#172042;color:#e6ecff;border:1px solid #2a3564;padding:8px 12px;border-radius:8px;cursor:pointer} .btn.primary{background:#3b5bfd;border-color:#3b5bfd;color:#fff} .panel{background:#0f1734;border:1px solid #263055;border-radius:10px;padding:12px;margin-top:12px} .progress{color:#9fb0ff;margin-bottom:8px} .question{font-weight:600;margin:8px 0} .choices{display:grid;gap:8px} .choice-btn{text-align:left;border:1px solid #2a3564;background:#0b1330;color:#e6ecff;padding:10px 12px;border-radius:8px;cursor:pointer} .choice-btn.selected{outline:2px solid #3b5bfd} .controls{display:flex;gap:8px;margin-top:12px} .summary{background:#0f1734;border:1px solid #263055;border-radius:10px;padding:12px;margin-top:12px} .result-detail{display:flex;flex-direction:column;gap:12px;margin-top:12px} .detail-card{background:#0f1734;border:1px solid #263055;border-radius:10px;padding:12px} .correct{color:#7bff95} .incorrect{color:#ff7b88} .exp{color:#9fb0ff;font-size:13px;margin-top:4px} .ans-line{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid #2a3564;border-radius:8px;background:#0b1330} .ans-head{display:flex;align-items:center;gap:8px} .ans-text{flex:1} .pill{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid transparent} .pill-correct{background:rgba(30,180,120,.15);color:#7bff95;border-color:rgba(30,180,120,.35)} .pill-picked{background:rgba(59,91,253,.15);color:#b9c6ff;border-color:rgba(59,91,253,.35)} .pill-wrong{background:rgba(255,60,60,.15);color:#ff9aa5;border-color:rgba(255,60,60,.35)} .ans-line.is-correct{border-color:rgba(30,180,120,.6);background:rgba(20,80,60,.15)} .ans-line.is-picked:not(.is-correct){border-color:rgba(255,60,60,.6);background:rgba(80,20,30,.18)}`;
     const js = `(()=>{const data=${data};let idx=0;let answers=new Array(data.questions.length).fill(null);const $=s=>document.querySelector(s);const titleEl=$('#tTitle');const stage=$('#stage');const prog=$('#prog');const qEl=$('#q');const choices=$('#choices');const btnPrev=$('#prev');const btnNext=$('#next');const btnFinish=$('#finish');const btnStart=$('#start');const resultSum=$('#rSum');const resultDetail=$('#rDetail');titleEl.textContent=data.title||'Bài kiểm tra';btnStart.onclick=()=>{stage.classList.remove('hide');renderQ();};function renderQ(){const total=data.questions.length;prog.textContent='Câu '+(idx+1)+'/'+total;const q=data.questions[idx];qEl.textContent=q.text||'(Không có nội dung)';choices.innerHTML='';q.choices.forEach((c,ci)=>{const b=document.createElement('button');b.className='choice-btn'+(answers[idx]===ci?' selected':'');b.textContent=c.text||'(Lựa chọn '+(ci+1)+')';b.onclick=()=>{answers[idx]=ci;renderQ();};choices.append(b);});btnPrev.disabled=(idx===0);btnNext.disabled=(idx===total-1);}btnPrev.onclick=()=>{if(idx>0){idx--;renderQ();}};btnNext.onclick=()=>{if(idx<data.questions.length-1){idx++;renderQ();}};btnFinish.onclick=()=>{const un=answers.findIndex(a=>a===null);if(un!==-1){if(!confirm('Vẫn còn câu chưa chọn. Bạn vẫn muốn nộp bài?'))return;}renderResult();document.body.classList.add('done');};function renderResult(){let correct=0;const details=data.questions.map((q,qi)=>{const ci=q.choices.findIndex(c=>c.correct);const ui=answers[qi];const ok=ui===ci;if(ok)correct++;return{question:q.text,correctIndex:ci,userIndex:ui,ok,choices:q.choices};});resultSum.innerHTML='<div><strong>Tổng điểm:</strong> '+correct+'/'+data.questions.length+'</div>';resultDetail.innerHTML='';details.forEach((d,i)=>{const card=document.createElement('div');card.className='detail-card';const h=document.createElement('div');h.innerHTML='<strong>Câu '+(i+1)+':</strong> '+escapeHtml(d.question||'');const s=document.createElement('div');s.className=d.ok?'correct':'incorrect';s.textContent=d.ok?'Đúng':'Sai';const list=document.createElement('div');list.style.marginTop='8px';d.choices.forEach((c,ci)=>{const isC=(ci===d.correctIndex),isP=(ci===d.userIndex);const line=document.createElement('div');line.className='ans-line'+(isC?' is-correct':'')+(isP?' is-picked':'');const head=document.createElement('div');head.className='ans-head';const text=document.createElement('div');text.className='ans-text';text.textContent=c.text||'';head.appendChild(text);if(isC){const t=document.createElement('span');t.className='pill pill-correct';t.textContent='Đáp án đúng';head.appendChild(t);}if(isP){const t=document.createElement('span');t.className='pill '+(isC?'pill-picked':'pill-wrong');t.textContent='Bạn chọn';head.appendChild(t);}line.appendChild(head);if(c.explanation){const ex=document.createElement('div');ex.className='exp';ex.textContent=c.explanation;line.appendChild(ex);}list.appendChild(line);});card.append(h,s,list);resultDetail.append(card);});}function escapeHtml(str){return String(str).replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]));}})();`;
-    return `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>${escapeHtml(escapedTitle)} - Standalone</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1020'/%3E%3Cpath d='M14 20h36v6H14zM14 30h24v6H14zM14 40h16v6H14z' fill='%23b9c6ff'/%3E%3C/svg%3E"/><style>${css}</style></head><body><div class="wrap"><div class="header"><div class="brand">MCQ Test - Standalone</div><button id="start" class="btn primary">Bắt đầu</button></div><div id="stage" class="panel hide"><div class="progress" id="prog"></div><div class="question" id="q"></div><div class="choices" id="choices"></div><div class="controls"><button id="prev" class="btn">◀ Trước</button><button id="next" class="btn">Tiếp ▶</button><button id="finish" class="btn primary">Nộp bài</button></div></div><div class="summary"><div id="tTitle" style="margin-bottom:8px;color:#cfd9ff;font-weight:600"></div><div id="rSum"></div><div id="rDetail" class="result-detail"></div></div></div><script>${js}</script></body></html>`;
+    return `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>${escapeHtml(escapedTitle)} - Standalone</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff9f43'/%3E%3Cpath d='M14 20h36v6H14zM14 30h24v6H14zM14 40h16v6H14z' fill='%23ffffff'/%3E%3C/svg%3E"/><style>${css}</style></head><body><div class="wrap"><div class="header"><div class="brand">MCQ Test - Standalone</div><button id="start" class="btn primary">Bắt đầu</button></div><div id="stage" class="panel hide"><div class="progress" id="prog"></div><div class="question" id="q"></div><div class="choices" id="choices"></div><div class="controls"><button id="prev" class="btn">◀ Trước</button><button id="next" class="btn">Tiếp ▶</button><button id="finish" class="btn primary">Nộp bài</button></div></div><div class="summary"><div id="tTitle" style="margin-bottom:8px;color:#cfd9ff;font-weight:600"></div><div id="rSum"></div><div id="rDetail" class="result-detail"></div></div></div><script>${js}</script></body></html>`;
   }
 
   // Init with an empty first question to guide
