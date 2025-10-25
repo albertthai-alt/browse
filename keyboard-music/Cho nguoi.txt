@@ -3,7 +3,7 @@ Một{D4} người{F4} con{G4} gái{A4} đứng{D5} nghiêng{C5} nghiêng{G4} v�
 Lòng{G4} nàng{G4} sao{A4} lưu{C5} luyến{D5} quá{D5}
 Hẹn{F4} hò{F4} một{G4} người{A4} đi{C5} xa{C5}
 Mà{A4} năm{C5} tháng{F5} đã{E5} dần{D5} qua{E5}
-Chuyện{F4} tình{F4} chung{G4} thủy{A4} có{A5} em{C5} bên{G4} bờ{F4} sông{G4} vắng{A4}
+Chuyện{D4} tình{F4} chung{G4} thủy{A4} có{D5} em{C5} bên{G4} bờ{F4} sông{G4} vắng{A4}
 Ngày{D4} ngày{F4} ra{G4} đón{A4} biết{D5} đâu{A4} anh{G4} còn{F4} nhớ{A4} chăng{G4}
 Lệ{G4} buồn{G4} đêm{A4} khuya{C5} thức{D5} trắng{D5}
 Chiều{F4} chiều{F4} nhìn{G4} theo{A4} ánh{C5} nắng{C5}
@@ -14,6 +14,6 @@ Và{D5} mỗi{D5} lần{D5} chim{E5} én{F5}{G5} đưa{F5}{E5} tin{D5} con{C5} �
 Môi{B4} mắt{D5} em{B4} chờ{A4}{G4} mong{A4}
 Sầu{D4} thương{F4} đã{G4} lỡ{A4} trách{D5} chi{A4} duyên{G4} tình{F4} dang{G4} dở{A4}
 Đời{D4} người{F4} con{G4} gái{A4} chỉ{D5} có{A4} một{G4} lần{F4} ước{A4} mơ{G4}
-Nào{G4} ngờ{G4} tình{G4} duyên{A4} trắc{D5} trở{D5}
+Nào{G4} ngờ{G4} tình{B4} duyên{C5} trắc{D5} trở{D5}
 Tình{F4} đẹp{F4} là{G4} tình{A4} bơ{C5} vơ{C5}
 Chờ{A4} người{C5} đến{F5}{G5} bao{F5}{E5} giờ{D5}
