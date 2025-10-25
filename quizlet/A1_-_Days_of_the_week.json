@@ -1,0 +1,34 @@
+{
+  "title": "Thẻ ghi nhớ: A1 - Days of the week",
+  "count": 7,
+  "cards": [
+    {
+      "term": "Monday",
+      "definition": "thứ hai"
+    },
+    {
+      "term": "tuesday",
+      "definition": "thứ ba"
+    },
+    {
+      "term": "wednesday",
+      "definition": "thứ tư"
+    },
+    {
+      "term": "thursday",
+      "definition": "thứ năm"
+    },
+    {
+      "term": "friday",
+      "definition": "thứ sáu"
+    },
+    {
+      "term": "saturday",
+      "definition": "thứ bảy"
+    },
+    {
+      "term": "sunday",
+      "definition": "chủ nhật"
+    }
+  ]
+}

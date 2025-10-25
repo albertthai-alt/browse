@@ -1,0 +1,50 @@
+{
+  "title": "Thẻ ghi nhớ: A1 - Activities #2",
+  "count": 11,
+  "cards": [
+    {
+      "term": "count",
+      "definition": "đếm"
+    },
+    {
+      "term": "listen",
+      "definition": "nghe"
+    },
+    {
+      "term": "find",
+      "definition": "tìm"
+    },
+    {
+      "term": "look",
+      "definition": "nhìn"
+    },
+    {
+      "term": "number",
+      "definition": "đánh số"
+    },
+    {
+      "term": "play",
+      "definition": "chơi"
+    },
+    {
+      "term": "say",
+      "definition": "nói"
+    },
+    {
+      "term": "circle",
+      "definition": "khoanh tròn"
+    },
+    {
+      "term": "hide",
+      "definition": "giấu"
+    },
+    {
+      "term": "instruction",
+      "definition": "hướng dẫn"
+    },
+    {
+      "term": "opposite",
+      "definition": "ngược lại"
+    }
+  ]
+}

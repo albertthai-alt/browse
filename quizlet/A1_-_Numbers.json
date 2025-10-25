@@ -1,0 +1,54 @@
+{
+  "title": "Thẻ ghi nhớ: A1 - Numbers",
+  "count": 12,
+  "cards": [
+    {
+      "term": "one",
+      "definition": "một"
+    },
+    {
+      "term": "two",
+      "definition": "hai"
+    },
+    {
+      "term": "three",
+      "definition": "ba"
+    },
+    {
+      "term": "four",
+      "definition": "bốn"
+    },
+    {
+      "term": "five",
+      "definition": "năm"
+    },
+    {
+      "term": "six",
+      "definition": "sáu"
+    },
+    {
+      "term": "seven",
+      "definition": "bảy"
+    },
+    {
+      "term": "eight",
+      "definition": "tám"
+    },
+    {
+      "term": "nine",
+      "definition": "chín"
+    },
+    {
+      "term": "ten",
+      "definition": "mười"
+    },
+    {
+      "term": "eleven",
+      "definition": "mười một"
+    },
+    {
+      "term": "twelve",
+      "definition": "mười hai"
+    }
+  ]
+}

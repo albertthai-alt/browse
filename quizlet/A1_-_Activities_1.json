@@ -1,0 +1,46 @@
+{
+  "title": "Thẻ ghi nhớ: A1 - Activities #1",
+  "count": 10,
+  "cards": [
+    {
+      "term": "check",
+      "definition": "kiểm tra"
+    },
+    {
+      "term": "write",
+      "definition": "viết"
+    },
+    {
+      "term": "choose",
+      "definition": "chọn"
+    },
+    {
+      "term": "match",
+      "definition": "ghép"
+    },
+    {
+      "term": "draw",
+      "definition": "vẽ"
+    },
+    {
+      "term": "color",
+      "definition": "tô màu"
+    },
+    {
+      "term": "read",
+      "definition": "đọc"
+    },
+    {
+      "term": "complete",
+      "definition": "hoàn thành"
+    },
+    {
+      "term": "answer",
+      "definition": "trả lời"
+    },
+    {
+      "term": "listen",
+      "definition": "nghe"
+    }
+  ]
+}
