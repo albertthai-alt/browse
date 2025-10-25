@@ -20,20 +20,19 @@
 
   const btnNewQuestion = $('#btnNewQuestion');
   const btnLoadJson = $('#btnLoadJson');
-  const btnAppendJson = $('#btnAppendJson');
   const fileOpen = $('#fileOpen');
-  const fileOpenAppend = $('#fileOpenAppend');
   const btnSaveJson = $('#btnSaveJson');
   const btnExportStandalone = $('#btnExportStandalone');
   const editStatus = $('#editStatus');
   const pasteJsonBox = $('#pasteJsonBox');
   const btnAppendFromText = $('#btnAppendFromText');
   const btnClearPaste = $('#btnClearPaste');
+  const chkAppend = $('#chkAppend');
 
   const testTitle = $('#testTitle');
   const btnStartTest = $('#btnStartTest');
   const btnLoadJsonTest = $('#btnLoadJsonTest');
-  const btnAppendJsonTest = $('#btnAppendJsonTest');
+  const chkAppendTest = $('#chkAppendTest');
   const testStage = $('#testStage');
   const testProgress = $('#testProgress');
   const testQuestion = $('#testQuestion');
@@ -414,12 +413,11 @@
     };
   }
 
-  btnLoadJson.onclick = () => fileOpen.click();
-  // Allow opening JSON from Test tab as well
-  if(btnLoadJsonTest){ btnLoadJsonTest.onclick = () => fileOpen.click(); }
-  // Append JSON from Edit and Test
-  if(btnAppendJson){ btnAppendJson.onclick = () => fileOpenAppend.click(); }
-  if(btnAppendJsonTest){ btnAppendJsonTest.onclick = () => fileOpenAppend.click(); }
+  // Keep track who triggered file open to read checkbox state appropriately
+  let openContext = 'edit'; // 'edit' | 'test'
+  btnLoadJson.onclick = () => { openContext = 'edit'; fileOpen.click(); };
+  if(btnLoadJsonTest){ btnLoadJsonTest.onclick = () => { openContext = 'test'; fileOpen.click(); }; }
+
   fileOpen.onchange = (e) => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -429,47 +427,32 @@
         const data = JSON.parse(String(reader.result));
         const err = validateQuiz(data);
         if(err){ alert(err); return; }
-        quiz = data;
-        renderEditor();
-        editStatus.textContent = `Đã mở: ${file.name}`;
-        // sync test view like local load behavior
-        testTitle.textContent = quiz.title || 'Bài kiểm tra';
-        testStage.classList.add('hidden');
-        testStatus.textContent = '';
-      }catch(err){
-        alert('Không đọc được JSON');
-      }
-    };
-    reader.readAsText(file);
-    // reset input to allow re-open same file
-    e.target.value = '';
-  };
-
-  // Append handler
-  fileOpenAppend.onchange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const data = JSON.parse(String(reader.result));
-        const err = validateQuiz(data);
-        if(err){ alert(err); return; }
-        const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
-        if(addCount === 0){ alert('File không có câu hỏi để thêm'); return; }
-        quiz.questions.push(...data.questions);
-        renderEditor();
-        const msg = `Đã thêm ${addCount} câu từ: ${file.name}`;
-        editStatus.textContent = msg;
-        // If currently in test stage, notify user to restart to include new questions
-        if(!testStage.classList.contains('hidden')){
-          testStatus.textContent = msg + '. Hãy bấm "Làm lại" để thi với đề mới.';
+        const appendMode = (openContext === 'edit' ? (chkAppend && chkAppend.checked) : (chkAppendTest && chkAppendTest.checked)) && quiz.questions.length > 0;
+        if(appendMode){
+          const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
+          if(addCount === 0){ alert('File không có câu hỏi để thêm'); return; }
+          quiz.questions.push(...data.questions);
+          renderEditor();
+          const msg = `Đã thêm ${addCount} câu từ: ${file.name}`;
+          editStatus.textContent = msg;
+          if(!testStage.classList.contains('hidden')){
+            testStatus.textContent = msg + '. Hãy bấm "Làm lại" để thi với đề mới.';
+          }
+        } else {
+          quiz = data;
+          renderEditor();
+          editStatus.textContent = `Đã mở: ${file.name}`;
+          // sync test view like local load behavior
+          testTitle.textContent = quiz.title || 'Bài kiểm tra';
+          testStage.classList.add('hidden');
+          testStatus.textContent = '';
         }
       }catch(err){
         alert('Không đọc được JSON');
       }
     };
     reader.readAsText(file);
+    // reset input to allow re-open same file
     e.target.value = '';
   };
 
@@ -522,35 +505,30 @@
       container.appendChild(empty);
       return;
     }
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexWrap = 'wrap';
+    wrap.style.gap = '8px 12px';
     items.forEach(it => {
-      const row = document.createElement('div');
-      row.className = 'q-card';
-      const name = document.createElement('div');
-      name.className = 'q-title';
-      name.textContent = it.name;
-      const actions = document.createElement('div');
-      actions.className = 'q-actions';
-      const btnOpen = document.createElement('button');
-      btnOpen.className = 'btn';
-      btnOpen.textContent = 'Mở';
-      btnOpen.onclick = async () => {
-        setInfoStatus(`Đang mở từ GitHub: ${it.name} ...`);
-        await openFromGithubPath(it.path, it.name);
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = it.name;
+      a.style.fontWeight = '400';
+      a.onclick = async (ev) => {
+        ev.preventDefault();
+        const inTest = !viewTest.classList.contains('hidden');
+        const useAppend = (inTest ? (chkAppendTest && chkAppendTest.checked) : (chkAppend && chkAppend.checked)) && quiz.questions.length > 0;
+        if(useAppend){
+          setInfoStatus(`Đang thêm từ GitHub: ${it.name} ...`);
+          await appendFromGithubPath(it.path, it.name);
+        } else {
+          setInfoStatus(`Đang mở từ GitHub: ${it.name} ...`);
+          await openFromGithubPath(it.path, it.name);
+        }
       };
-      const btnAppend = document.createElement('button');
-      btnAppend.className = 'btn';
-      btnAppend.textContent = 'Mở thêm';
-      btnAppend.onclick = async () => {
-        setInfoStatus(`Đang thêm từ GitHub: ${it.name} ...`);
-        await appendFromGithubPath(it.path, it.name);
-      };
-      actions.append(btnOpen, btnAppend);
-      const head = document.createElement('div');
-      head.className = 'q-header';
-      head.append(name, actions);
-      row.append(head);
-      container.append(row);
+      wrap.appendChild(a);
     });
+    container.appendChild(wrap);
   }
 
   // Backward-compatible raw URL open (not used by list now)
@@ -660,20 +638,11 @@
     }
   }
 
-  if(sourceSelectEdit){
-    sourceSelectEdit.addEventListener('change', ()=>{
-      toggleGhPanel(sourceSelectEdit, ghPanelEdit);
-      if(sourceSelectEdit.value === 'github' && ghListEdit){ refreshGh(ghListEdit); }
-    });
-  }
-  if(sourceSelectTest){
-    sourceSelectTest.addEventListener('change', ()=>{
-      toggleGhPanel(sourceSelectTest, ghPanelTest);
-      if(sourceSelectTest.value === 'github' && ghListTest){ refreshGh(ghListTest); }
-    });
-  }
   if(btnGhRefreshEdit && ghListEdit){ btnGhRefreshEdit.onclick = ()=> refreshGh(ghListEdit); }
   if(btnGhRefreshTest && ghListTest){ btnGhRefreshTest.onclick = ()=> refreshGh(ghListTest); }
+  // Auto load GitHub lists on load
+  if(ghListEdit){ refreshGh(ghListEdit); }
+  if(ghListTest){ refreshGh(ghListTest); }
 
   function slugify(s){
     return (s||'').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');

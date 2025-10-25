@@ -306,7 +306,7 @@
       "choices": [
         {
           "text": "with",
-          "explanation": "Incorrect choice.",
+          "explanation": "Không có married with",
           "correct": false
         },
         {
@@ -431,7 +431,7 @@
       "choices": [
         {
           "text": "on",
-          "explanation": "Incorrect choice.",
+          "explanation": "Attention đi kèm cố định với to",
           "correct": false
         },
         {
