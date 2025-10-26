@@ -87,7 +87,7 @@
 </style>
 </head>
 <body>
-<h1>Keyboard Music <span class="ver">v2.2</span></h1>
+<h1>Keyboard Music <span class="ver">v2.3</span></h1>
 <!-- Song area fixed on top -->
 <div id="songTop" class="song-top" style="display:none;">
   <div class="song" id="songArea"></div>
@@ -289,6 +289,7 @@ const buffersByInstrument = {}; // instrument -> { name -> AudioBuffer|undefined
 let keymapJson = {}; // loaded from keymap.json
 let pressedKeys = new Set();
 let shiftHeld = false;
+let spaceHeld = false; // Track if spacebar is held for sharp notes
 let transposeOctaves = 0; // number of octaves to shift keymap (+ up, - down)
 let openedSongFilename = '';
 
@@ -698,7 +699,7 @@ function makeKeyButton(k, mappedNote, available) {
   btn.className = 'key';
   btn.setAttribute('data-key', k);
   const bottomRowKeys = new Set(['x','c','b','m',',']);
-  const effNote = (shiftHeld && !bottomRowKeys.has(k)) ? (getShiftOverride(k) || mappedNote) : mappedNote;
+  const effNote = ((shiftHeld || spaceHeld) && !bottomRowKeys.has(k)) ? (getShiftOverride(k) || mappedNote) : mappedNote;
   btn.innerHTML = `<div class="k">${k.toUpperCase()}</div><div class="n">${formatKeyLabel(effNote || '')}</div>`;
   if (!available && mappedNote) btn.classList.add('unavailable');
   btn.addEventListener('pointerdown', ()=> {
@@ -708,7 +709,7 @@ function makeKeyButton(k, mappedNote, available) {
     const expected = getExpectedNextNote();
     const shiftName = (!bottomRowKeys.has(k) ? getShiftOverride(k) : null);
     const matchExpected = Array.isArray(expected) ? (expected && shiftName && expected.includes(shiftName)) : (expected && shiftName === expected);
-    const playName = matchExpected ? shiftName : ((shiftHeld && !bottomRowKeys.has(k)) ? (shiftName || mappedNote) : mappedNote);
+    const playName = matchExpected ? shiftName : (((shiftHeld || spaceHeld) && !bottomRowKeys.has(k)) ? (shiftName || mappedNote) : mappedNote);
     // Staff highlight
     if (playName) {
       setStaffNoteActive(playName, true);
@@ -1056,13 +1057,13 @@ function refreshLabelsForShift() {
   const currentMap = getCurrentMap();
   for (const k of keyRows.flat()) {
     const bottom = (k === 'x' || k === 'c' || k === 'b' || k === 'm' || k === ',');
-    const note = (shiftHeld && !bottom ? (getShiftOverride(k) || currentMap[k]) : currentMap[k]) || '';
+    const note = ((shiftHeld || spaceHeld) && !bottom ? (getShiftOverride(k) || currentMap[k]) : currentMap[k]) || '';
     const el = document.querySelector(`[data-key="${CSS.escape(k)}"] .n`);
     if (el) el.textContent = formatKeyLabel(note);
     // Toggle sharp styling for shift-based sharp keys (S,D,F,J,K,L) when Shift is held
     const keyEl = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
     if (keyEl) {
-      if (shiftHeld && (k === 's' || k === 'd' || k === 'f' || k === 'j' || k === 'k' || k === 'l')) keyEl.classList.add('sharp');
+      if ((shiftHeld || spaceHeld) && (k === 's' || k === 'd' || k === 'f' || k === 'j' || k === 'k' || k === 'l')) keyEl.classList.add('sharp');
       else if (!(k === 'w' || k === 'e' || k === 't' || k === 'y' || k === 'u' || k === 'o' || k === 'p')) keyEl.classList.remove('sharp');
     }
   }
@@ -1150,26 +1151,64 @@ function renderSong() {
   else area.classList.remove('scrollable');
 }
 
+function scrollToCurrentToken() {
+  const currentToken = document.querySelector('#songArea .token.current');
+  if (!currentToken) return;
+  
+  const songTop = document.getElementById('songTop');
+  if (!songTop) return;
+  
+  const tokenRect = currentToken.getBoundingClientRect();
+  const containerRect = songTop.getBoundingClientRect();
+  
+  // Calculate if token is outside the visible area
+  if (tokenRect.top < containerRect.top + 30) {
+    // Scroll up to show the token near the top (with some padding)
+    currentToken.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (tokenRect.bottom > containerRect.bottom - 30) {
+    // Scroll down to show the token near the bottom (with some padding)
+    currentToken.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+}
+
 function updateSongHighlight() {
-  const tokens = document.querySelectorAll('#songArea .token');
-  tokens.forEach(el=> el.classList.remove('current','done'));
+  if (!songMode) return;
+  const area = document.getElementById('songArea');
+  if (!area) return;
+
+  // Remove current class from all tokens
+  document.querySelectorAll('#songArea .token').forEach(el=>{
+    el.classList.remove('current');
+    el.classList.remove('done');
+  });
+
   // Find next visible token (skip newline placeholders)
   let visIdx = songPos;
   while (visIdx < songTokens.length && songTokens[visIdx].text === '\n') visIdx++;
   if (visIdx < songTokens.length) {
     const el = document.querySelector(`#songArea .token[data-index="${visIdx}"]`);
-    if (el) el.classList.add('current');
-  }
-  songTokens.forEach((t, idx)=>{
-    if (t.notes.length>0 && t.doneSteps >= t.notes.length) {
-      const el = document.querySelector(`#songArea .token[data-index="${idx}"]`);
-      if (el) el.classList.add('done');
+    if (el) {
+      el.classList.add('current');
+      // Scroll to make current token visible
+      requestAnimationFrame(scrollToCurrentToken);
     }
+  }
+  songTokens.forEach((t, idx) => {
+    const tokenEl = document.querySelector(`#songArea .token[data-index="${idx}"]`);
+    if (!tokenEl) return;
+    
+    // Mark completed tokens
+    if (t.notes && t.notes.length > 0 && t.doneSteps >= t.notes.length) {
+      tokenEl.classList.add('done');
+    }
+    
+    // Update note hints if enabled
     if (showSongNotes) {
-      const el = document.querySelector(`#songArea .token[data-index="${idx}"] .hints`);
-      if (el) {
-        if (t.notes.length) el.textContent = t.notes.map(step => Array.isArray(step) ? step.join('') : step).join(' ');
-        else el.textContent = '';
+      const hintEl = tokenEl.querySelector('.hints');
+      if (hintEl) {
+        hintEl.textContent = t.notes && t.notes.length 
+          ? t.notes.map(step => Array.isArray(step) ? step.join('') : step).join(' ')
+          : '';
       }
     }
   });
@@ -1393,10 +1432,20 @@ window.addEventListener('keydown', (e)=>{
     }
     return;
   }
-  if (k === ' ' || e.code === 'Space') {
+  // Toggle highlight with enter or backspace
+  if (k === 'enter' || e.code === 'Enter' || k === 'backspace' || e.code === 'Backspace') {
     if (!spaceHeldGuide) {
       spaceHeldGuide = true;
       updateKeyboardGuideHighlight();
+    }
+    e.preventDefault();
+    return;
+  }
+  // Handle spacebar as shift modifier for sharps
+  if (k === ' ' || e.code === 'Space') {
+    if (!spaceHeld) {
+      spaceHeld = true;
+      refreshLabelsForShift();
     }
     e.preventDefault();
     return;
@@ -1410,7 +1459,7 @@ window.addEventListener('keydown', (e)=>{
   const currentMap = getCurrentMap();
   // Shift override takes precedence for specific keys
   const _bottomRow = new Set(['x','c','b','m',',']);
-  let name = (e.shiftKey || shiftHeld)
+  let name = (e.shiftKey || shiftHeld || spaceHeld)
     ? (_bottomRow.has(k) ? currentMap[k] : (getShiftOverride(k) || currentMap[k]))
     : currentMap[k];
   // Do not auto-sharpify here; explicit sharps are encoded in maps/overrides
@@ -1419,7 +1468,7 @@ window.addEventListener('keydown', (e)=>{
   const expected = getExpectedNextNote();
   const shiftName = (!_bottomRow.has(k) ? getShiftOverride(k) : null);
   const matchExpected = Array.isArray(expected) ? (expected && shiftName && expected.includes(shiftName)) : (expected && shiftName === expected);
-  if (!e.shiftKey && !shiftHeld && matchExpected) name = shiftName;
+  if (!e.shiftKey && !shiftHeld && !spaceHeld && matchExpected) name = shiftName;
   // Staff highlight
   if (name) {
     setStaffNoteActive(name, true);
@@ -1462,7 +1511,8 @@ window.addEventListener('keydown', (e)=>{
 
 window.addEventListener('keyup', (e)=>{
   const k = e.key.toLowerCase();
-  if (k === ' ' || e.code === 'Space') {
+  // Handle enter or backspace key release
+  if (k === 'enter' || e.code === 'Enter' || k === 'backspace' || e.code === 'Backspace') {
     if (spaceHeldGuide) {
       spaceHeldGuide = false;
       updateKeyboardGuideHighlight();
@@ -1471,6 +1521,7 @@ window.addEventListener('keyup', (e)=>{
     return;
   }
   if (k === 'shift') { shiftHeld = false; refreshLabelsForShift(); return; }
+  if (k === ' ' || e.code === 'Space') { spaceHeld = false; refreshLabelsForShift(); return; }
   if (k === 'control') { ctrlHeld = false; return; }
   pressedKeys.delete(k);
   const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
