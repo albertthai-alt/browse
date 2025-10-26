@@ -149,8 +149,12 @@
   <div id="githubSongList" style="margin-top:8px; display:none; font-size:13px;"></div>
   <div class="composer-controls" id="composerControls" style="margin-top:8px; display:none;">
     <span id="composerStatus">Chọn một chữ để thêm nốt...</span>
-    <button id="composerClearBtn" style="margin-left:8px;">Xóa nốt của chữ</button>
-    <button id="composerSaveBtn" style="margin-left:8px;">Lưu bài hát (.txt)</button>
+    <button id="composerClearBtn" style="margin-left:8px;" title="Xóa nốt của từ đang chọn">Xóa nốt</button>
+    <button id="composerEditBtn" style="margin-left:8px;" title="Sửa từ đang chọn">Sửa</button>
+    <button id="composerDeleteBtn" style="margin-left:8px;" title="Xóa từ đang chọn">Xóa</button>
+    <button id="composerAddLeftBtn" style="margin-left:8px;" title="Thêm từ bên trái">Thêm trái</button>
+    <button id="composerAddRightBtn" style="margin-left:8px;" title="Thêm từ bên phải">Thêm phải</button>
+    <button id="composerSaveBtn" style="margin-left:8px;" title="Lưu bài hát">Lưu bài hát (.txt)</button>
   </div>
 </div>
 
@@ -226,51 +230,51 @@ let currentInstrument = 'piano';
 // Default keymap used when running from file:// or when fetching keymap.json fails
 const DEFAULT_KEYMAP = {
   'guitar': {
-    // Sharps on top row
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    // High notes and sharps on top row
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     // Naturals ZXCVASDFGHJKLBNM,. -> F3..B5
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'tank-drum': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'marimba': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'sao': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'piano': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'handpan': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'dan-da': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
   },
   'dan-bau': {
-    w:'C#4', e:'D#4', t:'F#4', y:'G#4', u:'A#4', o:'C#5', p:'D#5',
+    q:'C6', w:'C#4', e:'D#4', r:'D6', t:'F#4', y:'G#4', u:'A#4', i:'F6', o:'C#5', p:'D#5',
     z:'F3', x:'G3', c:'A3', v:'B3',
     a:'C4', s:'D4', d:'E4', f:'F4', g:'G4', h:'A4', j:'B4', k:'C5', l:'D5',
     b:'E5', n:'F5', m:'G5', ',':'A5', '.':'B5'
@@ -1628,6 +1632,80 @@ function serializeSongToTxt() {
   }
   return parts.join('').replace(/[ ]+\n/g, '\n').trim();
 }
+
+// Function to add a new token at the specified position
+function addTokenAtPosition(text, position) {
+  if (position < 0 || position > songTokens.length) return;
+  
+  const newToken = {
+    text: text || '...',
+    notes: []
+  };
+  
+  songTokens.splice(position, 0, newToken);
+  renderSong();
+  // Select the new token
+  composerSelectedIndex = position;
+  updateComposerStatus();
+  updateSongHighlight();
+}
+
+// Function to edit the currently selected token
+function editSelectedToken() {
+  if (composerSelectedIndex === null) return;
+  const tok = songTokens[composerSelectedIndex];
+  if (!tok) return;
+  
+  const newText = prompt('Sửa từ:', tok.text);
+  if (newText !== null) {
+    tok.text = newText;
+    renderSong();
+    updateComposerStatus();
+  }
+}
+
+// Function to delete the currently selected token
+function deleteSelectedToken() {
+  if (composerSelectedIndex === null) return;
+  if (!confirm('Bạn có chắc chắn muốn xóa từ này?')) return;
+  
+  songTokens.splice(composerSelectedIndex, 1);
+  renderSong();
+  
+  // Update selection to the previous token or next available
+  if (songTokens.length > 0) {
+    if (composerSelectedIndex >= songTokens.length) {
+      composerSelectedIndex = songTokens.length - 1;
+    }
+  } else {
+    composerSelectedIndex = null;
+  }
+  
+  updateComposerStatus();
+  updateSongHighlight();
+}
+
+// Event listeners for the new buttons
+document.getElementById('composerEditBtn').addEventListener('click', editSelectedToken);
+document.getElementById('composerDeleteBtn').addEventListener('click', deleteSelectedToken);
+
+document.getElementById('composerAddLeftBtn').addEventListener('click', () => {
+  if (composerSelectedIndex !== null) {
+    addTokenAtPosition('từ mới', composerSelectedIndex);
+  }
+});
+
+document.getElementById('composerAddRightBtn').addEventListener('click', () => {
+  if (composerSelectedIndex !== null) {
+    addTokenAtPosition('từ mới', composerSelectedIndex + 1);
+  } else if (songTokens.length > 0) {
+    // If nothing is selected, add to the end
+    addTokenAtPosition('từ mới', songTokens.length);
+  } else {
+    // First token
+    addTokenAtPosition('từ mới', 0);
+  }
+});
 
 document.getElementById('composerSaveBtn').addEventListener('click', ()=>{
   const txt = serializeSongToTxt();
