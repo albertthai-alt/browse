@@ -1,0 +1,122 @@
+{
+  "title": "Speaknow 2025-10-09",
+  "questions": [
+    {
+      "text": "The floor is very ______. I washed it.",
+      "choices": [
+        {"text": "clean", "explanation": "Correct. The sentence implies the floor is clean after washing.", "correct": true},
+        {"text": "difficult", "explanation": "Incorrect. 'Difficult' doesn’t describe the floor.", "correct": false},
+        {"text": "bad", "explanation": "Incorrect. The floor would not be 'bad' after washing.", "correct": false},
+        {"text": "hungry", "explanation": "Incorrect. 'Hungry' cannot describe an object like the floor.", "correct": false}
+      ]
+    },
+    {
+      "text": "The ______ carried a suitcase.",
+      "choices": [
+        {"text": "textbook", "explanation": "Incorrect. A textbook cannot carry something.", "correct": false},
+        {"text": "stairs", "explanation": "Incorrect. 'Stairs' cannot carry objects.", "correct": false},
+        {"text": "tourist", "explanation": "Correct. A tourist typically carries a suitcase when traveling.", "correct": true},
+        {"text": "forest", "explanation": "Incorrect. 'Forest' is unrelated to carrying objects.", "correct": false}
+      ]
+    },
+    {
+      "text": "The movie was ______.",
+      "choices": [
+        {"text": "bitter", "explanation": "Incorrect. 'Bitter' describes taste or feelings, not movies.", "correct": false},
+        {"text": "frightening", "explanation": "Incorrect. Could be possible, but context suggests affordability.", "correct": false},
+        {"text": "inexpensive", "explanation": "Correct. The sentence likely describes the cost of the movie.", "correct": true},
+        {"text": "curly", "explanation": "Incorrect. 'Curly' describes hair, not movies.", "correct": false}
+      ]
+    },
+    {
+      "text": "If someone has a lot of valuable jewels, he is ______.",
+      "choices": [
+        {"text": "rusty", "explanation": "Incorrect. 'Rusty' means old or corroded.", "correct": false},
+        {"text": "wealthy", "explanation": "Correct. A person with valuable jewels is rich or wealthy.", "correct": true},
+        {"text": "precious", "explanation": "Incorrect. Jewels are precious, not the person.", "correct": false},
+        {"text": "precise", "explanation": "Incorrect. 'Precise' means exact, not rich.", "correct": false}
+      ]
+    },
+    {
+      "text": "The argument was very ______.",
+      "choices": [
+        {"text": "primitive", "explanation": "Incorrect. 'Primitive' does not fit the context.", "correct": false},
+        {"text": "persuasive", "explanation": "Correct. A good argument can be persuasive.", "correct": true},
+        {"text": "luxurious", "explanation": "Incorrect. Arguments are not 'luxurious'.", "correct": false},
+        {"text": "overcrowded", "explanation": "Incorrect. 'Overcrowded' describes spaces, not arguments.", "correct": false}
+      ]
+    },
+    {
+      "text": "Something bad happened yesterday. What is the best way to tell about it?",
+      "choices": [
+        {"text": "I drove to the beach and I crashed into a tree.", "explanation": "Correct. This is grammatically correct and clear.", "correct": true},
+        {"text": "While I drove to the beach, I was crashed into a tree.", "explanation": "Incorrect. 'Was crashed' is incorrect passive form.", "correct": false},
+        {"text": "I crashing into a tree when I was drive to the beach.", "explanation": "Incorrect grammar and tense usage.", "correct": false},
+        {"text": "While I was driving to the beach, I crashed into a tree.", "explanation": "Also correct grammatically, but less concise than the first.", "correct": false}
+      ]
+    },
+    {
+      "text": "You caught a cold after going out in the rain.",
+      "choices": [
+        {"text": "If you wore a jacket, you won’t get a cold.", "explanation": "Incorrect tense and condition structure.", "correct": false},
+        {"text": "If you have worn a jacket, you might not have gotten a cold.", "explanation": "Incorrect tense; should use past perfect conditional.", "correct": false},
+        {"text": "If you wear a jacket, you aren’t a cold.", "explanation": "Incorrect structure and vocabulary.", "correct": false},
+        {"text": "If you had worn a jacket, you might not have gotten a cold.", "explanation": "Correct. Third conditional expressing past regret.", "correct": true}
+      ]
+    },
+    {
+      "text": "He went to sleep late. He ______ a long time before the alarm rang.",
+      "choices": [
+        {"text": "had not been sleeping", "explanation": "Correct. Past perfect continuous negative fits the timeline.", "correct": true},
+        {"text": "has not been sleeping", "explanation": "Incorrect. This refers to the present.", "correct": false},
+        {"text": "was not sleeping", "explanation": "Incorrect. Refers to an action at a specific past moment.", "correct": false},
+        {"text": "is not sleeping", "explanation": "Incorrect. Refers to the present.", "correct": false}
+      ]
+    },
+    {
+      "text": "How did you get hurt?",
+      "choices": [
+        {"text": "I was walking to the store when I tripped.", "explanation": "Correct. The structure fits a past continuous + simple past.", "correct": true},
+        {"text": "I was walking to the store and I have been tripped.", "explanation": "Incorrect tense mix.", "correct": false},
+        {"text": "I was walking to the store and I was tripping.", "explanation": "Incorrect, 'was tripping' implies ongoing, not sudden.", "correct": false},
+        {"text": "I walked to the store and I tripped.", "explanation": "Also correct, but less natural for describing a sudden event.", "correct": false}
+      ]
+    },
+    {
+      "text": "Someone asks you about a change in your office. You say:",
+      "choices": [
+        {"text": "I am not affecting by it.", "explanation": "Incorrect passive form.", "correct": false},
+        {"text": "I am not affected by it.", "explanation": "Correct. Passive voice is used correctly.", "correct": true},
+        {"text": "It does not affecting me.", "explanation": "Incorrect verb form.", "correct": false},
+        {"text": "I was not affecting it.", "explanation": "Incorrect tense and meaning.", "correct": false}
+      ]
+    },
+    {
+      "text": "Which is the most correct?",
+      "choices": [
+        {"text": "If you fell off the roof, you are hurt.", "explanation": "Incorrect tense; mixed conditional.", "correct": false},
+        {"text": "If you fell off the roof, you will get hurt.", "explanation": "Incorrect; uses past with future.", "correct": false},
+        {"text": "If you fall off the roof, you will get hurt.", "explanation": "Correct. First conditional for possible future events.", "correct": true},
+        {"text": "If you are falling off the roof, you are getting hurt.", "explanation": "Incorrect continuous structure.", "correct": false}
+      ]
+    },
+    {
+      "text": "The ice cubes melted. The door of the freezer ______.",
+      "choices": [
+        {"text": "could being open", "explanation": "Incorrect structure.", "correct": false},
+        {"text": "must have been open", "explanation": "Correct. Logical deduction about the past.", "correct": true},
+        {"text": "should be open", "explanation": "Incorrect; suggests advice, not deduction.", "correct": false},
+        {"text": "can have been open", "explanation": "Incorrect modal form.", "correct": false}
+      ]
+    },
+    {
+      "text": "I am very tired. What advice can you give me?",
+      "choices": [
+        {"text": "You should go to bed earlier.", "explanation": "Correct. 'Should' is used for giving advice.", "correct": true},
+        {"text": "You don’t need stay up late.", "explanation": "Incorrect; missing 'to'.", "correct": false},
+        {"text": "You must to go to bed earlier.", "explanation": "Incorrect; 'must' is followed by base verb, not 'to'.", "correct": false},
+        {"text": "You don’t can to stay up late.", "explanation": "Incorrect; double modal is not possible.", "correct": false}
+      ]
+    }
+  ]
+}

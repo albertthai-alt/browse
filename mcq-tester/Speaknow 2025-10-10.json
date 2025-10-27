@@ -1,0 +1,122 @@
+{
+  "title": "Speaknow 2025-10-10",
+  "questions": [
+    {
+      "text": "I hear a ______.",
+      "choices": [
+        {"text": "chair", "explanation": "Incorrect. A chair cannot be heard.", "correct": false},
+        {"text": "board", "explanation": "Incorrect. A board does not make sound by itself.", "correct": false},
+        {"text": "noise", "explanation": "Correct. 'Noise' is something you can hear.", "correct": true},
+        {"text": "flower", "explanation": "Incorrect. A flower cannot be heard.", "correct": false}
+      ]
+    },
+    {
+      "text": "Painting is a kind of ______.",
+      "choices": [
+        {"text": "magazine", "explanation": "Incorrect. A magazine is something you read.", "correct": false},
+        {"text": "document", "explanation": "Incorrect. A document is a written file.", "correct": false},
+        {"text": "hobby", "explanation": "Correct. Painting is an enjoyable activity, a hobby.", "correct": true},
+        {"text": "fashion", "explanation": "Incorrect. 'Fashion' refers to clothing trends.", "correct": false}
+      ]
+    },
+    {
+      "text": "The hero defended the palace ______.",
+      "choices": [
+        {"text": "angrily", "explanation": "Incorrect. The sentence suggests bravery, not anger.", "correct": false},
+        {"text": "suddenly", "explanation": "Incorrect. 'Suddenly' describes timing, not attitude.", "correct": false},
+        {"text": "curiously", "explanation": "Incorrect. 'Curiously' means with curiosity.", "correct": false},
+        {"text": "bravely", "explanation": "Correct. A hero defends bravely.", "correct": true}
+      ]
+    },
+    {
+      "text": "He was able to succeed because his ______ was very high.",
+      "choices": [
+        {"text": "bark", "explanation": "Incorrect. 'Bark' refers to sound of a dog or tree covering.", "correct": false},
+        {"text": "bench", "explanation": "Incorrect. A 'bench' is furniture.", "correct": false},
+        {"text": "cardboard", "explanation": "Incorrect. 'Cardboard' is a material.", "correct": false},
+        {"text": "motivation", "explanation": "Correct. High motivation leads to success.", "correct": true}
+      ]
+    },
+    {
+      "text": "The woman was not polite. She spoke very ______.",
+      "choices": [
+        {"text": "sensibly", "explanation": "Incorrect. 'Sensibly' means wisely or logically.", "correct": false},
+        {"text": "similarly", "explanation": "Incorrect. Not relevant to politeness.", "correct": false},
+        {"text": "sincerely", "explanation": "Incorrect. 'Sincerely' means honestly.", "correct": false},
+        {"text": "rudely", "explanation": "Correct. Someone not polite speaks rudely.", "correct": true}
+      ]
+    },
+    {
+      "text": "The girl fell off her roof. What happened?",
+      "choices": [
+        {"text": "Her arm is breaking.", "explanation": "Incorrect. Wrong tense; ongoing action doesn’t fit.", "correct": false},
+        {"text": "Her arm got broke.", "explanation": "Incorrect. Grammar error; 'got broken' is correct form.", "correct": false},
+        {"text": "Her arm is broken.", "explanation": "Correct. Describes a present result of a past action.", "correct": true},
+        {"text": "Her arm was broke.", "explanation": "Incorrect. Grammar error; 'was broken' is correct form.", "correct": false}
+      ]
+    },
+    {
+      "text": "What are your plans for this summer?",
+      "choices": [
+        {"text": "I take a trip.", "explanation": "Incorrect. Present simple doesn’t fit planned future actions.", "correct": false},
+        {"text": "I have gone on a trip.", "explanation": "Incorrect. This refers to past actions.", "correct": false},
+        {"text": "I will be going on a trip.", "explanation": "Correct. Future continuous shows planned future action.", "correct": true},
+        {"text": "I have been going on a trip.", "explanation": "Incorrect. Refers to repeated past activity, not plan.", "correct": false}
+      ]
+    },
+    {
+      "text": "How much do you plan to spend to finish this project?",
+      "choices": [
+        {"text": "I will be spending $50,000 to complete it.", "explanation": "Correct. Shows future intention for a planned action.", "correct": true},
+        {"text": "I had spent $50,000 to complete it.", "explanation": "Incorrect. Refers to past perfect; not relevant.", "correct": false},
+        {"text": "I have been spending $50,000 to complete it.", "explanation": "Incorrect. Ongoing, not planned future.", "correct": false},
+        {"text": "I was spending $50,000 to complete it.", "explanation": "Incorrect. Refers to an interrupted past event.", "correct": false}
+      ]
+    },
+    {
+      "text": "The thief escaped!",
+      "choices": [
+        {"text": "Don’t worry, he is going to be catched tomorrow.", "explanation": "Incorrect. 'Catched' is not a valid form; should be 'caught'.", "correct": false},
+        {"text": "Don’t worry, the police can to catch him quickly.", "explanation": "Incorrect. 'Can' is followed by base verb, not 'to catch'.", "correct": false},
+        {"text": "Don’t worry, by tomorrow he will have been caught.", "explanation": "Correct. Future perfect passive indicates he will be caught by that time.", "correct": true},
+        {"text": "Don’t worry, he is already caught today.", "explanation": "Incorrect. Doesn’t make sense with 'escaped'.", "correct": false}
+      ]
+    },
+    {
+      "text": "I saw a man with a big car and house.",
+      "choices": [
+        {"text": "He should have been rich.", "explanation": "Incorrect. Suggests past obligation, not deduction.", "correct": false},
+        {"text": "He must have been rich.", "explanation": "Correct. Logical deduction based on evidence.", "correct": true},
+        {"text": "He would be rich.", "explanation": "Incorrect. 'Would' is used for hypothetical cases.", "correct": false},
+        {"text": "He can be rich.", "explanation": "Incorrect. 'Can' expresses possibility, not deduction.", "correct": false}
+      ]
+    },
+    {
+      "text": "What do you plan to do at 6 pm?",
+      "choices": [
+        {"text": "At 6 pm, I eat dinner.", "explanation": "Incorrect. Simple present doesn’t fit planned actions.", "correct": false},
+        {"text": "At 6 pm, I have finished dinner.", "explanation": "Incorrect. Future perfect not suitable here.", "correct": false},
+        {"text": "At 6 pm, I was eating dinner.", "explanation": "Incorrect. Past continuous is wrong tense.", "correct": false},
+        {"text": "At 6 pm, I will be eating dinner.", "explanation": "Correct. Future continuous for planned activity.", "correct": true}
+      ]
+    },
+    {
+      "text": "You want to leave early to get to a concert. Why?",
+      "choices": [
+        {"text": "The seats would have be gone when we arrived.", "explanation": "Incorrect grammar; 'would have been gone'.", "correct": false},
+        {"text": "Someone will take all the seats before we come.", "explanation": "Incorrect tense mix.", "correct": false},
+        {"text": "The seats will have been taken by the time we get there.", "explanation": "Correct. Future perfect shows an action completed before another future event.", "correct": true},
+        {"text": "There might have been too few seats for us.", "explanation": "Incorrect. Refers to past possibility, not future reason.", "correct": false}
+      ]
+    },
+    {
+      "text": "Sally went home very late many days this month.",
+      "choices": [
+        {"text": "She has been working very hard.", "explanation": "Correct. Present perfect continuous explains repeated actions.", "correct": true},
+        {"text": "She has worked very hard.", "explanation": "Also possible, but less emphasis on duration.", "correct": false},
+        {"text": "She is been working very hard.", "explanation": "Incorrect grammar; 'has been working' needed.", "correct": false},
+        {"text": "She had worked very hard.", "explanation": "Incorrect; past perfect doesn’t match present timeframe.", "correct": false}
+      ]
+    }
+  ]
+}
