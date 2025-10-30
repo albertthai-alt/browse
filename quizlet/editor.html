@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .text-box {
+            flex: 1;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+        }
+        .translation-group {
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .translation-group h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        /* Default button styles - all white with gray border */
+        button {
+            padding: 8px 16px;
+            background-color: white;
+            color: #202124;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin: 2px;
+            box-shadow: none;
+        }
+        button:hover {
+            background-color: #f8f9fa;
+            border-color: #dadce0;
+        }
+        
+        /* Card toggle buttons */
+        .switch-btn, #switchToEnVi, #switchToViEn {
+            padding: 5px 15px;
+            background: #f8f9fa;
+            color: #202124;
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            margin: 0 2px;
+        }
+        .switch-btn.active, #switchToEnVi.active, #switchToViEn.active {
+            background: #f1f3f4;
+            color: #202124;
+            font-weight: 500;
+        }
+        .card-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 3px;
+            z-index: 1; /* Ensure buttons are above other content */
+        }
+        .card-actions button {
+            padding: 2px 6px;
+            font-size: 11px;
+            background: none;
+            border: none;
+            color: #5f6368;
+            text-decoration: none;
+            opacity: 0.7;
+        }
+        .card-actions button:hover {
+            background: none;
+            color: #202124;
+            box-shadow: none;
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .edit-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+        .edit-buttons button {
+            padding: 4px 12px;
+            font-size: 13px;
+        }
+        .edit-buttons .save-btn {
+            background-color: white;
+            color: #202124;
+            border: 1px solid #dadce0;
+        }
+        .edit-buttons .save-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+        }
+        .edit-buttons .cancel-btn {
+            background-color: #f1f3f4;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
+        .edit-buttons .cancel-btn:hover {
+            background-color: #e8eaed;
+            color: #202124;
+        }
+        .card-item {
+            position: relative;
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            transition: box-shadow 0.2s;
+        }
+        .card-item:hover {
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1), 0 1px 3px 1px rgba(0,0,0,0.1);
+        }
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .card-term, .card-definition {
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Editor</h1>
+        <div id="lastSavedTime" style="color: #5f6368; font-size: 14px; min-width: 200px; text-align: right;">Đang tải...</div>
+    </div>
+    
+    <!-- English to Vietnamese -->
+    <div class="translation-group">
+        <h3>Dịch Anh - Việt</h3>
+        <div class="container">
+            <div class="text-box">
+                <label for="englishText">Tiếng Anh:</label>
+                <textarea id="englishText" placeholder="Nhập văn bản tiếng Anh..."></textarea>
+                <div style="margin-top: 10px;">
+                    <button id="translateEnToViBtn">Dịch sang tiếng Việt</button>
+                    <button id="addEnViCardBtn" style="margin-left: 10px;">Thêm thẻ</button>
+                </div>
+            </div>
+            
+            <div class="text-box">
+                <label for="vietnameseText">Tiếng Việt:</label>
+                <textarea id="vietnameseText" placeholder="Bản dịch tiếng Việt sẽ xuất hiện ở đây..."></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vietnamese to English -->
+    <div class="translation-group">
+        <h3>Dịch Việt - Anh</h3>
+        <div class="container">
+            <div class="text-box">
+                <label for="vietnameseText2">Tiếng Việt:</label>
+                <textarea id="vietnameseText2" placeholder="Nhập văn bản tiếng Việt..."></textarea>
+                <div style="margin-top: 10px;">
+                    <button id="translateViToEnBtn">Dịch sang tiếng Anh</button>
+                    <button id="addViEnCardBtn" style="margin-left: 10px;">Thêm thẻ</button>
+                </div>
+            </div>
+            
+            <div class="text-box">
+                <label for="englishText2">Tiếng Anh:</label>
+                <textarea id="englishText2" placeholder="English translation will appear here..."></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <div class="button-container" style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center;">
+            <button id="saveBtn" style="background-color: #34a853;">Lưu tạm tất cả</button>
+            <span style="margin: 0 10px; color: #666; font-size: 0.9em;">Lần lưu cuối:</span>
+            <span id="lastSaved" style="color: #666; font-size: 0.9em;">-</span>
+        </div>
+    </div>
+    
+    <div id="cardPreview" style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center;">
+                <h3 style="margin: 0 15px 0 0;">Xem trước thẻ:</h3>
+                <div class="switch-container" style="display: flex; border: 1px solid #ccc; border-radius: 20px; overflow: hidden;">
+                    <button id="switchToEnVi" class="switch-btn active" style="border: none; padding: 5px 15px; background: #4285f4; color: white; cursor: pointer;">Anh - Việt</button>
+                    <button id="switchToViEn" class="switch-btn" style="border: none; padding: 5px 15px; background: #f5f5f5; color: #333; cursor: pointer;">Việt - Anh</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="saveCardBtn" style="background-color: #34a853; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">Lưu thẻ</button>
+                <button id="deleteCardsBtn" style="background-color: #ea4335; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">Xóa thẻ</button>
+            </div>
+        </div>
+        <div id="enViCardList" class="card-list" style="background: #f5f5f5; padding: 15px; border-radius: 4px; display: block;">
+            <!-- English-Vietnamese cards will be added here -->
+        </div>
+        <div id="viEnCardList" class="card-list" style="background: #f5f5f5; padding: 15px; border-radius: 4px; display: none;">
+            <!-- Vietnamese-English cards will be added here -->
+        </div>
+    </div>
+
+    <script>
+        // Function to save cards to JSON file
+        function saveCardsToFile(cards, filename = 'flashcards.json') {
+            const data = JSON.stringify(cards, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Function to get all cards from a container with deduplication
+        const getAllCards = (containerId) => {
+            const cards = [];
+            const seen = new Set();
+            
+            document.querySelectorAll(`#${containerId} > .card-item`).forEach(card => {
+                const content = card.querySelector('.card-content');
+                if (content) {
+                    const term = (content.querySelector('.card-term')?.textContent || '').trim();
+                    const definition = (content.querySelector('.card-definition')?.textContent || '').trim();
+                    
+                    // Create a unique key for this card
+                    const cardKey = `${term}|||${definition}`;
+                    
+                    if ((term || definition) && !seen.has(cardKey)) {
+                        seen.add(cardKey);
+                        cards.push({ term, definition });
+                    }
+                }
+            });
+            return cards;
+        };
+
+        // Function to save all data to localStorage
+        function saveAllData() {
+            try {
+                // First get all current data
+                const enViCards = getAllCards('enViCardList');
+                const viEnCards = getAllCards('viEnCardList');
+                
+                // Clear all card data in localStorage
+                localStorage.removeItem('enViCards');
+                localStorage.removeItem('viEnCards');
+                
+                // Save text inputs
+                const englishText = document.getElementById('englishText').value;
+                const vietnameseText = document.getElementById('vietnameseText').value;
+                const englishText2 = document.getElementById('englishText2').value;
+                const vietnameseText2 = document.getElementById('vietnameseText2').value;
+                
+                // Save text areas to localStorage
+                localStorage.setItem('englishText', englishText);
+                localStorage.setItem('vietnameseText', vietnameseText);
+                localStorage.setItem('englishText2', englishText2);
+                localStorage.setItem('vietnameseText2', vietnameseText2);
+                
+                // Save deduplicated cards to localStorage
+                localStorage.setItem('enViCards', JSON.stringify(enViCards));
+                localStorage.setItem('viEnCards', JSON.stringify(viEnCards));
+                
+                // Update last saved time and display
+                const now = new Date();
+                localStorage.setItem('lastSaved', now.toISOString());
+                updateLastSavedDisplay();
+                
+                return true;
+            } catch (error) {
+                console.error('Lỗi khi lưu dữ liệu:', error);
+                return false;
+            }
+        }
+        
+        // Format timestamp to display
+        const formatTimestamp = (timestamp) => {
+            if (!timestamp) return 'Chưa lưu';
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('vi-VN', { 
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } catch (e) {
+                console.error('Error formatting timestamp:', e);
+                return 'Chưa lưu';
+            }
+        };
+
+        // Function to update last saved time display
+        const updateLastSavedDisplay = () => {
+            try {
+                console.log('Updating last saved display...');
+                const savedTime = localStorage.getItem('lastSaved');
+                console.log('Saved time from localStorage:', savedTime);
+                
+                const lastSavedEl = document.getElementById('lastSaved');
+                if (!lastSavedEl) {
+                    console.error('Could not find lastSaved element');
+                    return;
+                }
+                
+                if (savedTime) {
+                    const date = new Date(savedTime);
+                    lastSavedEl.textContent = date.toLocaleString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                } else {
+                    lastSavedEl.textContent = '-';
+                }
+                
+            } catch (error) {
+                console.error('Error updating last saved display:', error);
+                const timeDisplay = document.getElementById('lastSavedTime');
+                if (timeDisplay) {
+                    timeDisplay.textContent = 'Lỗi tải thời gian';
+                    timeDisplay.style.color = '#ea4335';
+                }
+            }
+        };
+
+        // Function to initialize the page
+        const initializePage = () => {
+            console.log('Initializing page...');
+            
+            // First, load and display the last saved time
+            updateLastSavedDisplay();
+            
+            // Then load the rest of the content
+            loadPageContent();
+        };
+        
+        // Function to load page content
+        const loadPageContent = () => {
+            console.log('Loading page content...');
+            
+            // Load text inputs from localStorage
+            const englishText = localStorage.getItem('englishText') || '';
+            const vietnameseText = localStorage.getItem('vietnameseText') || '';
+            const englishText2 = localStorage.getItem('englishText2') || '';
+            const vietnameseText2 = localStorage.getItem('vietnameseText2') || '';
+            
+            // Set the values in the text areas
+            document.getElementById('englishText').value = englishText;
+            document.getElementById('vietnameseText').value = vietnameseText;
+            document.getElementById('englishText2').value = englishText2;
+            document.getElementById('vietnameseText2').value = vietnameseText2;
+            
+            // Load card sets
+            loadCardSets();
+        };
+        
+        // Function to load card sets with deduplication
+        const loadCards = (cardListId, cardsData) => {
+            const cardList = document.getElementById(cardListId);
+            if (!cardList || !Array.isArray(cardsData) || cardsData.length === 0) {
+                return;
+            }
+            
+            // Clear existing cards
+            cardList.innerHTML = '';
+            
+            // Use a Set to track unique cards
+            const uniqueCards = [];
+            const seen = new Set();
+            
+            // Filter out duplicates
+            cardsData.forEach(card => {
+                if (!card) return;
+                
+                const term = (card.term || '').trim();
+                const definition = (card.definition || '').trim();
+                
+                // Skip if both term and definition are empty
+                if (!term && !definition) return;
+                
+                const cardKey = `${term}|||${definition}`;
+                
+                if (!seen.has(cardKey)) {
+                    seen.add(cardKey);
+                    uniqueCards.push({ term, definition });
+                }
+            });
+            
+            // Add unique cards to the list
+            const isEnToVi = cardListId === 'enViCardList';
+            
+            uniqueCards.forEach(card => {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-item';
+                
+                const cardContent = createCardContent(
+                    card.term, 
+                    card.definition, 
+                    isEnToVi
+                );
+                
+                cardContainer.appendChild(cardContent);
+                cardList.appendChild(cardContainer);
+            });
+            
+            // Show the card preview if there are cards
+            if (cardList.children.length > 0) {
+                const cardPreview = document.getElementById('cardPreview');
+                if (cardPreview) {
+                    cardPreview.style.display = 'block';
+                }
+            }
+        };
+
+        // Function to safely parse JSON from localStorage
+        const safeJsonParse = (jsonString, defaultValue = []) => {
+            try {
+                return jsonString ? JSON.parse(jsonString) : defaultValue;
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                return defaultValue;
+            }
+        };
+
+        // Function to load card sets
+        const loadCardSets = () => {
+            console.log('Loading card sets...');
+            
+            // Load English-Vietnamese cards
+            const savedEnViCards = localStorage.getItem('enViCards');
+            const enViCards = safeJsonParse(savedEnViCards, []);
+            
+            // Load Vietnamese-English cards
+            const savedViEnCards = localStorage.getItem('viEnCards');
+            const viEnCards = safeJsonParse(savedViEnCards, []);
+            
+            // Load cards into the UI
+            loadCards('enViCardList', enViCards);
+            loadCards('viEnCardList', viEnCards);
+            
+            // Show the appropriate card set based on which one has cards
+            if (enViCards.length > 0 || viEnCards.length > 0) {
+                const cardPreview = document.getElementById('cardPreview');
+                if (cardPreview) cardPreview.style.display = 'block';
+                
+                if (enViCards.length === 0 && viEnCards.length > 0) {
+                    const switchBtn = document.getElementById('switchToViEn');
+                    if (switchBtn) switchBtn.click();
+                }
+            }
+        };
+        
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded');
+            
+            // Initialize the page with a small delay to ensure everything is ready
+            setTimeout(initializePage, 50);
+
+            // Load text inputs from localStorage
+            const englishText = localStorage.getItem('englishText') || '';
+            const vietnameseText = localStorage.getItem('vietnameseText') || '';
+            const englishText2 = localStorage.getItem('englishText2') || '';
+            const vietnameseText2 = localStorage.getItem('vietnameseText2') || '';
+            
+            // Set the values in the text areas
+            document.getElementById('englishText').value = englishText;
+            document.getElementById('vietnameseText').value = vietnameseText;
+            document.getElementById('englishText2').value = englishText2;
+            document.getElementById('vietnameseText2').value = vietnameseText2;
+            
+            // Set data-target for save button
+            document.getElementById('saveCardBtn')?.setAttribute('data-target', 'enVi');
+            
+            // Clear both card lists first
+            const enViCardList = document.getElementById('enViCardList');
+            const viEnCardList = document.getElementById('viEnCardList');
+            if (enViCardList) enViCardList.innerHTML = '';
+            if (viEnCardList) viEnCardList.innerHTML = '';
+            
+            // Load English-Vietnamese cards
+            const savedEnViCards = localStorage.getItem('enViCards');
+            const enViCards = safeJsonParse(savedEnViCards, []);
+            
+            // Load Vietnamese-English cards
+            const savedViEnCards = localStorage.getItem('viEnCards');
+            const viEnCards = safeJsonParse(savedViEnCards, []);
+            
+            // Only load cards if we have valid data
+            if (Array.isArray(enViCards) && enViCards.length > 0) {
+                loadCards('enViCardList', enViCards);
+            }
+            
+            if (Array.isArray(viEnCards) && viEnCards.length > 0) {
+                loadCards('viEnCardList', viEnCards);
+                // If there are Vi-En cards but no En-Vi cards, switch to Vi-En view
+                if (enViCards.length === 0) {
+                    const switchBtn = document.getElementById('switchToViEn');
+                    if (switchBtn) switchBtn.click();
+                }
+            }
+            
+            // Display last saved time
+            const lastSaved = localStorage.getItem('lastSaved');
+            const lastSavedTimeEl = document.getElementById('lastSavedTime');
+            if (lastSaved && lastSavedTimeEl) {
+                try {
+                    const lastSavedDate = new Date(lastSaved);
+                    if (!isNaN(lastSavedDate.getTime())) {
+                        const timeString = lastSavedDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                        lastSavedTimeEl.textContent = `Lần lưu cuối: ${timeString}`;
+                        lastSavedTimeEl.style.color = '#5f6368';
+                        lastSavedTimeEl.style.fontStyle = 'normal';
+                    } else {
+                        throw new Error('Invalid date');
+                    }
+                } catch (e) {
+                    lastSavedTimeEl.textContent = 'Lỗi thời gian lưu';
+                    lastSavedTimeEl.style.color = '#d93025';
+                    lastSavedTimeEl.style.fontStyle = 'italic';
+                }
+            }
+        });
+
+        // Save all button click handler
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            // Save all data to localStorage
+            const saveSuccess = saveAllData();
+
+            if (saveSuccess) {
+                // Show save confirmation
+                const saveBtn = document.getElementById('saveBtn');
+                const lastSavedEl = document.getElementById('lastSaved');
+                const originalText = saveBtn.textContent;
+                
+                // Update button text
+                saveBtn.textContent = 'Đã lưu tất cả!';
+                
+                // Update last saved time display
+                if (lastSavedEl) {
+                    const now = new Date();
+                    lastSavedEl.textContent = now.toLocaleString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                }
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                }, 2000);
+            } else {
+                alert('Có lỗi xảy ra khi lưu dữ liệu');
+            }
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+            }, 2000);
+        });
+
+        // Function to create action buttons for a card
+        function createActionButtons(cardDiv, isEnToVi = true) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'card-actions';
+            
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Sửa';
+            editBtn.title = 'Sửa thẻ';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                enableEditMode(cardDiv, isEnToVi);
+            };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Xóa';
+            deleteBtn.title = 'Xóa thẻ';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm('Bạn có chắc chắn muốn xóa thẻ này?')) {
+                    cardDiv.remove();
+                    saveAllData();
+                }
+            };
+            
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+            return actionsDiv;
+        }
+        
+        // Function to enable edit mode for a card
+        function enableEditMode(cardDiv, isEnToVi) {
+            // Get the card content div which contains term and definition
+            const contentDiv = cardDiv.querySelector('.card-content');
+            if (!contentDiv) return;
+            
+            const term = contentDiv.querySelector('.card-term')?.textContent || '';
+            const definition = contentDiv.querySelector('.card-definition')?.textContent || '';
+            
+            // Create input fields
+            const editForm = document.createElement('div');
+            editForm.className = 'card-content';
+            
+            const termInput = document.createElement('textarea');
+            termInput.value = term;
+            termInput.className = 'card-term-edit';
+            termInput.style.width = '100%';
+            termInput.style.minHeight = '60px';
+            
+            const definitionInput = document.createElement('textarea');
+            definitionInput.value = definition;
+            definitionInput.className = 'card-definition-edit';
+            definitionInput.style.width = '100%';
+            definitionInput.style.minHeight = '60px';
+            
+            // Create action buttons
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'edit-buttons';
+            buttonsDiv.style.gridColumn = '1 / -1';
+            
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Lưu';
+            saveBtn.className = 'save-btn';
+            saveBtn.onclick = (e) => {
+                e.stopPropagation();
+                const newTerm = termInput.value.trim();
+                const newDefinition = definitionInput.value.trim();
+                if (newTerm && newDefinition) {
+                    // Create new card content
+                    cardDiv.innerHTML = '';
+                    cardDiv.appendChild(createCardContent(newTerm, newDefinition, isEnToVi));
+                    saveAllData();
+                }
+            };
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Hủy';
+            cancelBtn.className = 'cancel-btn';
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                // Restore original card content
+                cardDiv.innerHTML = '';
+                cardDiv.appendChild(createCardContent(term, definition, isEnToVi));
+            };
+            
+            buttonsDiv.appendChild(saveBtn);
+            buttonsDiv.appendChild(cancelBtn);
+            
+            // Add elements to edit form
+            editForm.appendChild(termInput);
+            editForm.appendChild(definitionInput);
+            editForm.appendChild(buttonsDiv);
+            
+            // Replace card content with edit form
+            cardDiv.innerHTML = '';
+            cardDiv.appendChild(editForm);
+            
+            // Focus on the first input
+            termInput.focus();
+        }
+        
+        // Function to create card content
+        function createCardContent(term, definition, isEnToVi) {
+            // Create card container
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card-item';
+            
+            // Create content container
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'card-content';
+            
+            // Create term and definition elements
+            const termDiv = document.createElement('div');
+            termDiv.className = 'card-term';
+            termDiv.textContent = term || '';
+            
+            const definitionDiv = document.createElement('div');
+            definitionDiv.className = 'card-definition';
+            definitionDiv.textContent = definition || '';
+            
+            // Add term and definition to content
+            if (term) contentDiv.appendChild(termDiv);
+            if (definition) contentDiv.appendChild(definitionDiv);
+            
+            // Add content to card
+            cardDiv.appendChild(contentDiv);
+            
+            // Add action buttons to card (not to content)
+            const actions = createActionButtons(cardDiv, isEnToVi);
+            cardDiv.insertBefore(actions, contentDiv);
+            
+            return cardDiv;
+        }
+        
+        // Function to add a card
+        function addCard(term, definition, isEnToVi = true) {
+            // Allow adding card if at least one field has content
+            if (!term && !definition) return false;
+            
+            const cardList = document.getElementById(isEnToVi ? 'enViCardList' : 'viEnCardList');
+            if (!cardList) return false;
+            
+            // Create card container
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-item';
+            
+            // Create and add the card content
+            const cardContent = createCardContent(term, definition, isEnToVi);
+            cardContainer.appendChild(cardContent);
+            
+            // Add the card to the list
+            cardList.appendChild(cardContainer);
+            
+            // Show the card preview section if it's hidden
+            const cardPreview = document.getElementById('cardPreview');
+            if (cardPreview) {
+                cardPreview.style.display = 'block';
+            }
+            
+            // Save to localStorage
+            saveAllData();
+            
+            return true;
+        }
+        
+        // Add card button handlers
+        document.getElementById('addEnViCardBtn').addEventListener('click', () => {
+            const englishText = document.getElementById('englishText').value.trim();
+            const vietnameseText = document.getElementById('vietnameseText').value.trim();
+            
+            if (addCard(englishText, vietnameseText, true)) {
+                // Clear the input fields
+                document.getElementById('englishText').value = '';
+                document.getElementById('vietnameseText').value = '';
+            }
+        });
+        
+        document.getElementById('addViEnCardBtn').addEventListener('click', () => {
+            const vietnameseText = document.getElementById('vietnameseText2').value.trim();
+            const englishText = document.getElementById('englishText2').value.trim();
+            
+            if (addCard(vietnameseText, englishText, false)) {
+                // Clear the input fields
+                document.getElementById('vietnameseText2').value = '';
+                document.getElementById('englishText2').value = '';
+            }
+        });
+
+        // Card set switching
+        document.getElementById('switchToEnVi').addEventListener('click', function() {
+            document.getElementById('enViCardList').style.display = 'block';
+            document.getElementById('viEnCardList').style.display = 'none';
+            this.style.background = '#4285f4';
+            this.style.color = 'white';
+            document.getElementById('switchToViEn').style.background = '#f5f5f5';
+            document.getElementById('switchToViEn').style.color = '#333';
+            // Update save button to target current card set
+            document.getElementById('saveCardBtn').setAttribute('data-target', 'enVi');
+        });
+
+        document.getElementById('switchToViEn').addEventListener('click', function() {
+            document.getElementById('enViCardList').style.display = 'none';
+            document.getElementById('viEnCardList').style.display = 'block';
+            this.style.background = '#4285f4';
+            this.style.color = 'white';
+            document.getElementById('switchToEnVi').style.background = '#f5f5f5';
+            document.getElementById('switchToEnVi').style.color = '#333';
+            // Update save button to target current card set
+            document.getElementById('saveCardBtn').setAttribute('data-target', 'viEn');
+        });
+
+        // Function to get the currently active card list
+        function getActiveCardList() {
+            const isEnToVi = document.getElementById('enViCardList').style.display !== 'none';
+            return document.getElementById(isEnToVi ? 'enViCardList' : 'viEnCardList');
+        }
+
+        // Delete cards button click handler
+        document.getElementById('deleteCardsBtn').addEventListener('click', () => {
+            if (confirm('Bạn có chắc chắn muốn xóa tất cả thẻ trong bộ hiện tại không?')) {
+                const cardList = getActiveCardList();
+                cardList.innerHTML = '';
+                saveAllData();
+                
+                // Show success message
+                const deleteBtn = document.getElementById('deleteCardsBtn');
+                const originalText = deleteBtn.textContent;
+                deleteBtn.textContent = 'Đã xóa!';
+                
+                setTimeout(() => {
+                    deleteBtn.textContent = originalText;
+                }, 2000);
+            }
+        });
+
+        // Save card button click handler
+        document.getElementById('saveCardBtn').addEventListener('click', () => {
+            const cardList = getActiveCardList();
+            const isEnToVi = cardList.id === 'enViCardList';
+            const cards = [];
+            
+            // Get all cards from the active list
+            cardList.querySelectorAll('.card-item').forEach(cardEl => {
+                const term = cardEl.querySelector('.card-term')?.textContent?.trim();
+                const definition = cardEl.querySelector('.card-definition')?.textContent?.trim();
+                
+                if (term && definition) {
+                    cards.push({
+                        term: term,
+                        definition: definition,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            });
+            
+            // Save to file
+            const filename = isEnToVi ? 'english_vietnamese_cards.json' : 'vietnamese_english_cards.json';
+            saveCardsToFile(cards, filename);
+            
+            // Show success message
+            const saveBtn = document.getElementById('saveCardBtn');
+            saveBtn.style.background = '#ffffff';
+            saveBtn.style.border = '1px solid #dadce0';
+            saveBtn.style.padding = '5px 10px';
+            saveBtn.style.borderRadius = '4px';
+            saveBtn.style.cursor = 'pointer';
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Đã lưu!';
+            saveBtn.style.fontWeight = 'bold';
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.fontWeight = 'normal';
+            }, 2000);
+        });
+
+        // Translate button handlers
+        document.getElementById('translateEnToViBtn').addEventListener('click', async () => {
+            const englishText = document.getElementById('englishText').value.trim();
+            const vietnameseText = document.getElementById('vietnameseText');
+            
+            if (!englishText) {
+                alert('Vui lòng nhập văn bản cần dịch');
+                return;
+            }
+
+            try {
+                // Using Google Translate website for translation
+                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(englishText)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Translation failed');
+                }
+                
+                const data = await response.json();
+                
+                // Extract the translated text from the response
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    vietnameseText.value = data[0].map(item => item[0]).join('');
+                } else {
+                    throw new Error('Could not parse translation');
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                vietnameseText.value = 'Lỗi: Không thể dịch văn bản. Vui lòng kiểm tra kết nối mạng và thử lại.';
+            }
+        });
+        
+        // Vietnamese to English translation
+        document.getElementById('translateViToEnBtn').addEventListener('click', async () => {
+            const vietnameseText = document.getElementById('vietnameseText2').value.trim();
+            const englishText = document.getElementById('englishText2');
+            
+            if (!vietnameseText) {
+                alert('Vui lòng nhập văn bản cần dịch');
+                return;
+            }
+            
+            try {
+                // Using Google Translate website for translation
+                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=vi&tl=en&dt=t&q=${encodeURIComponent(vietnameseText)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Translation failed');
+                }
+                
+                const data = await response.json();
+                
+                // Extract the translated text from the response
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    englishText.value = data[0].map(item => item[0]).join('');
+                } else {
+                    throw new Error('Could not parse translation');
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+                englishText.value = 'Error: Could not translate text. Please check your internet connection and try again.';
+            }
+        });
+    </script>
+</body>
+</html>
