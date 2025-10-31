@@ -1,0 +1,46 @@
+{
+  "title": "Thẻ ghi nhớ: Story Central 2 - Our School #2",
+  "count": 10,
+  "cards": [
+    {
+      "term": "English",
+      "definition": "tiếng anh"
+    },
+    {
+      "term": "art",
+      "definition": "(n) nghệ thuật, mỹ thuật"
+    },
+    {
+      "term": "math",
+      "definition": "toán"
+    },
+    {
+      "term": "Geography",
+      "definition": "địa lý"
+    },
+    {
+      "term": "computer studies",
+      "definition": "tin học"
+    },
+    {
+      "term": "recess",
+      "definition": "giờ ra chơi"
+    },
+    {
+      "term": "PE",
+      "definition": "thể dục"
+    },
+    {
+      "term": "Science",
+      "definition": "khoa học"
+    },
+    {
+      "term": "spanish",
+      "definition": "tiếng Tây Ban Nha"
+    },
+    {
+      "term": "history",
+      "definition": "lịch sử"
+    }
+  ]
+}
