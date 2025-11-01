@@ -32,6 +32,8 @@
   const testTitle = $('#testTitle');
   const btnStartTest = $('#btnStartTest');
   const btnLoadJsonTest = $('#btnLoadJsonTest');
+  const btnLoadResultsJson = $('#btnLoadResultsJson');
+  const fileOpenResults = $('#fileOpenResults');
   const chkAppendTest = $('#chkAppendTest');
   const testStage = $('#testStage');
   const testProgress = $('#testProgress');
@@ -350,46 +352,16 @@
 
   // Editor events
   btnNewQuestion.onclick = () => {
-    const q = { text: '', choices: [
-      { text: '', explanation: '', correct: true },
-      { text: '', explanation: '', correct: false }
-    ] };
+    const q = { 
+      text: '', 
+      choices: [
+        { text: '', explanation: '', correct: true },
+        { text: '', explanation: '', correct: false }
+      ] 
+    };
     quiz.questions.push(q);
     renderEditor();
   };
-
-  titleInput.oninput = (e)=>{ quiz.title = e.target.value; };
-
-  if(btnAppendFromText){
-    btnAppendFromText.onclick = () => {
-      const raw = (pasteJsonBox && pasteJsonBox.value || '').trim();
-      if(!raw){ alert('Chưa có JSON để thêm'); return; }
-      try{
-        const data = JSON.parse(raw);
-        let arr = [];
-        if(Array.isArray(data)){
-          arr = data;
-        } else if(data && Array.isArray(data.questions)){
-          arr = data.questions;
-        } else {
-          alert('JSON không đúng định dạng. Cần mảng câu hỏi hoặc object có trường questions.');
-          return;
-        }
-        // validate minimal structure using validateQuiz on a temp object
-        const temp = { title: quiz.title || '', questions: arr };
-        const err = validateQuiz(temp);
-        if(err){ alert(err); return; }
-        const addCount = arr.length;
-        if(addCount === 0){ alert('Không có câu hỏi để thêm'); return; }
-        quiz.questions.push(...arr);
-        renderEditor();
-        editStatus.textContent = `Đã thêm ${addCount} câu từ JSON dán`;
-        if(pasteJsonBox) pasteJsonBox.value = '';
-      }catch(e){
-        alert('Không phân tích được JSON');
-      }
-    };
-  }
 
   if(btnClearPaste){
     btnClearPaste.onclick = ()=>{ if(pasteJsonBox) pasteJsonBox.value = ''; };
@@ -414,10 +386,73 @@
   }
 
   // Keep track who triggered file open to read checkbox state appropriately
-  let openContext = 'edit'; // 'edit' | 'test'
-  btnLoadJson.onclick = () => { openContext = 'edit'; fileOpen.click(); };
-  if(btnLoadJsonTest){ btnLoadJsonTest.onclick = () => { openContext = 'test'; fileOpen.click(); }; }
+  let openContext = 'edit'; // 'edit' | 'test' | 'results'
+  
+  // Set up event handlers for loading JSON files
+  btnLoadJson.onclick = () => { 
+    openContext = 'edit'; 
+    fileOpen.click(); 
+  };
+  
+  if(btnLoadJsonTest) { 
+    btnLoadJsonTest.onclick = () => { 
+      openContext = 'test'; 
+      fileOpen.click(); 
+    }; 
+  }
+  
+  if(btnLoadResultsJson) {
+    btnLoadResultsJson.onclick = () => { 
+      openContext = 'results'; 
+      fileOpenResults.click(); 
+    };
+  }
 
+  // Handle loading test results JSON
+  fileOpenResults.onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const resultData = JSON.parse(String(reader.result));
+        
+        // Check if this is a results file (should have answers array and quiz data)
+        if (resultData.answers && resultData.quiz) {
+          // Validate the quiz data
+          const err = validateQuiz(resultData.quiz);
+          if (err) { 
+            alert('Lỗi dữ liệu câu hỏi: ' + err); 
+            return; 
+          }
+          
+          // Set the quiz data
+          quiz = resultData.quiz;
+          
+          // Set the answers if the length matches
+          if (resultData.answers.length === quiz.questions.length) {
+            answers = resultData.answers;
+            // Go directly to the result view to show the results
+            setMode('result');
+            renderResult();
+          } else {
+            alert('Số lượng câu trả lời không khớp với số câu hỏi.');
+          }
+        } else {
+          alert('Đây không phải file kết quả hợp lệ. File cần chứa dữ liệu câu hỏi và đáp án.');
+        }
+      } catch(err) {
+        console.error('Lỗi khi đọc file kết quả:', err);
+        alert('Lỗi khi đọc file kết quả: ' + (err.message || 'Dữ liệu không hợp lệ'));
+      }
+    };
+    reader.readAsText(file);
+    // Reset the input to allow selecting the same file again
+    e.target.value = '';
+  };
+
+  // Handle loading quiz JSON
   fileOpen.onchange = (e) => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -426,7 +461,7 @@
       try{
         const data = JSON.parse(String(reader.result));
         const err = validateQuiz(data);
-        if(err){ alert(err); return; }
+        if(err){ alert('Lỗi dữ liệu: ' + err); return; }
         const appendMode = (openContext === 'edit' ? (chkAppend && chkAppend.checked) : (chkAppendTest && chkAppendTest.checked)) && quiz.questions.length > 0;
         if(appendMode){
           const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
@@ -479,8 +514,14 @@
   btnBackToEdit.onclick = () => setMode('edit');
   btnRetake.onclick = () => { setMode('test'); startTest(); };
   btnExportAnswers.onclick = () => {
-    const r = computeResult();
-    download('result.json', JSON.stringify({ title: quiz.title || '', ...r }, null, 2));
+    // Export complete quiz data and user answers for later review
+    const exportData = {
+      quiz: quiz,
+      answers: answers,
+      timestamp: new Date().toISOString()
+    };
+    const filename = (quiz.title ? slugify(quiz.title) : 'quiz') + '-result.json';
+    download(filename, JSON.stringify(exportData, null, 2));
   };
 
   // GitHub listing and open/append
