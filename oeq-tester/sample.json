@@ -1,0 +1,42 @@
+{
+  "title": "Scrum",
+  "questions": [
+    {
+      "text": "The three pillars of Scrum",
+      "answers": [
+        {
+          "text": "transparency",
+          "explanation": "All aspects of the work and process are visible to the team and stakeholders. This includes the product backlog, the progress of the work, and the definition of \"done,\" fostering open communication and a shared understanding."
+        },
+        {
+          "text": "inspection",
+          "explanation": "The Scrum team regularly inspects the product and the process to detect undesirable variances or problems. Events like the Daily Scrum and Sprint Review provide opportunities for this inspection."
+        },
+        {
+          "text": "adaptation",
+          "explanation": "Based on the inspection, the team adjusts its process or product to improve its effectiveness. If the inspection reveals a deviation, the team adapts to get back on track."
+        }
+      ]
+    },
+    {
+      "text": "The five formal events in Scrum",
+      "answers": [
+        {
+          "text": "Sprint"
+        },
+        {
+          "text": "Sprint Planning"
+        },
+        {
+          "text": "Daily Scrum"
+        },
+        {
+          "text": "Sprint Review"
+        },
+        {
+          "text": "Sprint Retrospective"
+        }
+      ]
+    }
+  ]
+}

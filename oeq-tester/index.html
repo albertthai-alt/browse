@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OEQ Tester - Local</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff9f43'/%3E%3Ctext x='32' y='48' font-size='48' font-weight='bold' text-anchor='middle' fill='%23ffffff'%3E%3F%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-title">OEQ Tester</div>
+        <div class="brand-sub">Chạy local, không cần server</div>
+      </div>
+      <nav class="nav">
+        <button id="tabEdit" class="tab active">Soạn</button>
+        <button id="tabPractice" class="tab">Thực hành</button>
+        <button id="tabTest" class="tab">Kiểm tra</button>
+        <button id="tabResult" class="tab" disabled>Kết quả</button>
+      </nav>
+      <div class="brand-sub">v1.0</div>
+    </header>
+
+    <main id="viewEdit" class="view">
+      <section class="toolbar">
+        <input id="titleInput" type="text" class="title-input" placeholder="Tiêu đề bài test (tuỳ chọn)" />
+        <div class="spacer"></div>
+        <button id="btnNewQuestion" class="btn">+ Thêm câu hỏi</button>
+        <button id="btnLoadJson" class="btn">Mở JSON</button>
+        <label class="small" style="display:flex;align-items:center;gap:6px;">
+          <input id="chkAppend" type="checkbox" /> Mở thêm
+        </label>
+        <input id="fileOpen" type="file" accept="application/json,.json" hidden />
+        <input id="fileOpenResults" type="file" accept="application/json,.json" hidden />
+        <button id="btnSaveJson" class="btn">Lưu JSON</button>
+        <button id="btnExportStandalone" class="btn primary">Xuất HTML</button>
+      </section>
+      <section id="ghPanelEdit" class="panel">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+          <div class="small">Nguồn file JSON từ Github repo: <code>albertthai-alt/browse</code>, thư mục: <code>/oeq-tester</code></div>
+          <div class="spacer"></div>
+          <button id="btnGhRefreshEdit" class="btn">Tải danh sách</button>
+        </div>
+        <div id="ghListEdit" class="editor"></div>
+      </section>
+      <section id="editor" class="editor"></section>
+      <section class="panel" style="margin-top:8px;">
+        <div class="small" style="margin-bottom:6px;">Dán JSON để thêm câu hỏi (hỗ trợ cả mảng câu hỏi hoặc object có trường <code>questions</code>):</div>
+        <textarea id="pasteJsonBox" class="textarea" rows="6" placeholder='Ví dụ: [{"text":"...?","answers":[{"text":"đáp án 1"},{"text":"đáp án 2"}]}]'></textarea>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button id="btnAppendFromText" class="btn primary">Thêm từ JSON (Dán)</button>
+          <button id="btnClearPaste" class="btn">Xoá nội dung</button>
+        </div>
+      </section>
+      <section class="footbar">
+        <div id="editStatus" class="status"></div>
+      </section>
+    </main>
+
+    <main id="viewPractice" class="view hidden">
+      <section class="toolbar">
+        <div class="test-title" id="practiceTitle"></div>
+        <div class="spacer"></div>
+        <button id="btnLoadJsonPractice" class="btn">Mở JSON</button>
+        <button id="btnStartPractice" class="btn primary">Bắt đầu</button>
+      </section>
+      <section id="practiceStage" class="test-stage hidden">
+        <div class="progress" id="practiceProgress"></div>
+        <div class="question" id="practiceQuestion"></div>
+        <div class="choices" id="practiceChoices"></div>
+        <div class="controls">
+          <button id="btnPrevQPractice" class="btn">◀ Trước</button>
+          <button id="btnNextQPractice" class="btn">Tiếp ▶</button>
+          <button id="btnShowAnswers" class="btn primary">Mở đáp án</button>
+        </div>
+      </section>
+      <section class="footbar">
+        <div id="practiceStatus" class="status"></div>
+      </section>
+    </main>
+
+    <main id="viewTest" class="view hidden">
+      <section class="toolbar">
+        <div class="test-title" id="testTitle"></div>
+        <div class="spacer"></div>
+        <button id="btnLoadJsonTest" class="btn">Mở JSON</button>
+        <button id="btnLoadResultsJson" class="btn">Mở kết quả</button>
+        <label class="small" style="display:flex;align-items:center;gap:6px;">
+          <input id="chkAppendTest" type="checkbox" /> Mở thêm
+        </label>
+        <button id="btnGhRefreshTest" class="btn">Tải danh sách</button>
+        <button id="btnStartTest" class="btn primary">Bắt đầu</button>
+      </section>
+      <section id="ghPanelTest" class="panel">
+        <div class="small" style="margin-bottom:8px;">Nguồn file JSON từ Github repo: <code>albertthai-alt/browse</code>, thư mục: <code>/oeq-tester</code></div>
+        <div id="ghListTest" class="editor"></div>
+      </section>
+      <section id="testStage" class="test-stage hidden">
+        <div class="progress" id="testProgress"></div>
+        <div class="question" id="testQuestion"></div>
+        <div class="choices" id="testChoices"></div>
+        <div class="controls">
+          <button id="btnPrevQ" class="btn">◀ Trước</button>
+          <button id="btnNextQ" class="btn">Tiếp ▶</button>
+          <button id="btnFinish" class="btn primary">Nộp bài</button>
+        </div>
+      </section>
+      <section class="footbar">
+        <div id="testStatus" class="status"></div>
+      </section>
+    </main>
+
+    <main id="viewResult" class="view hidden">
+      <section class="toolbar">
+        <div class="summary-title">Kết quả</div>
+        <div class="spacer"></div>
+        <button id="btnBackToEdit" class="btn">Quay lại soạn</button>
+        <button id="btnRetake" class="btn primary">Làm lại</button>
+      </section>
+      <section id="resultSummary" class="result-summary"></section>
+      <section id="resultDetail" class="result-detail"></section>
+      <section class="footbar">
+        <button id="btnExportAnswers" class="btn">Tải JSON</button>
+      </section>
+    </main>
+
+    <footer class="footer">Dữ liệu xử lý hoàn toàn trên trình duyệt.</footer>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
