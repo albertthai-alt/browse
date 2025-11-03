@@ -1589,35 +1589,59 @@ start();
 
   // Initialize speech synthesis
   const synth = window.speechSynthesis;
-  
-  // Function to speak text
+  let cachedVoices = [];
+  function loadVoices() {
+    try {
+      cachedVoices = synth ? synth.getVoices() : [];
+    } catch { cachedVoices = []; }
+  }
+  if (synth) {
+    loadVoices();
+    try { synth.addEventListener('voiceschanged', loadVoices); } catch {}
+  }
+  function isVietnameseText(t) {
+    const s = String(t || '').toLowerCase();
+    if (!s) return false;
+    // Check for Vietnamese-specific diacritics and characters
+    const viChars = /[ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i;
+    if (viChars.test(s)) return true;
+    // Fallback: common Vietnamese words
+    const viWords = /(\b)và\b|\bcủa\b|\blà\b|\bmột\b|\bnhững\b|\bcác\b|\bcho\b|\btừ\b|\btrong\b|\bkhi\b|\bđược\b|\bvới\b|\bkhông\b|\bnhư\b|\bđã\b|\bnày\b|\bđó\b|\bthì\b|\bđể\b|\bsẽ\b|\brất\b|\bcó\b|\bnhưng\b|\bhay\b|\bhoặc\b|\btôi\b|\bbạn\b|\bchúng\b|\bta\b/i;
+    return viWords.test(s);
+  }
+
+  // Function to speak text with auto language detection
   function speakText(text) {
     if (!text || !synth || !chkRead.checked) return;
     
     // Cancel any ongoing speech
-    synth.cancel();
+    try { synth.cancel(); } catch {}
     
     // Create a new speech utterance
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Set Vietnamese voice if available, otherwise use default
-    const voices = synth.getVoices();
-    const vietnameseVoice = voices.find(voice => voice.lang === 'vi-VN' || voice.lang.startsWith('vi'));
-    if (vietnameseVoice) {
-      utterance.voice = vietnameseVoice;
+    // Decide desired language
+    const wantVi = isVietnameseText(text);
+    let voice = null;
+    const list = cachedVoices && cachedVoices.length ? cachedVoices : (synth ? synth.getVoices() : []);
+    if (wantVi) {
+      voice = (list || []).find(v => v && v.lang && v.lang.toLowerCase().startsWith('vi')) || null;
+      utterance.lang = 'vi-VN';
     } else {
-      // Fallback to any available voice
-      utterance.voice = voices[0];
+      voice = (list || []).find(v => v && v.lang && v.lang.toLowerCase().startsWith('en')) || null;
+      utterance.lang = 'en-US';
     }
+    if (!voice && list && list.length) voice = list[0];
+    if (voice) utterance.voice = voice;
     
     // Set speech properties
-    utterance.rate = 0.9; // Slightly slower than normal
-    utterance.pitch = 1.0; // Normal pitch
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
     
     // Speak the text
-    synth.speak(utterance);
+    try { synth.speak(utterance); } catch {}
   }
-  
+
   // Add click handler to flip the card when clicked and read the text
   card.addEventListener('click', () => {
     const wasFlipped = card.classList.contains('flipped');
