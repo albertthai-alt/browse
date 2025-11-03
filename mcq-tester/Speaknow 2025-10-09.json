@@ -49,10 +49,10 @@
     {
       "text": "Something bad happened yesterday. What is the best way to tell about it?",
       "choices": [
-        {"text": "I drove to the beach and I crashed into a tree.", "explanation": "Correct. This is grammatically correct and clear.", "correct": true},
+        {"text": "I drove to the beach and I crashed into a tree.", "explanation": "Sai về nghĩa thời gian: nghe như hai hành động nối tiếp bình thường, không nhấn mạnh sự việc bất ngờ (crash).", "correct": false},
         {"text": "While I drove to the beach, I was crashed into a tree.", "explanation": "Incorrect. 'Was crashed' is incorrect passive form.", "correct": false},
         {"text": "I crashing into a tree when I was drive to the beach.", "explanation": "Incorrect grammar and tense usage.", "correct": false},
-        {"text": "While I was driving to the beach, I crashed into a tree.", "explanation": "Also correct grammatically, but less concise than the first.", "correct": false}
+        {"text": "While I was driving to the beach, I crashed into a tree.", "explanation": "Correct. Diễn tả một hành động đang diễn ra thì một hành động khác xen vào.", "correct": true}
       ]
     },
     {

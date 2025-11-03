@@ -37,6 +37,26 @@
           "text": "Sprint Retrospective"
         }
       ]
+    },
+    {
+      "text": "Agile Project Lifecycle",
+      "answers": [
+        {
+          "text": "Concept | Inception"
+        },
+        {
+          "text": "Iteration | Execution"
+        },
+        {
+          "text": "Release"
+        },
+        {
+          "text": "Maintenance"
+        },
+        {
+          "text": "Retirement"
+        }
+      ]
     }
   ]
 }

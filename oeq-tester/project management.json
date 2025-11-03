@@ -1,0 +1,31 @@
+{
+  "title": "Project management",
+  "questions": [
+    {
+      "text": "The five phases of a project life cycle",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Initiation",
+          "explanation": "Define the project, its objectives, stakeholders, and determine if it’s feasible to proceed."
+        },
+        {
+          "text": "Planning",
+          "explanation": "Develop a detailed project management plan, define scope, schedule, cost, risks, and resources."
+        },
+        {
+          "text": "Execution",
+          "explanation": "Carry out the plan by coordinating people and resources to produce deliverables."
+        },
+        {
+          "text": "Monitoring and Controlling",
+          "explanation": "Track progress, manage changes, and ensure the project stays on schedule and within scope and budget."
+        },
+        {
+          "text": "Closing",
+          "explanation": "Finalize all project activities, hand over deliverables, release resources, and document lessons learned."
+        }
+      ]
+    }
+  ]
+}

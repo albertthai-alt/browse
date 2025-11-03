@@ -1,0 +1,65 @@
+{
+  "title": "Lean",
+  "questions": [
+    {
+      "text": "The five principles of Lean",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Value",
+          "explanation": "Identify what creates true value for the customer."
+        },
+        {
+          "text": "Value Stream",
+          "explanation": "Map all steps of the process and remove those that do not create value."
+        },
+        {
+          "text": "Flow",
+          "explanation": "Ensure the work flows smoothly without interruptions or delays."
+        },
+        {
+          "text": "Pull",
+          "explanation": "Produce only when there is actual demand from the customer."
+        },
+        {
+          "text": "Perfection",
+          "explanation": "Continuously improve processes to achieve maximum efficiency and quality."
+        }
+      ]
+    },
+    {
+      "text": "The seven wastes (Muda) in Lean",
+      "answers_required": 7,
+      "answers": [
+        {
+          "text": "Overproduction",
+          "explanation": "Producing more than what is needed or before it is needed."
+        },
+        {
+          "text": "Waiting",
+          "explanation": "Idle time when resources or people are waiting for the next step."
+        },
+        {
+          "text": "Transport",
+          "explanation": "Unnecessary movement of products or materials."
+        },
+        {
+          "text": "Extra Processing",
+          "explanation": "Performing more work or using more resources than required."
+        },
+        {
+          "text": "Inventory",
+          "explanation": "Excess raw materials, work-in-progress, or finished goods."
+        },
+        {
+          "text": "Motion",
+          "explanation": "Unnecessary movements by people that do not add value."
+        },
+        {
+          "text": "Defects",
+          "explanation": "Effort involved in inspecting, fixing, or redoing defective work."
+        }
+      ]
+    }
+  ]
+}

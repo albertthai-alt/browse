@@ -1,0 +1,200 @@
+{
+  "title": "Agile and Scrum",
+  "questions": [
+    {
+      "text": "The three pillars of Scrum",
+      "answers_required": 3,
+      "answers": [
+        {
+          "text": "transparency"
+        },
+        {
+          "text": "inspection"
+        },
+        {
+          "text": "adaptation"
+        }
+      ]
+    },
+    {
+      "text": "The five formal events in Scrum",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Sprint"
+        },
+        {
+          "text": "Sprint Planning"
+        },
+        {
+          "text": "Daily Scrum"
+        },
+        {
+          "text": "Sprint Review"
+        },
+        {
+          "text": "Sprint Retrospective"
+        }
+      ]
+    },
+    {
+      "text": "The three Scrum roles",
+      "answers_required": 3,
+      "answers": [
+        {
+          "text": "Product Owner"
+        },
+        {
+          "text": "Scrum Master"
+        },
+        {
+          "text": "Developers"
+        }
+      ]
+    },
+    {
+      "text": "The three Scrum artifacts",
+      "answers_required": 3,
+      "answers": [
+        {
+          "text": "Product Backlog"
+        },
+        {
+          "text": "Sprint Backlog"
+        },
+        {
+          "text": "Increment"
+        }
+      ]
+    },
+    {
+      "text": "The four values of the Agile Manifesto",
+      "answers_required": 4,
+      "answers": [
+        {
+          "text": "Individuals and interactions over processes and tools"
+        },
+        {
+          "text": "Working software over comprehensive documentation"
+        },
+        {
+          "text": "Customer collaboration over contract negotiation"
+        },
+        {
+          "text": "Responding to change over following a plan"
+        }
+      ]
+    },
+    {
+      "text": "The five Scrum values",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Commitment"
+        },
+        {
+          "text": "Courage"
+        },
+        {
+          "text": "Focus"
+        },
+        {
+          "text": "Openness"
+        },
+        {
+          "text": "Respect"
+        }
+      ]
+    },
+    {
+      "text": "Typical activities in a Sprint",
+      "answers_required": 4,
+      "answers": [
+        {
+          "text": "Daily Scrum"
+        },
+        {
+          "text": "Development work"
+        },
+        {
+          "text": "Sprint Review"
+        },
+        {
+          "text": "Sprint Retrospective"
+        }
+      ]
+    },
+    {
+      "text": "Outputs of Sprint Planning",
+      "answers_required": 3,
+      "answers": [
+        {
+          "text": "Sprint Goal"
+        },
+        {
+          "text": "Sprint Backlog"
+        },
+        {
+          "text": "Plan for delivering the Increment"
+        }
+      ]
+    },
+    {
+      "text": "Characteristics of a good Product Backlog item (PBI)",
+      "answers_required": 4,
+      "answers": [
+        {
+          "text": "Clear and understandable"
+        },
+        {
+          "text": "Valuable to the customer or user"
+        },
+        {
+          "text": "Estimated and prioritized"
+        },
+        {
+          "text": "Testable"
+        }
+      ]
+    },
+    {
+      "text": "Responsibilities of the Scrum Master",
+      "answers_required": 4,
+      "answers": [
+        {
+          "text": "Coaching the team in Scrum practices"
+        },
+        {
+          "text": "Removing impediments"
+        },
+        {
+          "text": "Facilitating Scrum events"
+        },
+        {
+          "text": "Ensuring Scrum is understood and enacted"
+        }
+      ]
+    },
+    {
+      "text": "The five phases of Agile Project Lifecycle",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Concept | Inception"
+        },
+        {
+          "text": "Iteration | Execution"
+        },
+        {
+          "text": "Release"
+        },
+        {
+          "text": "Maintenance"
+        },
+        {
+          "text": "Retirement"
+        }
+      ]
+    }
+  ]
+}
