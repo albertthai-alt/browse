@@ -1,0 +1,210 @@
+{
+  "title": "Thẻ ghi nhớ: Work EN-VN #1",
+  "count": 51,
+  "cards": [
+    {
+      "term": "compensation",
+      "definition": "(n) sự bồi thường"
+    },
+    {
+      "term": "ephemeral",
+      "definition": "(a) ngắn ngủi, chóng tàn, phù du, thoáng qua"
+    },
+    {
+      "term": "furlough",
+      "definition": "(n, v) nghỉ không lương tạm thời"
+    },
+    {
+      "term": "triage",
+      "definition": "(v) phân loại"
+    },
+    {
+      "term": "ITIL - Information Technology Infrastructure Library",
+      "definition": "(abbr-full) bộ khung quản lý dịch vụ CNTT"
+    },
+    {
+      "term": "deprecated",
+      "definition": "lỗi thời (không khuyến khích dùng)"
+    },
+    {
+      "term": "obsolete",
+      "definition": "lỗi thời (hết tác dụng)"
+    },
+    {
+      "term": "aka - also know as",
+      "definition": "(abbr-full) hay còn gọi là"
+    },
+    {
+      "term": "practice",
+      "definition": "(n) thông lệ, thực tiễn"
+    },
+    {
+      "term": "1st line support",
+      "definition": "(np) hỗ trợ tuyến đầu"
+    },
+    {
+      "term": "Application Maintenance and Support",
+      "definition": "AMS - dịch vụ bảo trì và hỗ trợ ứng dụng"
+    },
+    {
+      "term": "SLA - Service Level Agreement",
+      "definition": "(abbr-full) thỏa thuận mức độ dịch vụ"
+    },
+    {
+      "term": "CAB - Change Advisory Board",
+      "definition": "(abbr-full) Hội đồng tư vấn thay đổi"
+    },
+    {
+      "term": "Catalogue",
+      "definition": "danh mục (Service Request ___)"
+    },
+    {
+      "term": "offering",
+      "definition": "sản phẩm, dịch vụ cung cấp (To provide a single source of consistent information on all services and service ___)"
+    },
+    {
+      "term": "vitally important",
+      "definition": "cực kỳ quan trọng (___, could be as high as management board)"
+    },
+    {
+      "term": "expedited",
+      "definition": "(pp a) tốc hành, nhanh (trang trọng, chuyên nghiệp) (___ assessment and authorization)"
+    },
+    {
+      "term": "go over",
+      "definition": "(phrv) kiểm tra, xem xét kĩ lưỡng; giải thích, trình bày (Let's ___ ___ the report before the meeting.)"
+    },
+    {
+      "term": "allocation (/ˌæləˈkeɪʃn/)",
+      "definition": "sự phân bổ"
+    },
+    {
+      "term": "proprietary",
+      "definition": "(a) độc quyền (No associations to any commercial ___ practices or solutions)"
+    },
+    {
+      "term": "Nonprescriptive",
+      "definition": "(a) không mang tính áp đặt (___: Recommended the approach of \"adopt and adapt\")"
+    },
+    {
+      "term": "iteratively (/ˈɪt̬.ə.rə.tɪv.li/)",
+      "definition": "(adv) lặp đi lặp lại (Progress ___ with feedback)"
+    },
+    {
+      "term": "perceived",
+      "definition": "(pp a) nhận thức được, nhận thấy được (Value is the ___ benefits, usefulness, and importance of something)"
+    },
+    {
+      "term": "realization",
+      "definition": "(n) hiện thực hóa (... to facilitate value ___)"
+    },
+    {
+      "term": "elaborate (v)",
+      "definition": "(v) nói thêm chi tiết (Can you ___ a little on what this is)"
+    },
+    {
+      "term": "breakdown",
+      "definition": "(n) phân tích chi tiết (We need a detailed ___ of the costs.)"
+    },
+    {
+      "term": "succession",
+      "definition": "(n) sự kế thừa (___ plan)"
+    },
+    {
+      "term": "National Health Service",
+      "definition": "NHS - dịch vụ y tế quốc gia"
+    },
+    {
+      "term": "cascade",
+      "definition": "(v) truyền thông tin xuống theo tầng lớp (Please can you help me ___ this to squad members)"
+    },
+    {
+      "term": "matter",
+      "definition": "(n) vấn đề, chuyện quan trọng cần xem xét (I believe I have a say on ___ that impact the work I do)"
+    },
+    {
+      "term": "dignity",
+      "definition": "(n) phẩm giá (Our organisation treats everybody with ___ and respect, regardless of gender, race, sexuality, age etc.)"
+    },
+    {
+      "term": "Flexible Benefit Options",
+      "definition": "FBO - Tuỳ chọn quyền lợi linh hoạt"
+    },
+    {
+      "term": "scheme",
+      "definition": "(n) kế hoạch, chương trình (FBO ___)"
+    },
+    {
+      "term": "tenure",
+      "definition": "(n) nhiệm kỳ (___ in Current Role: khoảng thời gian vị trí hiện tại)"
+    },
+    {
+      "term": "progression",
+      "definition": "(n) sự tiến bộ, sự phát triển (The nature of concern of the promotion risk is ___)"
+    },
+    {
+      "term": "typography",
+      "definition": "nghệ thuật và kỹ thuật sắp xếp chữ cái, kiểu chữ (trong MUI)"
+    },
+    {
+      "term": "breaking change",
+      "definition": "(np) thay đổi gây lỗi, thay đổi không tương thích ngược (Removing the old authentication API was a ___ ___ because all clients using it stopped working.)"
+    },
+    {
+      "term": "A/B testing",
+      "definition": "so sánh hai phiên bản (A và B) của cùng một thứ"
+    },
+    {
+      "term": "Ernst & Young",
+      "definition": "EY - Một trong bốn công ty kiểm toán lớn nhất thế giới (Big Four) (chuyên cung cấp các dịch vụ tư vấn (1) chiến lược, (2) tài chính, (3) kiểm toán, và (4) chuyển đổi số cho doanh nghiệp toàn cầu.)"
+    },
+    {
+      "term": "Lead by context",
+      "definition": "Lãnh đạo thông qua bối cảnh (Nhà lãnh đạo không kiểm soát từng hành động cụ thể mà cung cấp đầy đủ bối cảnh, định hướng, mục tiêu và nguyên tắc để nhân viên tự ra quyết định # Lead by Control)"
+    },
+    {
+      "term": "entrepreneurial (/ˌɒntrəprəˈnɜːriəl/)",
+      "definition": "(a) mang tính doanh nhân, tinh thần khởi nghiệp"
+    },
+    {
+      "term": "Architecture Design and Alignment",
+      "definition": "ADA - Thiết kế và đồng bộ kiến trúc"
+    },
+    {
+      "term": "TTM - Trailing Twelve Months",
+      "definition": "(abbr-full) 12 tháng liền kề gần nhất (tính từ thời điểm hiện tại trở về trước)"
+    },
+    {
+      "term": "SAST - Static Application Security Testing",
+      "definition": "(abbr-full) Kiểm thử bảo mật tĩnh cho ứng dụng"
+    },
+    {
+      "term": "justice",
+      "definition": "(n) công lý"
+    },
+    {
+      "term": "eNPS - Employee Net Promoter Score",
+      "definition": "(abbr-full) Một chỉ số được sử dụng để đo lường mức độ sẵn lòng của nhân viên trong việc giới thiệu công ty của họ như một nơi làm việc tuyệt vời."
+    },
+    {
+      "term": "AAD - Azure Active Directory",
+      "definition": "(abbr-full) Một dịch vụ quản lý danh tính và truy cập dựa trên nền tảng đám mây của Microsoft (identity and access management) (Dùng để: 1. Xác thực người dùng và quản lý quyền truy cập; 2. Single Sign-On (SSO); 3. Multi-Factor Authentication (MFA); 4. Quản lý người dùng, nhóm, chính sách bảo mật)"
+    },
+    {
+      "term": "WAF - Web Application Firewall",
+      "definition": "(abbr-full) Tường lửa ứng dụng web"
+    },
+    {
+      "term": "MSA - Master Service Agreement",
+      "definition": "(abbr-full) Hợp đồng dịch vụ tổng thể"
+    },
+    {
+      "term": "SAML - Security Assertion Markup Language",
+      "definition": "(abbr-full) Một giao thức xác thực dựa trên XML. Chủ yếu dùng trong doanh nghiệp, đặc biệt là các ứng dụng on-premise hoặc legacy."
+    },
+    {
+      "term": "OIDC - OpenID Connect",
+      "definition": "(abbr-full) Một lớp xác thực xây dựng trên OAuth 2.0 Dùng phổ biến trong các ứng dụng hiện đại: web, mobile, API"
+    }
+  ]
+}

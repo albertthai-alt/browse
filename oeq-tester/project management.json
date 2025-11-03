@@ -26,6 +26,26 @@
           "explanation": "Finalize all project activities, hand over deliverables, release resources, and document lessons learned."
         }
       ]
-    }
+    },{
+      "text": "The five phases of Six Sigma (DMAIC)",
+      "answers_required": 5,
+      "answers": [
+        {
+          "text": "Define",
+          "explanation": "Identify the problem, project goals, customers, and process scope for improvement."
+        },
+        {
+          "text": "Measure",
+          "explanation": "Collect data and measure current process performance to establish a baseline."
+        },
+        {
+          "text": "Analyze",
+          "explanation": "Identify root causes of defects or variation using data analysis techniques."
+        },
+        {
+          "text": "Improve",
+          "explanation": "Develop and implement solutions to eliminate root causes and optimize the process."
+        }
+	}
   ]
 }
