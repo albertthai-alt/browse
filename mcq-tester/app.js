@@ -81,6 +81,10 @@
     while(q.choices.length < 2){
       q.choices.push({ text: '', explanation: '', correct: false });
     }
+    // Initialize correctAnswers array if not exists
+    if (!q.correctAnswers) {
+      q.correctAnswers = q.choices.map((c, i) => c.correct ? i : -1).filter(i => i !== -1);
+    }
   }
 
   function validateQuiz(qz){
@@ -97,7 +101,13 @@
         if(!!c.correct) correctCount++;
         if(c.explanation != null && typeof c.explanation !== 'string') return `Câu ${i+1} - lựa chọn ${j+1} giải thích phải là chuỗi`;
       }
-      if(correctCount !== 1) return `Câu ${i+1} phải có đúng 1 đáp án đúng`;
+      // Allow any number of correct answers (0 or more)
+      if (correctCount === 0) return `Câu ${i+1} phải có ít nhất 1 đáp án đúng`;
+      
+      // Ensure correctAnswers array is properly set
+      if (!q.correctAnswers || !Array.isArray(q.correctAnswers)) {
+        q.correctAnswers = q.choices.map((c, i) => c.correct ? i : -1).filter(i => i !== -1);
+      }
     }
     return null;
   }
@@ -137,7 +147,7 @@
 
       const small = document.createElement('div');
       small.className = 'small';
-      small.textContent = 'Chọn 1 đáp án đúng';
+      small.textContent = 'Chọn một hoặc nhiều đáp án đúng';
 
       const choicesWrap = document.createElement('div');
 
@@ -145,13 +155,13 @@
         const row = document.createElement('div');
         row.className = 'choice-row';
 
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = `correct-${qi}`;
-        radio.checked = !!c.correct;
-        radio.onchange = ()=>{
-          q.choices.forEach((c2)=> c2.correct = false);
-          c.correct = true;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = !!c.correct;
+        checkbox.onchange = (e)=>{
+          c.correct = e.target.checked;
+          // Update correctAnswers array
+          q.correctAnswers = q.choices.map((c, i) => c.correct ? i : -1).filter(i => i !== -1);
         };
 
         const main = document.createElement('div');
@@ -191,7 +201,7 @@
         exp.value = c.explanation || '';
         exp.oninput = (e)=>{ c.explanation = e.target.value; };
 
-        row.append(radio, main);
+        row.append(checkbox, main);
         choicesWrap.append(row);
         const expRow = document.createElement('div');
         expRow.style.marginLeft = '32px';
@@ -212,17 +222,50 @@
   // Test rendering
   function renderTestQuestion(){
     const total = quiz.questions.length;
-    testProgress.textContent = `Câu ${testIndex+1}/${total}`;
     const q = quiz.questions[testIndex];
+    testProgress.textContent = `Câu ${testIndex+1}/${total}`;
     testQuestion.textContent = q.text || '(Không có nội dung)';
     testChoices.innerHTML = '';
+    
+    // Get correct answers count for this question
+    const correctAnswersCount = q.choices.filter(c => c.correct).length;
+    const isSingleAnswer = correctAnswersCount === 1;
+    
+    // Initialize answers[testIndex] as array if not exists
+    if (!Array.isArray(answers[testIndex])) {
+      answers[testIndex] = [];
+    }
+    
     q.choices.forEach((c, ci) => {
       const btn = document.createElement('button');
-      btn.className = 'choice-btn' + (answers[testIndex] === ci ? ' selected' : '');
+      const isSelected = answers[testIndex].includes(ci);
+      btn.className = 'choice-btn' + (isSelected ? ' selected' : '');
       btn.textContent = c.text || `(Lựa chọn ${ci+1})`;
-      btn.onclick = () => { answers[testIndex] = ci; renderTestQuestion(); };
+      btn.onclick = () => { 
+        const selectedIndex = answers[testIndex].indexOf(ci);
+        
+        if (isSingleAnswer) {
+          // For single answer questions, replace the selection
+          if (selectedIndex === -1) {
+            answers[testIndex] = [ci]; // Replace with new selection
+          } else {
+            answers[testIndex] = []; // Deselect if clicking the same option
+          }
+        } else {
+          // For multiple answer questions, toggle the selection
+          if (selectedIndex === -1) {
+            answers[testIndex].push(ci);
+          } else {
+            answers[testIndex].splice(selectedIndex, 1);
+          }
+        }
+        
+        renderTestQuestion(); 
+      };
       testChoices.append(btn);
     });
+
+    // Removed instruction text as per user request
 
     btnPrevQ.disabled = (testIndex === 0);
     btnNextQ.disabled = (testIndex === total-1);
@@ -239,72 +282,130 @@
   }
 
   function computeResult(){
-    let correct = 0;
-    const details = quiz.questions.map((q, qi) => {
-      const correctIndex = q.choices.findIndex(c=>c.correct);
-      const user = answers[qi];
-      const ok = user === correctIndex;
-      if(ok) correct++;
-      return { question: q.text, correctIndex, userIndex: user, ok, choices: q.choices };
+    const details = [];
+    let totalScore = 0;
+    
+    quiz.questions.forEach((q, qi) => {
+      const correctIndices = q.choices.map((c, i) => c.correct ? i : -1).filter(i => i !== -1);
+      const userSelections = Array.isArray(answers[qi]) ? answers[qi] : [];
+      
+      // Calculate correct and wrong answers
+      const correctSelections = userSelections.filter(sel => correctIndices.includes(sel));
+      const wrongSelections = userSelections.filter(sel => !correctIndices.includes(sel));
+      
+      // Calculate score for this question (0 to 1)
+      let score = 0;
+      if (correctIndices.length > 0) {
+        // Each correct answer adds 1/correctCount, each wrong answer subtracts 1/correctCount
+        const correctCount = correctIndices.length;
+        let questionScore = (correctSelections.length / correctCount) - (wrongSelections.length / correctCount);
+        // Ensure score is between 0 and 1
+        score = Math.max(0, Math.min(1, questionScore));
+      }
+      
+      // Add to total score (each question is worth 1 point max)
+      totalScore += score;
+      
+      details.push({
+        question: q.text,
+        correctIndices,
+        userSelections,
+        correctSelections,
+        wrongSelections,
+        score,  // This is now between 0 and 1
+        maxScore: 1,  // Each question is worth 1 point max
+        choices: q.choices
+      });
     });
-    return { total: quiz.questions.length, correct, details };
+    
+    // Calculate final score (0 to 1)
+    const finalScore = quiz.questions.length > 0 ? totalScore / quiz.questions.length : 0;
+    
+    return {
+      total: quiz.questions.length,
+      score: finalScore,  // This is now between 0 and 1
+      maxScore: 1,  // Max score is 1 (100%)
+      details
+    };
   }
 
   function renderResult(){
     const r = computeResult();
-    resultSummary.innerHTML = `<div><strong>Tổng điểm:</strong> ${r.correct}/${r.total}</div>`;
+    resultSummary.innerHTML = `
+      <div><strong>Tổng điểm:</strong> ${r.score}/${r.maxScore} (${Math.round((r.score/r.maxScore)*100)}%)</div>
+      <div><strong>Số câu:</strong> ${r.total}</div>
+    `;
+    
     resultDetail.innerHTML = '';
     r.details.forEach((d, i) => {
       const card = document.createElement('div');
       card.className = 'detail-card';
+      
       const h = document.createElement('div');
-      h.innerHTML = `<strong>Câu ${i+1}:</strong> ${escapeHtml(d.question || '')}`;
-      const s = document.createElement('div');
-      s.className = d.ok ? 'correct' : 'incorrect';
-      s.textContent = d.ok ? 'Đúng' : 'Sai';
+      h.innerHTML = `<strong>Câu ${i+1}:</strong> ${escapeHtml(d.question||'')}`;
+      
+      // Show score for this question
+      const scoreText = document.createElement('div');
+      scoreText.className = 'question-score';
+      scoreText.textContent = `Điểm: ${d.score}/${d.maxScore}`;
+      if (d.score === d.maxScore) {
+        scoreText.classList.add('correct');
+      } else if (d.score === 0) {
+        scoreText.classList.add('incorrect');
+      } else {
+        scoreText.classList.add('partial');
+      }
+      
       const list = document.createElement('div');
       list.style.marginTop = '8px';
-      d.choices.forEach((c, ci)=>{
-        const isCorrect = (ci === d.correctIndex);
-        const isPicked = (ci === d.userIndex);
-
+      
+      d.choices.forEach((c, ci) => {
+        const isCorrect = d.correctIndices.includes(ci);
+        const isPicked = d.userSelections.includes(ci);
+        const isCorrectlyPicked = isCorrect && isPicked;
+        const isWronglyPicked = !isCorrect && isPicked;
+        
         const line = document.createElement('div');
-        line.className = 'ans-line' + (isCorrect ? ' is-correct' : '') + (isPicked ? ' is-picked' : '');
-
+        line.className = 'ans-line' + 
+          (isCorrect ? ' is-correct' : '') + 
+          (isPicked ? ' is-picked' : '') +
+          (isWronglyPicked ? ' is-wrong' : '');
+          
         const head = document.createElement('div');
         head.className = 'ans-head';
-
+        
         const text = document.createElement('div');
         text.className = 'ans-text';
         text.textContent = c.text || '';
-
         head.appendChild(text);
-
+        
         if(isCorrect){
-          const pillC = document.createElement('span');
-          pillC.className = 'pill pill-correct';
-          pillC.textContent = 'Đáp án đúng';
-          head.appendChild(pillC);
+          const t = document.createElement('span');
+          t.className = 'pill pill-correct';
+          t.textContent = 'Đáp án đúng';
+          head.appendChild(t);
         }
+        
         if(isPicked){
-          const pillP = document.createElement('span');
-          pillP.className = 'pill ' + (isCorrect ? 'pill-picked' : 'pill-wrong');
-          pillP.textContent = 'Bạn chọn';
-          head.appendChild(pillP);
+          const t = document.createElement('span');
+          t.className = 'pill ' + (isCorrect ? 'pill-picked' : 'pill-wrong');
+          t.textContent = 'Bạn chọn';
+          head.appendChild(t);
         }
-
+        
         line.appendChild(head);
-
-        if(c.explanation){
+        
+        if(c.explanation && (isCorrectlyPicked || isWronglyPicked)){
           const ex = document.createElement('div');
           ex.className = 'exp';
           ex.textContent = c.explanation;
           line.appendChild(ex);
         }
-
+        
         list.appendChild(line);
       });
-      card.append(h, s, list);
+      
+      card.append(h, scoreText, list);
       resultDetail.append(card);
     });
   }
@@ -455,38 +556,118 @@
   // Handle loading quiz JSON
   fileOpen.onchange = (e) => {
     const file = e.target.files && e.target.files[0];
-    if(!file) return;
+    if (!file) return;
+    
     const reader = new FileReader();
     reader.onload = () => {
-      try{
-        const data = JSON.parse(String(reader.result));
-        const err = validateQuiz(data);
-        if(err){ alert('Lỗi dữ liệu: ' + err); return; }
+      try {
+        const fileContent = String(reader.result).trim();
+        if (!fileContent) {
+          throw new Error('File trống');
+        }
+        
+        let data;
+        try {
+          // First try to parse as-is
+          data = JSON.parse(fileContent);
+        } catch (parseError) {
+          console.log('Initial parse failed, trying to clean JSON...', parseError);
+          
+          // Try to fix common JSON issues with a simpler approach
+          try {
+            // Remove BOM if present
+            let fixedContent = fileContent.replace(/^\uFEFF/, '');
+            
+            // Remove single-line comments (not standard JSON but sometimes present)
+            fixedContent = fixedContent.replace(/\/\/(.*?)(\r\n|\r|\n|$)/g, '');
+            
+            // Remove multi-line comments (not standard JSON but sometimes present)
+            fixedContent = fixedContent.replace(/\/\*[\s\S]*?\*\//g, '');
+            
+            // Fix trailing commas in objects and arrays
+            fixedContent = fixedContent.replace(/,\s*([}\]])/g, '$1');
+            
+            // Fix single quotes to double quotes
+            fixedContent = fixedContent.replace(/'/g, '"');
+            
+            // Fix unquoted property names
+            fixedContent = fixedContent.replace(/([\{\,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
+            
+            // Fix trailing commas in arrays and objects
+            fixedContent = fixedContent.replace(/,\s*([}\]])/g, '$1');
+            
+            console.log('Cleaned JSON:', fixedContent);
+            data = JSON.parse(fixedContent);
+          } catch (fixError) {
+            console.error('Failed to parse JSON after cleaning:', fixError);
+            throw new Error('Định dạng JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp file.');
+          }
+        }
+        
+        // Handle both direct question array and { questions: [...] } format
+        let questions = [];
+        if (Array.isArray(data)) {
+          questions = data;
+        } else if (data && Array.isArray(data.questions)) {
+          questions = data.questions;
+          // Preserve other properties like title if they exist
+          if (data.title) {
+            quiz.title = data.title;
+          }
+        } else {
+          throw new Error('Định dạng dữ liệu không hợp lệ. File phải chứa mảng câu hỏi hoặc đối tượng có thuộc tính questions.');
+        }
+        
+        // Validate each question
+        for (let i = 0; i < questions.length; i++) {
+          const q = questions[i];
+          if (!q || typeof q !== 'object') {
+            throw new Error(`Câu hỏi thứ ${i + 1} không hợp lệ`);
+          }
+          if (!Array.isArray(q.choices) || q.choices.length < 2) {
+            throw new Error(`Câu hỏi thứ ${i + 1} phải có ít nhất 2 lựa chọn`);
+          }
+          // Ensure correctAnswers array exists
+          if (!q.correctAnswers || !Array.isArray(q.correctAnswers)) {
+            q.correctAnswers = (q.choices || [])
+              .map((c, idx) => c.correct ? idx : -1)
+              .filter(idx => idx !== -1);
+          }
+        }
+        
         const appendMode = (openContext === 'edit' ? (chkAppend && chkAppend.checked) : (chkAppendTest && chkAppendTest.checked)) && quiz.questions.length > 0;
-        if(appendMode){
-          const addCount = Array.isArray(data.questions) ? data.questions.length : 0;
-          if(addCount === 0){ alert('File không có câu hỏi để thêm'); return; }
-          quiz.questions.push(...data.questions);
+        
+        if (appendMode) {
+          if (questions.length === 0) {
+            throw new Error('File không có câu hỏi để thêm');
+          }
+          quiz.questions.push(...questions);
           renderEditor();
-          const msg = `Đã thêm ${addCount} câu từ: ${file.name}`;
+          const msg = `Đã thêm ${questions.length} câu từ: ${file.name}`;
           editStatus.textContent = msg;
-          if(!testStage.classList.contains('hidden')){
+          if (!testStage.classList.contains('hidden')) {
             testStatus.textContent = msg + '. Hãy bấm "Làm lại" để thi với đề mới.';
           }
         } else {
-          quiz = data;
+          quiz.questions = questions;
           renderEditor();
-          editStatus.textContent = `Đã mở: ${file.name}`;
+          editStatus.textContent = `Đã mở: ${file.name} (${questions.length} câu)`;
           // sync test view like local load behavior
           testTitle.textContent = quiz.title || 'Bài kiểm tra';
           testStage.classList.add('hidden');
           testStatus.textContent = '';
         }
-      }catch(err){
-        alert('Không đọc được JSON');
+      } catch (err) {
+        console.error('Lỗi khi đọc file:', err);
+        alert(`Lỗi: ${err.message || 'Không đọc được file JSON. Vui lòng kiểm tra lại định dạng file.'}`);
       }
     };
-    reader.readAsText(file);
+    
+    reader.onerror = () => {
+      alert('Lỗi khi đọc file. Vui lòng thử lại.');
+    };
+    
+    reader.readAsText(file, 'UTF-8');
     // reset input to allow re-open same file
     e.target.value = '';
   };

@@ -1,0 +1,40 @@
+{
+  "title": "Learning about careers in project management",
+  "questions": [
+    {
+      "text": "When you review a job listing, which section offers the most insight when deciding if the role is well-suited for you?",
+      "choices": [
+        {"text": "Job salary", "explanation": "", "correct": false},
+        {"text": "Job description", "explanation": "", "correct": true},
+        {"text": "Job location", "explanation": "", "correct": false},
+        {"text": "Job benefits", "explanation": "", "correct": false}
+      ]
+    },
+    {
+      "text": "Which of the following might be part of a job description for an entry-level project manager role?",
+      "choices": [
+        {"text": "Our North Coast branch needs a new Junior Project Manager who can channel drive and enthusiasm. You'll be front and center, hands-on, and contributing your creative energy to high-impact projects.", "explanation": "", "correct": true},
+        {"text": "Our leadership team is currently looking for a Senior Project Manager to support our clients in the Life Sciences and Industrial sectors.", "explanation": "", "correct": false},
+        {"text": "Our business group is hiring an experienced project management professional who has a broad understanding of solutions and industry best practices.", "explanation": "", "correct": false},
+        {"text": "Our company is seeking a Program Manager with experience managing a team in the Agile framework.", "explanation": "", "correct": false}
+      ]
+    },
+    {
+      "text": "Which of the following best exemplifies the progression of a project management career?",
+      "choices": [
+        {"text": "Program manager to project manager to portfolio manager", "explanation": "", "correct": false},
+        {"text": "Project manager to program manager to portfolio manager", "explanation": "", "correct": true},
+        {"text": "Project manager to portfolio manager to program manager", "explanation": "", "correct": false}
+      ]
+    },
+    {
+      "text": "What three types of information can be helpful to include in your search for project management roles? Select the three options that apply:",
+      "choices": [
+        {"text": "Skills you've acquired in your current or previous position", "explanation": "", "correct": true},
+        {"text": "Common project management-related buzzwords like “process improvement” and “risk management”", "explanation": "", "correct": true},
+        {"text": "Essential project management skills like coordination, organization, and leadership", "explanation": "", "correct": true},
+        {"text": "Training you may gain later in your project management career", "explanation": "", "correct": false}
+      ]
+    }
+  ]
+}
