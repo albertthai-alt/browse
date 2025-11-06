@@ -131,6 +131,7 @@
   let idx = 0;
   let testIdx = 0;
   let testOrder = [];
+  let knownCards = new Set(); // Track known card indices
   
   // Toggle star status for a card (only updates in memory, doesn't save to file)
   function toggleStar(cardIndex) {
@@ -141,12 +142,53 @@
     }
   }
   
+  // Toggle known status for a card
+  function toggleKnown(cardIndex) {
+    if (cardIndex >= 0 && cardIndex < cards.length) {
+      if (knownCards.has(cardIndex)) {
+        knownCards.delete(cardIndex);
+      } else {
+        knownCards.add(cardIndex);
+      }
+      updateKnownButton(cardIndex);
+      updateNextButtonText();
+    }
+  }
+  
   // Update star button appearance based on card's starred status
   function updateStarButton(cardIndex) {
     const starBtn = document.getElementById('starBtn');
-    if (starBtn) {
-      starBtn.innerHTML = cards[cardIndex]?.starred ? '★' : '☆';
-      starBtn.style.color = cards[cardIndex]?.starred ? '#ffd700' : '#ccc';
+    if (starBtn && cardIndex >= 0 && cardIndex < cards.length) {
+      const isStarred = cards[cardIndex]?.starred;
+      starBtn.innerHTML = isStarred ? '★' : '☆';
+      starBtn.style.color = isStarred ? '#ffd700' : '#ccc';
+      starBtn.classList.toggle('starred', isStarred);
+    }
+  }
+  
+  // Update known button appearance
+  function updateKnownButton(cardIndex) {
+    const knownBtn = document.getElementById('knownBtn');
+    if (knownBtn) {
+      const isKnown = knownCards.has(cardIndex);
+      knownBtn.innerHTML = isKnown ? '✓' : '?';
+      knownBtn.style.color = isKnown ? '#4CAF50' : '#ccc';
+      knownBtn.title = isKnown ? 'Bỏ đánh dấu đã biết' : 'Đánh dấu đã biết';
+    }
+  }
+  
+  // Update next button text based on known cards
+  function updateNextButtonText() {
+    const currentCards = getCurrentCards();
+    const isLastCard = idx === currentCards.length - 1;
+    const hasKnownCards = knownCards.size > 0;
+    
+    if (nextBtn) {
+      if (isLastCard && hasKnownCards) {
+        nextBtn.textContent = 'Học tiếp';
+      } else {
+        nextBtn.textContent = 'Tiếp ▶';
+      }
     }
   }
   let mode = 'study';
@@ -771,10 +813,15 @@ start();
 
   // Function to get current cards based on filters
   function getCurrentCards() {
+    // Always return a fresh copy of cards to avoid reference issues
+    let currentCards = JSON.parse(JSON.stringify(cards));
+    
+    // Apply star filter if needed
     if (chkStarred && chkStarred.checked) {
-      return cards.filter(card => card.starred);
+      currentCards = currentCards.filter(card => card.starred);
     }
-    return cards;
+    
+    return currentCards;
   }
 
   // Update card count display
@@ -786,18 +833,34 @@ start();
 
   function renderStudy() {
     const currentCards = getCurrentCards();
-    if (!currentCards.length) {
+    const filteredCards = currentCards.filter((card, index) => {
+      const cardIndex = cards.findIndex(c => 
+        c.term === card.term && c.definition === card.definition
+      );
+      return !knownCards.has(cardIndex);
+    });
+    
+    if (filteredCards.length === 0) {
       cardArea.hidden = true;
+      // If no cards left but we have known cards, reset to show all cards
+      if (knownCards.size > 0) {
+        knownCards.clear();
+        idx = 0;
+        renderStudy();
+      }
       return;
+    }
+    
+    // Ensure idx is within bounds for filtered cards
+    if (idx >= filteredCards.length) {
+      idx = Math.max(0, filteredCards.length - 1);
     }
     cardArea.hidden = false;
     
-    // Ensure idx is within bounds
-    if (idx >= currentCards.length) {
-      idx = 0;
-    }
-    
-    const c = currentCards[idx];
+    const c = filteredCards[idx];
+    const currentCardIndex = cards.findIndex(card => 
+      card.term === c.term && card.definition === c.definition
+    );
     
     // Set card content based on study direction
     if (studyDirection === 'def_to_term') {
@@ -810,8 +873,11 @@ start();
     card.classList.remove('flipped');
     progressIndex.textContent = String(idx + 1);
     // Show filtered card count in study mode
-    progressTotal.textContent = String(currentCards.length);
-    updateStarButton(idx);
+    progressTotal.textContent = String(filteredCards.length);
+    
+    // Update buttons with the correct card index from the original cards array
+    updateStarButton(currentCardIndex);
+    updateKnownButton(currentCardIndex);
   }
 
   function normalize(s) {
@@ -1845,6 +1911,47 @@ start();
     try { synth.speak(utterance); } catch {}
   }
 
+  // Create known button
+  const knownBtn = document.createElement('button');
+  knownBtn.id = 'knownBtn';
+  knownBtn.className = 'known-btn';
+  knownBtn.textContent = '?';
+  knownBtn.style.position = 'absolute';
+  knownBtn.style.top = '10px';
+  knownBtn.style.right = '50px';
+  knownBtn.style.background = 'none';
+  knownBtn.style.border = 'none';
+  knownBtn.style.fontSize = '24px';
+  knownBtn.style.cursor = 'pointer';
+  knownBtn.style.zIndex = '10';
+  knownBtn.style.color = '#ccc';
+  knownBtn.title = 'Đánh dấu đã biết';
+  knownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const currentCards = getCurrentCards();
+    const filteredCards = currentCards.filter((card) => {
+      const cardIndex = cards.findIndex(c => 
+        c.term === card.term && c.definition === card.definition
+      );
+      return !knownCards.has(cardIndex);
+    });
+    
+    if (filteredCards.length > 0 && idx >= 0 && idx < filteredCards.length) {
+      const currentCard = filteredCards[idx];
+      const cardIndex = cards.findIndex(card => 
+        card.term === currentCard.term && 
+        card.definition === currentCard.definition
+      );
+      
+      if (cardIndex !== -1) {
+        toggleKnown(cardIndex);
+        // Move to next card after marking as known
+        setTimeout(() => navigateCard(1), 300);
+      }
+    }
+  });
+  card.appendChild(knownBtn);
+
   // Create star button
   const starBtn = document.createElement('button');
   starBtn.id = 'starBtn';
@@ -1862,7 +1969,17 @@ start();
   starBtn.title = 'Đánh dấu sao (chỉ lưu khi nhấn nút Lưu thẻ)';
   starBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleStar(idx);
+    const currentCards = getCurrentCards();
+    if (currentCards.length > 0 && idx >= 0 && idx < currentCards.length) {
+      const currentCard = currentCards[idx];
+      const cardIndex = cards.findIndex(card => 
+        card.term === currentCard.term && 
+        card.definition === currentCard.definition
+      );
+      if (cardIndex !== -1) {
+        toggleStar(cardIndex);
+      }
+    }
   });
   card.appendChild(starBtn);
   
@@ -1899,8 +2016,29 @@ start();
   function navigateCard(offset) {
     if (mode === 'study') {
       const currentCards = getCurrentCards();
-      idx = (idx + offset + currentCards.length) % currentCards.length;
+      const filteredCards = currentCards.filter((_, index) => !knownCards.has(cards.indexOf(currentCards[index])));
+      
+      if (filteredCards.length === 0) {
+        // No more cards to show, reset known cards and start over
+        knownCards.clear();
+        idx = 0;
+      } else {
+        const isLastCard = idx === filteredCards.length - 1 && offset > 0;
+        const isFirstCard = idx === 0 && offset < 0;
+        
+        // Handle "Học tiếp" button
+        if (isLastCard && knownCards.size > 0) {
+          // Reset index and clear known cards for the next round
+          idx = 0;
+          knownCards.clear();
+        } else {
+          // Normal navigation
+          idx = (idx + offset + filteredCards.length) % filteredCards.length;
+        }
+      }
+      
       renderStudy();
+      updateNextButtonText();
       
       // Read the front of the card if 'Đọc' is enabled
       if (chkRead && chkRead.checked) {

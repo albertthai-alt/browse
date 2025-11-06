@@ -93,9 +93,20 @@ input[type="file"] { padding: 6px; }
   background: rgba(0, 0, 0, 0.05);
 }
 
+.star-btn:hover { color: #ffd700 !important; }
+
 .star-btn.starred {
   color: #ffd700;
   opacity: 1;
+}
+
+.known-btn {
+  transition: all 0.2s ease;
+}
+
+.known-btn:hover {
+  color: #4CAF50 !important;
+  transform: scale(1.1);
 }
 
 /* Dark mode support */
