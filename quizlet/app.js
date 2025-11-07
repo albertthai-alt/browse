@@ -171,8 +171,9 @@
     const knownBtn = document.getElementById('knownBtn');
     if (knownBtn) {
       const isKnown = knownCards.has(cardIndex);
-      knownBtn.innerHTML = isKnown ? '✓' : '?';
+      knownBtn.innerHTML = isKnown ? '✓' : '✓';
       knownBtn.style.color = isKnown ? '#4CAF50' : '#ccc';
+      knownBtn.style.opacity = isKnown ? '1' : '0.5';
       knownBtn.title = isKnown ? 'Bỏ đánh dấu đã biết' : 'Đánh dấu đã biết';
     }
   }
@@ -1915,7 +1916,7 @@ start();
   const knownBtn = document.createElement('button');
   knownBtn.id = 'knownBtn';
   knownBtn.className = 'known-btn';
-  knownBtn.textContent = '?';
+  knownBtn.textContent = '✓';
   knownBtn.style.position = 'absolute';
   knownBtn.style.top = '10px';
   knownBtn.style.right = '50px';
@@ -1929,6 +1930,8 @@ start();
   knownBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const currentCards = getCurrentCards();
+    
+    // Get the current card from the filtered list
     const filteredCards = currentCards.filter((card) => {
       const cardIndex = cards.findIndex(c => 
         c.term === card.term && c.definition === card.definition
@@ -1944,9 +1947,40 @@ start();
       );
       
       if (cardIndex !== -1) {
+        // Store the current card's index for comparison
+        const currentCardBeforeToggle = filteredCards[idx];
+        
+        // Toggle the known status
         toggleKnown(cardIndex);
-        // Move to next card after marking as known
-        setTimeout(() => navigateCard(1), 300);
+        
+        // Re-render to update the UI with the new known status
+        renderStudy();
+        
+        // After rendering, check if we have a new card in this position
+        const currentCardsAfterToggle = getCurrentCards();
+        const newFilteredCards = currentCardsAfterToggle.filter(card => {
+          const idx = cards.findIndex(c => 
+            c.term === card.term && c.definition === card.definition
+          );
+          return !knownCards.has(idx);
+        });
+        
+        if (newFilteredCards.length > 0 && idx < newFilteredCards.length) {
+          const newCard = newFilteredCards[idx];
+          // If we have a new card in this position, read it aloud
+          if (!currentCardBeforeToggle || 
+              newCard.term !== currentCardBeforeToggle.term || 
+              newCard.definition !== currentCardBeforeToggle.definition) {
+            
+            // Use the same logic as in navigateCard to read the text
+            if (chkRead && chkRead.checked) {
+              const textToRead = studyDirection === 'def_to_term' ? 
+                (newCard.definition || '') : 
+                (newCard.term || '');
+              speakText(textToRead);
+            }
+          }
+        }
       }
     }
   });
