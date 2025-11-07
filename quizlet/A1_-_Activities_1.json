@@ -1,46 +1,65 @@
 {
-  "title": "Thẻ ghi nhớ: A1 - Activities #1",
-  "count": 10,
+  "title": "Flashcards",
   "cards": [
     {
       "term": "check",
-      "definition": "kiểm tra"
+      "definition": "kiểm tra",
+      "starred": true,
+      "timestamp": "2025-11-07T00:20:38.851Z"
     },
     {
       "term": "write",
-      "definition": "viết"
+      "definition": "viết",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.864Z"
     },
     {
       "term": "choose",
-      "definition": "chọn"
+      "definition": "chọn",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "match",
-      "definition": "ghép"
+      "definition": "ghép",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "draw",
-      "definition": "vẽ"
+      "definition": "vẽ",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "color",
-      "definition": "tô màu"
+      "definition": "tô màu",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "read",
-      "definition": "đọc"
+      "definition": "đọc",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "complete",
-      "definition": "hoàn thành"
+      "definition": "hoàn thành",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "answer",
-      "definition": "trả lời"
+      "definition": "trả lời",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     },
     {
       "term": "listen",
-      "definition": "nghe"
+      "definition": "nghe",
+      "starred": false,
+      "timestamp": "2025-11-07T00:20:38.865Z"
     }
   ]
 }

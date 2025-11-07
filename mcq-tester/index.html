@@ -4,6 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCQ Tester - Local</title>
+  <style>
+    .star-checkbox {
+      margin-right: 8px;
+      transform: scale(1.3);
+      cursor: pointer;
+    }
+    .star-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 12px;
+    }
+    .starred-question {
+      background-color: #fff8e1 !important;
+      border-left: 3px solid #ffc107;
+    }
+  </style>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff9f43'/%3E%3Cpath d='M14 20h36v6H14zM14 30h24v6H14zM14 40h16v6H14z' fill='%23ffffff'/%3E%3C/svg%3E" />
 </head>
@@ -19,7 +36,7 @@
         <button id="tabTest" class="tab">Kiểm tra</button>
         <button id="tabResult" class="tab" disabled>Kết quả</button>
       </nav>
-      <div class="brand-sub">v1.3</div>
+      <div class="brand-sub">v1.4</div>
     </header>
 
     <main id="viewEdit" class="view">
@@ -62,13 +79,16 @@
       <section class="toolbar">
         <div class="test-title" id="testTitle"></div>
         <div class="spacer"></div>
-        <button id="btnLoadJsonTest" class="btn">Mở JSON</button>
+        <div class="star-filter">
+          <input type="checkbox" id="filterStarred">
+          <label for="filterStarred">Chỉ làm câu đánh dấu sao</label>
+        </div>
+        <button id="btnStartTest" class="btn primary">Bắt đầu</button>
         <button id="btnLoadResultsJson" class="btn">Mở kết quả</button>
         <label class="small" style="display:flex;align-items:center;gap:6px;">
           <input id="chkAppendTest" type="checkbox" /> Mở thêm
         </label>
         <button id="btnGhRefreshTest" class="btn">Tải danh sách</button>
-        <button id="btnStartTest" class="btn primary">Bắt đầu</button>
       </section>
       <section id="ghPanelTest" class="panel">
         <div class="small" style="margin-bottom:8px;">Nguồn file JSON từ Github repo: <code>albertthai-alt/browse</code>, thư mục: <code>/mcq-tester</code></div>
@@ -103,7 +123,7 @@
       </section>
     </main>
 
-    <footer class="footer">Dữ liệu xử lý hoàn toàn trên trình duyệt.</footer>
+    <footer class="footer">Tác giả: Albert Thai</footer>
   </div>
   <script src="./app.js"></script>
 </body>

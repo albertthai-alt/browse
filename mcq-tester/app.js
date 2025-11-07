@@ -1,6 +1,7 @@
 (function(){
   // Data model
   let quiz = { title: '', questions: [] };
+  let testQuestions = []; // Will store the shuffled version of questions for testing
   let mode = 'edit';
   let testIndex = 0;
   let answers = []; // selected choice index per question, or null
@@ -61,6 +62,16 @@
   const ghListTest = $('#ghListTest');
 
   // Utilities
+  function shuffleArray(array) {
+    // Create a copy of the array to avoid modifying the original
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }
+
   function download(filename, dataStr) {
     const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -114,6 +125,7 @@
 
   // Rendering - Editor
   function renderEditor(){
+    // Always use the full list of questions to preserve all data including stars
     titleInput.value = quiz.title || '';
     editor.innerHTML = '';
     quiz.questions.forEach((q, qi) => {
@@ -126,6 +138,18 @@
       const title = document.createElement('div');
       title.className = 'q-title';
       title.textContent = `Câu ${qi+1}`;
+      
+      // Add star checkbox
+      const starCheckbox = document.createElement('input');
+      starCheckbox.type = 'checkbox';
+      starCheckbox.className = 'star-checkbox';
+      starCheckbox.checked = !!q.starred;
+      starCheckbox.title = 'Đánh dấu sao câu hỏi';
+      starCheckbox.onchange = (e) => {
+        q.starred = e.target.checked;
+      };
+      title.prepend(starCheckbox);
+      
       const actions = document.createElement('div');
       actions.className = 'q-actions';
       const btnAddChoice = document.createElement('button');
@@ -219,10 +243,21 @@
     editStatus.textContent = quiz.questions.length ? `Đang soạn ${quiz.questions.length} câu hỏi` : 'Chưa có câu hỏi';
   }
 
+  // Add filter for starred questions
+  function getFilteredQuestions() {
+    const filterStarred = $('#filterStarred')?.checked;
+    if (filterStarred) {
+      // Return a new array to avoid modifying the original questions
+      return quiz.questions.filter(q => q.starred).map(q => ({...q}));
+    }
+    // Return a shallow copy to prevent accidental modifications
+    return [...quiz.questions];
+  }
+
   // Test rendering
   function renderTestQuestion(){
-    const total = quiz.questions.length;
-    const q = quiz.questions[testIndex];
+    const total = testQuestions.length;
+    const q = testQuestions[testIndex];
     testProgress.textContent = `Câu ${testIndex+1}/${total}`;
     testQuestion.textContent = q.text || '(Không có nội dung)';
     testChoices.innerHTML = '';
@@ -274,7 +309,29 @@
   function startTest(){
     const err = validateQuiz(quiz);
     if(err){ alert(err); return; }
-    answers = new Array(quiz.questions.length).fill(null);
+    const questions = getFilteredQuestions();
+    
+    // Create a shuffled version of each question's choices for the test
+    testQuestions = questions.map(q => {
+      // Create a deep copy of the question
+      const questionCopy = JSON.parse(JSON.stringify(q));
+      
+      // Store original indices before shuffling
+      questionCopy.originalIndices = q.choices.map((_, i) => i);
+      
+      // Shuffle the choices and keep track of the mapping
+      const shuffledIndices = shuffleArray([...Array(q.choices.length).keys()]);
+      questionCopy.choices = shuffledIndices.map(i => q.choices[i]);
+      
+      // Update correct answers to use the new indices
+      questionCopy.correctAnswers = q.correctAnswers.map(originalIndex => 
+        shuffledIndices.indexOf(originalIndex)
+      ).filter(i => i !== -1);
+      
+      return questionCopy;
+    });
+    
+    answers = new Array(testQuestions.length).fill(null);
     testIndex = 0;
     testTitle.textContent = quiz.title || 'Bài kiểm tra';
     testStage.classList.remove('hidden');
@@ -285,8 +342,13 @@
     const details = [];
     let totalScore = 0;
     
-    quiz.questions.forEach((q, qi) => {
-      const correctIndices = q.choices.map((c, i) => c.correct ? i : -1).filter(i => i !== -1);
+    // Use the original questions (not the shuffled ones) for result calculation
+    const originalQuestions = getFilteredQuestions();
+    
+    testQuestions.forEach((testQ, qi) => {
+      // Find the corresponding original question and get correct answers
+      const originalQ = originalQuestions[qi];
+      const correctIndices = testQ.correctAnswers;
       const userSelections = Array.isArray(answers[qi]) ? answers[qi] : [];
       
       // Calculate correct and wrong answers
@@ -307,22 +369,22 @@
       totalScore += score;
       
       details.push({
-        question: q.text,
+        question: testQ.text,
         correctIndices,
         userSelections,
         correctSelections,
         wrongSelections,
         score,  // This is now between 0 and 1
         maxScore: 1,  // Each question is worth 1 point max
-        choices: q.choices
+        choices: testQ.choices
       });
     });
     
     // Calculate final score (0 to 1)
-    const finalScore = quiz.questions.length > 0 ? totalScore / quiz.questions.length : 0;
+    const finalScore = testQuestions.length > 0 ? totalScore / testQuestions.length : 0;
     
     return {
-      total: quiz.questions.length,
+      total: testQuestions.length,
       score: finalScore,  // This is now between 0 and 1
       maxScore: 1,  // Max score is 1 (100%)
       details
@@ -335,6 +397,42 @@
       <div><strong>Tổng điểm:</strong> ${r.score}/${r.maxScore} (${Math.round((r.score/r.maxScore)*100)}%)</div>
       <div><strong>Số câu:</strong> ${r.total}</div>
     `;
+    
+    // Remove any existing star button first to prevent duplicates
+    const existingStarBtn = document.getElementById('btnStarIncorrect');
+    if (existingStarBtn) {
+      existingStarBtn.remove();
+    }
+    
+    // Add button to star incorrect answers
+    const btnStarIncorrect = document.createElement('button');
+    btnStarIncorrect.id = 'btnStarIncorrect';
+    btnStarIncorrect.className = 'btn';
+    btnStarIncorrect.innerHTML = '⭐ Đánh dấu sao các câu sai';
+    btnStarIncorrect.onclick = () => {
+      r.details.forEach((d, i) => {
+        if (d.score < d.maxScore) {
+          // Find the original question index in the quiz
+          const originalIndex = quiz.questions.findIndex(q => q.text === d.question);
+          if (originalIndex !== -1) {
+            quiz.questions[originalIndex].starred = true;
+          }
+        }
+      });
+      // Show feedback
+      const status = document.createElement('div');
+      status.className = 'status success';
+      status.textContent = 'Đã đánh dấu sao các câu trả lời sai';
+      resultSummary.appendChild(status);
+      setTimeout(() => status.remove(), 3000);
+    };
+    
+    // Add the button to the toolbar
+    const toolbar = document.querySelector('#viewResult .toolbar');
+    const retakeBtn = document.getElementById('btnRetake');
+    if (toolbar && retakeBtn) {
+      toolbar.insertBefore(btnStarIncorrect, retakeBtn);
+    }
     
     resultDetail.innerHTML = '';
     r.details.forEach((d, i) => {
@@ -436,6 +534,8 @@
       tabEdit.classList.add('active');
       viewEdit.classList.remove('hidden');
       tabResult.disabled = true;
+      // Force re-render editor to reflect any changes (like star marks)
+      renderEditor();
     } else if(m==='test'){
       tabTest.classList.add('active');
       viewTest.classList.remove('hidden');
