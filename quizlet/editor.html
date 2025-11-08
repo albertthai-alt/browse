@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor</title>
+    <title>Editor v1.1</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFA500'><path d='M20.71 5.63l-2.34-2.34a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83a1 1 0 0 0 0-1.42zM3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z'/></svg>" type="image/svg+xml">
     <style>
         /* Read button styles */
@@ -195,8 +195,9 @@
     </style>
 </head>
 <body>
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
         <h1>Editor</h1>
+        <span style="color: #666; font-size: 0.9em;">v1.1</span>
     </div>
     
     <!-- English to Vietnamese -->
@@ -276,11 +277,6 @@
     </div>
     
     <div class="button-container" style="display: flex; align-items: center; gap: 15px;">
-        <div style="display: flex; align-items: center;">
-            <button id="saveBtn" style="background-color: #34a853;">Lưu tạm tất cả</button>
-            <span style="margin: 0 10px; color: #666; font-size: 0.9em;">Lần lưu cuối:</span>
-            <span id="lastSaved" style="color: #666; font-size: 0.9em;">-</span>
-        </div>
     </div>
     
     <div id="cardPreview" style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; display: none;">
@@ -343,41 +339,63 @@
             return cards;
         };
 
-        // Function to save all data to localStorage
-        function saveAllData() {
+        // API configuration
+        const API_MASTER_KEY = '$2a$10$xn4fMyT.KvPOUmj84gm9t.YtAcoyYCV6Vti1YZtWz9Ivo3EUq0eCy';
+        const BIN_ID = '690d8f53d0ea881f40d91199';
+        const API_BASE_URL = 'https://api.jsonbin.io/v3/b';
+        
+        // Function to save all data to jsonbin.io
+        async function saveAllData() {
             try {
                 // First get all current data
                 const enViCards = getAllCards('enViCardList');
                 const viEnCards = getAllCards('viEnCardList');
                 
-                // Clear all card data in localStorage
-                localStorage.removeItem('enViCards');
-                localStorage.removeItem('viEnCards');
+                // Prepare data to save
+                const dataToSave = {
+                    englishText: document.getElementById('englishText').value,
+                    vietnameseText: document.getElementById('vietnameseText').value,
+                    englishText2: document.getElementById('englishText2').value,
+                    vietnameseText2: document.getElementById('vietnameseText2').value,
+                    enViCards: enViCards,
+                    viEnCards: viEnCards,
+                    lastSaved: new Date().toISOString()
+                };
                 
-                // Save text inputs
-                const englishText = document.getElementById('englishText').value;
-                const vietnameseText = document.getElementById('vietnameseText').value;
-                const englishText2 = document.getElementById('englishText2').value;
-                const vietnameseText2 = document.getElementById('vietnameseText2').value;
-                
-                // Save text areas to localStorage
-                localStorage.setItem('englishText', englishText);
-                localStorage.setItem('vietnameseText', vietnameseText);
-                localStorage.setItem('englishText2', englishText2);
-                localStorage.setItem('vietnameseText2', vietnameseText2);
-                
-                // Save deduplicated cards to localStorage
-                localStorage.setItem('enViCards', JSON.stringify(enViCards));
-                localStorage.setItem('viEnCards', JSON.stringify(viEnCards));
-                
-                // Update last saved time and display
+                // Save all data to the single bin
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${BIN_ID}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': API_MASTER_KEY,
+                            'X-Bin-Name': 'Flashcards',
+                            'X-Bin-Versioning': 'false'
+                        },
+                        body: JSON.stringify({
+                            enViCards,
+                            viEnCards,
+                            lastUpdated: new Date().toISOString()
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to save data (${response.status}): ${JSON.stringify(result)}`);
+                    }
+                } catch (error) {
+                    throw new Error(`Failed to save data: ${error.message}`);
+                };
+
+                // Update last saved time
                 const now = new Date();
                 localStorage.setItem('lastSaved', now.toISOString());
                 updateLastSavedDisplay();
-                
+
                 return true;
             } catch (error) {
-                console.error('Lỗi khi lưu dữ liệu:', error);
+                alert('Lỗi khi lưu dữ liệu: ' + error.message);
                 return false;
             }
         }
@@ -404,127 +422,206 @@
         // Function to update last saved time display
         const updateLastSavedDisplay = () => {
             try {
-                console.log('Updating last saved display...');
-                const savedTime = localStorage.getItem('lastSaved');
-                console.log('Saved time from localStorage:', savedTime);
-                
                 const lastSavedEl = document.getElementById('lastSaved');
-                if (!lastSavedEl) {
-                    console.error('Could not find lastSaved element');
+                if (!lastSavedEl) return;
+                
+                // The last saved time is now managed in the data object from jsonbin.io
+                // This function is kept for backward compatibility
+                if (lastSavedEl.textContent === 'Đang tải...' || lastSavedEl.textContent === 'Chưa lưu') {
+                    // Don't override the loading or not saved state
                     return;
                 }
                 
-                if (savedTime) {
-                    const date = new Date(savedTime);
-                    lastSavedEl.textContent = date.toLocaleString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                } else {
-                    lastSavedEl.textContent = '-';
+                // If we have a last saved time in the data, it will be shown by loadPageContent
+                // Otherwise, show 'Chưa lưu'
+                if (lastSavedEl.textContent === '') {
+                    lastSavedEl.textContent = 'Chưa lưu';
                 }
                 
             } catch (error) {
                 console.error('Error updating last saved display:', error);
-                const timeDisplay = document.getElementById('lastSavedTime');
-                if (timeDisplay) {
-                    timeDisplay.textContent = 'Lỗi tải thời gian';
-                    timeDisplay.style.color = '#ea4335';
+                const lastSavedEl = document.getElementById('lastSaved');
+                if (lastSavedEl) {
+                    lastSavedEl.textContent = 'Lỗi tải thời gian';
+                    lastSavedEl.style.color = '#ea4335';
                 }
             }
         };
 
         // Function to initialize the page
-        const initializePage = () => {
-            console.log('Initializing page...');
-            
-            // First, load and display the last saved time
-            updateLastSavedDisplay();
-            
-            // Then load the rest of the content
-            loadPageContent();
-        };
-        
-        // Function to load page content
-        const loadPageContent = () => {
-            console.log('Loading page content...');
-            
-            // Load text inputs from localStorage
-            const englishText = localStorage.getItem('englishText') || '';
-            const vietnameseText = localStorage.getItem('vietnameseText') || '';
-            const englishText2 = localStorage.getItem('englishText2') || '';
-            const vietnameseText2 = localStorage.getItem('vietnameseText2') || '';
-            
-            // Set the values in the text areas
-            document.getElementById('englishText').value = englishText;
-            document.getElementById('vietnameseText').value = vietnameseText;
-            document.getElementById('englishText2').value = englishText2;
-            document.getElementById('vietnameseText2').value = vietnameseText2;
-            
-            // Load card sets
-            loadCardSets();
-        };
-        
+        const initializePage = async () => {
+            try {
+                // Clear any existing data
+                const lastSavedEl = document.getElementById('lastSaved');
+                if (lastSavedEl) lastSavedEl.textContent = 'Đang tải...';
+
+                // Show loading state for card lists
+                const enViCardList = document.getElementById('enViCardList');
+                const viEnCardList = document.getElementById('viEnCardList');
+                if (enViCardList) enViCardList.innerHTML = '<div>Đang tải thẻ...</div>';
+                if (viEnCardList) viEnCardList.innerHTML = '<div>Đang tải thẻ...</div>';
+
+                // Try to load data from the single bin
+                const response = await fetch(`${API_BASE_URL}/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_MASTER_KEY
+                    }
+                }).catch(error => {
+                    console.error('Error loading data:', error);
+                    return { ok: false, status: 'error', error };
+                });
+
+                let data = {
+                    enViCards: [],
+                    viEnCards: []
+                };
+
+                // Process the response
+                if (response && response.ok) {
+                    try {
+                        const result = await response.json();
+                        if (result.record) {
+                            data = {
+                                enViCards: Array.isArray(result.record.enViCards) ? result.record.enViCards : [],
+                                viEnCards: Array.isArray(result.record.viEnCards) ? result.record.viEnCards : []
+                            };
+                        }
+                    } catch (e) {
+                        console.error('Error parsing data:', e);
+                    }
+                }
+
+                // Ensure we have arrays for cards
+                if (!Array.isArray(data.enViCards)) data.enViCards = [];
+                if (!Array.isArray(data.viEnCards)) data.viEnCards = [];
+
+                // Update text areas only if they're empty
+                const textElements = {
+                    'englishText': data.englishText,
+                    'vietnameseText': data.vietnameseText,
+                    'englishText2': data.englishText2,
+                    'vietnameseText2': data.vietnameseText2
+                };
+                
+                Object.entries(textElements).forEach(([id, value]) => {
+                    if (value) {  // Only update if we have a value from the server
+                        const element = document.getElementById(id);
+                        if (element && !element.value) {  // Only update if the field is empty
+                            element.value = value;
+                        }
+                    }
+                });
+
+                // Update last saved time
+                const lastSavedElement = document.getElementById('lastSaved');
+                if (lastSavedElement) {
+                    lastSavedElement.textContent = data.lastSaved ? formatTimestamp(data.lastSaved) : 'Chưa lưu';
+                }
+
+                // Clear and load card lists
+                if (enViCardList) enViCardList.innerHTML = '';
+                if (viEnCardList) viEnCardList.innerHTML = '';
+
+                // Load cards if we have data
+                if (data.enViCards && data.enViCards.length > 0) {
+                    loadCards('enViCardList', data.enViCards);
+                }
+                if (data.viEnCards && data.viEnCards.length > 0) {
+                    loadCards('viEnCardList', data.viEnCards);
+                }
+
+                // Show card preview if we have any cards
+                const cardPreview = document.getElementById('cardPreview');
+                const hasCards = (data.enViCards && data.enViCards.length > 0) || (data.viEnCards && data.viEnCards.length > 0);
+
+                if (cardPreview) {
+                    cardPreview.style.display = hasCards ? 'block' : 'none';
+                }
+
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                const lastSavedEl = document.getElementById('lastSaved');
+                if (lastSavedEl) lastSavedEl.textContent = 'Lỗi tải dữ liệu';
+                alert('Không thể tải dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.');
+            }
+        }
+
         // Function to load card sets with deduplication
         const loadCards = (cardListId, cardsData) => {
             const cardList = document.getElementById(cardListId);
-            if (!cardList || !Array.isArray(cardsData) || cardsData.length === 0) {
+            if (!cardList) return;
+
+            if (!Array.isArray(cardsData) || cardsData.length === 0) {
+                cardList.innerHTML = '<div class="no-cards">Chưa có thẻ nào</div>';
                 return;
             }
-            
+
             // Clear existing cards
             cardList.innerHTML = '';
-            
+
             // Use a Set to track unique cards
             const uniqueCards = [];
             const seen = new Set();
-            
-            // Filter out duplicates
+
+            // Filter out duplicates and handle different card formats
             cardsData.forEach(card => {
                 if (!card) return;
-                
-                const term = (card.term || '').trim();
-                const definition = (card.definition || '').trim();
-                
+
+                // Handle different card formats
+                let term, definition;
+
+                if (typeof card === 'object') {
+                    // Handle {term: '...', definition: '...'} format
+                    term = (card.term || card.front || '').toString().trim();
+                    definition = (card.definition || card.back || '').toString().trim();
+                } else if (Array.isArray(card) && card.length >= 2) {
+                    // Handle array format [term, definition]
+                    term = (card[0] || '').toString().trim();
+                    definition = (card[1] || '').toString().trim();
+                } else {
+                    // Skip if we can't parse the card
+                    return;
+                }
+
                 // Skip if both term and definition are empty
                 if (!term && !definition) return;
-                
-                const cardKey = `${term}|||${definition}`;
-                
+
+                const cardKey = `${term}|||${definition}`.toLowerCase();
+
                 if (!seen.has(cardKey)) {
                     seen.add(cardKey);
                     uniqueCards.push({ term, definition });
                 }
             });
-            
+
+            if (uniqueCards.length === 0) {
+                cardList.innerHTML = '<div class="no-cards">Chưa có thẻ nào</div>';
+                return;
+            }
+
             // Add unique cards to the list
             const isEnToVi = cardListId === 'enViCardList';
-            
-            uniqueCards.forEach(card => {
-                const cardContainer = document.createElement('div');
-                cardContainer.className = 'card-item';
-                
-                const cardContent = createCardContent(
-                    card.term, 
-                    card.definition, 
-                    isEnToVi
-                );
-                
-                cardContainer.appendChild(cardContent);
-                cardList.appendChild(cardContainer);
-            });
-            
-            // Show the card preview if there are cards
-            if (cardList.children.length > 0) {
-                const cardPreview = document.getElementById('cardPreview');
-                if (cardPreview) {
-                    cardPreview.style.display = 'block';
+
+            uniqueCards.forEach((card, index) => {
+                try {
+                    const cardContainer = document.createElement('div');
+                    cardContainer.className = 'card-item';
+
+                    const cardContent = createCardContent(
+                        card.term, 
+                        card.definition, 
+                        isEnToVi
+                    );
+
+                    if (cardContent) {
+                        cardContainer.appendChild(cardContent);
+                        cardList.appendChild(cardContainer);
+                    }
+                } catch (e) {
+                    console.error('Error creating card:', e, card);
                 }
-            }
+            });
+
         };
 
         // Function to safely parse JSON from localStorage
@@ -537,51 +634,23 @@
             }
         };
 
-        // Function to load card sets
-        const loadCardSets = () => {
-            console.log('Loading card sets...');
-            
-            // Load English-Vietnamese cards
-            const savedEnViCards = localStorage.getItem('enViCards');
-            const enViCards = safeJsonParse(savedEnViCards, []);
-            
-            // Load Vietnamese-English cards
-            const savedViEnCards = localStorage.getItem('viEnCards');
-            const viEnCards = safeJsonParse(savedViEnCards, []);
-            
-            // Load cards into the UI
-            loadCards('enViCardList', enViCards);
-            loadCards('viEnCardList', viEnCards);
-            
-            // Show the appropriate card set based on which one has cards
-            if (enViCards.length > 0 || viEnCards.length > 0) {
-                const cardPreview = document.getElementById('cardPreview');
-                if (cardPreview) cardPreview.style.display = 'block';
-                
-                if (enViCards.length === 0 && viEnCards.length > 0) {
-                    const switchBtn = document.getElementById('switchToViEn');
-                    if (switchBtn) switchBtn.click();
-                }
-            }
-        };
-        
         // Text-to-speech function
         function speakText(text, lang) {
             if (!text) return;
-            
+
             // Stop any currently playing speech
             window.speechSynthesis.cancel();
-            
+
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang || 'en-US';
-            
+
             // Set voice based on language
             const voices = window.speechSynthesis.getVoices();
             const preferredVoices = {
                 'vi-VN': voices.find(v => v.lang === 'vi-VN'),
                 'en-US': voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB')
             };
-            
+
             if (preferredVoices[utterance.lang]) {
                 utterance.voice = preferredVoices[utterance.lang];
             }
@@ -589,107 +658,164 @@
             window.speechSynthesis.speak(utterance);
         }
         
-        // Initialize the page when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM fully loaded');
-            
-            // Initialize the page with a small delay to ensure everything is ready
-            setTimeout(initializePage, 50);
+        // Function to load data from jsonbin.io
+        async function loadFromJsonBin() {
+            try {
+                // Show loading state
+                const lastSavedEl = document.getElementById('lastSaved');
+                if (lastSavedEl) lastSavedEl.textContent = 'Đang tải...';
 
-            // Load text inputs from localStorage
-            const englishText = localStorage.getItem('englishText') || '';
-            const vietnameseText = localStorage.getItem('vietnameseText') || '';
-            const englishText2 = localStorage.getItem('englishText2') || '';
-            const vietnameseText2 = localStorage.getItem('vietnameseText2') || '';
-            
-            // Set the values in the text areas
-            document.getElementById('englishText').value = englishText;
-            document.getElementById('vietnameseText').value = vietnameseText;
-            document.getElementById('englishText2').value = englishText2;
-            document.getElementById('vietnameseText2').value = vietnameseText2;
-            
-            // Set data-target for save button
-            document.getElementById('saveCardBtn')?.setAttribute('data-target', 'enVi');
-            
-            // Clear both card lists first
-            const enViCardList = document.getElementById('enViCardList');
-            const viEnCardList = document.getElementById('viEnCardList');
-            if (enViCardList) enViCardList.innerHTML = '';
-            if (viEnCardList) viEnCardList.innerHTML = '';
-            
-            // Load English-Vietnamese cards
-            const savedEnViCards = localStorage.getItem('enViCards');
-            const enViCards = safeJsonParse(savedEnViCards, []);
-            
-            // Load Vietnamese-English cards
-            const savedViEnCards = localStorage.getItem('viEnCards');
-            const viEnCards = safeJsonParse(savedViEnCards, []);
-            
-            // Only load cards if we have valid data
-            if (Array.isArray(enViCards) && enViCards.length > 0) {
-                loadCards('enViCardList', enViCards);
-            }
-            
-            if (Array.isArray(viEnCards) && viEnCards.length > 0) {
-                loadCards('viEnCardList', viEnCards);
+                // Try to load data from the single bin
+                const response = await fetch(`${API_BASE_URL}/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_MASTER_KEY
+                    }
+                }).catch(error => {
+                    return { ok: false, status: 'error', error };
+                });
+
+                let enViCards = [];
+                let viEnCards = [];
+
+                if (response && response.ok) {
+                    try {
+                        const result = await response.json();
+                        
+                        // Handle the response
+                        if (result.record) {
+                            // Check if we have enViCards and viEnCards in the record
+                            if (result.record.enViCards) {
+                                enViCards = Array.isArray(result.record.enViCards) ? result.record.enViCards : [];
+                                if (enViCards.length > 0) {
+                                    loadCards('enViCardList', enViCards);
+                                }
+                            }
+                            
+                            if (result.record.viEnCards) {
+                                viEnCards = Array.isArray(result.record.viEnCards) ? result.record.viEnCards : [];
+                                if (viEnCards.length > 0) {
+                                    loadCards('viEnCardList', viEnCards);
+                                }
+                            }
+                            
+                            // Update last saved time if available
+                            if (result.record.lastUpdated) {
+                                const lastSavedEl = document.getElementById('lastSaved');
+                                if (lastSavedEl) {
+                                    lastSavedEl.textContent = formatTimestamp(result.record.lastUpdated);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error processing response');
+                    }
+                }
+
                 // If there are Vi-En cards but no En-Vi cards, switch to Vi-En view
-                if (enViCards.length === 0) {
+                if (enViCards.length === 0 && viEnCards.length > 0) {
                     const switchBtn = document.getElementById('switchToViEn');
                     if (switchBtn) switchBtn.click();
                 }
-            }
-            
-        });
 
-        // Add click event listeners to all read buttons
-        document.querySelectorAll('.read-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = button.getAttribute('data-target');
-                const lang = button.getAttribute('data-lang');
-                const text = document.getElementById(targetId).value;
-                speakText(text, lang);
-            });
-        });
-        
-        // Save all button click handler
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            // Save all data to localStorage
-            const saveSuccess = saveAllData();
-
-            if (saveSuccess) {
-                // Show save confirmation
-                const saveBtn = document.getElementById('saveBtn');
-                const lastSavedEl = document.getElementById('lastSaved');
-                const originalText = saveBtn.textContent;
-                
-                // Update button text
-                saveBtn.textContent = 'Đã lưu tất cả!';
-                
-                // Update last saved time display
-                if (lastSavedEl) {
-                    const now = new Date();
-                    lastSavedEl.textContent = now.toLocaleString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
+                // Show/hide card preview based on whether we have cards
+                const cardPreview = document.getElementById('cardPreview');
+                if (cardPreview) {
+                    cardPreview.style.display = (enViCards.length > 0 || viEnCards.length > 0) ? 'block' : 'none';
                 }
 
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                }, 2000);
-            } else {
-                alert('Có lỗi xảy ra khi lưu dữ liệu');
+                return true;
+            } catch (error) {
+                    return false;
             }
-            setTimeout(() => {
-                saveBtn.textContent = originalText;
-            }, 2000);
-        });
+        }
+
+        // Save textbox values to localStorage
+        function saveTextboxValues() {
+            const textboxes = {
+                'englishText': document.getElementById('englishText')?.value || '',
+                'vietnameseText': document.getElementById('vietnameseText')?.value || '',
+                'englishText2': document.getElementById('englishText2')?.value || '',
+                'vietnameseText2': document.getElementById('vietnameseText2')?.value || ''
+            };
+            
+            localStorage.setItem('textboxValues', JSON.stringify(textboxes));
+        }
+        
+        // Load textbox values from localStorage
+        function loadTextboxValues() {
+            try {
+                const savedValues = localStorage.getItem('textboxValues');
+                if (savedValues) {
+                    const values = JSON.parse(savedValues);
+                    Object.keys(values).forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element && values[id]) {
+                            element.value = values[id];
+                        }
+                    });
+                }
+            } catch (e) {
+                // Silent error
+            }
+        }
+        
+        // Initialize the application
+        async function initializeApp() {
+            try {
+                // Add input event listeners to all textboxes first
+                const textboxIds = ['englishText', 'vietnameseText', 'englishText2', 'vietnameseText2'];
+                textboxIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('input', saveTextboxValues);
+                        element.addEventListener('blur', saveTextboxValues);
+                    }
+                });
+                
+                // Load saved textbox values from localStorage
+                loadTextboxValues();
+                
+                // Initialize the page and load data from jsonbin.io
+                await initializePage();
+                
+                // Set data-target for save button if it exists
+                const saveCardBtn = document.getElementById('saveCardBtn');
+                if (saveCardBtn) {
+                    saveCardBtn.setAttribute('data-target', 'enVi');
+                }
+                
+                // Load data from jsonbin.io
+                await loadFromJsonBin();
+                
+                // Save the current state after loading
+                saveTextboxValues();
+                
+                // Add click event listeners to all read buttons
+                document.querySelectorAll('.read-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = button.getAttribute('data-target');
+                        const lang = button.getAttribute('data-lang');
+                        const text = document.getElementById(targetId)?.value;
+                        if (text) {
+                            speakText(text, lang);
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                // Silent error
+            }
+        }
+        
+        // Start the application when the DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+        
+        // Save button has been removed from UI, so we don't need this event listener anymore
 
         // Function to create action buttons for a card
         function createActionButtons(cardDiv, isEnToVi = true) {
