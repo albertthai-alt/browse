@@ -700,22 +700,87 @@ start();
     }
   }
 
-  async function loadGithubBrowser() {
+  async function loadGithubBrowser(path = '') {
     if (!ghList) return;
     try {
       ghList.textContent = 'Đang tải danh sách...';
-      const api = 'https://api.github.com/repos/albertthai-alt/browse/contents/quizlet';
+      const api = path
+        ? `https://api.github.com/repos/albertthai-alt/browse/contents/quizlet/${path}`
+        : 'https://api.github.com/repos/albertthai-alt/browse/contents/quizlet';
+      
       const resp = await fetch(api, { cache: 'no-store' });
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      
       const data = await resp.json();
-      const files = (Array.isArray(data) ? data : []).filter(it => it && it.type === 'file' && /\.json$/i.test(it.name));
-      files.sort((a,b)=>a.name.localeCompare(b.name, 'vi'));
-      ghList.innerHTML = files.map(it => (
-        '<a href="#" class="gh-json" data-url="' + (it.download_url || '') + '" data-name="' + (it.name || '') + '" style="display:inline-block;padding:6px 10px;border:1px solid #1f2937;border-radius:8px;background:#12141a;color:#eaeef2;text-decoration:none;">' + (it.name || '') + '</a>'
-      )).join(' ');
-      if (!files.length) ghList.textContent = 'Không tìm thấy file JSON.';
+      const items = Array.isArray(data) ? data : [];
+      
+      // Separate folders and files
+      const folders = items.filter(it => it.type === 'dir');
+      const files = items.filter(it => it.type === 'file' && /\.json$/i.test(it.name));
+      
+      // Sort alphabetically
+      folders.sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+      files.sort((a,b) => a.name.localeCompare(b.name, 'vi'));
+      
+      // Create breadcrumb navigation
+      const pathParts = path.split('/').filter(Boolean);
+      let breadcrumb = '<div style="margin-bottom: 10px;">';
+      breadcrumb += '<a href="#" class="gh-folder" data-path="" style="color: #60a5fa;">Thư viện</a>';
+      
+      let currentPath = '';
+      pathParts.forEach((part, index) => {
+        currentPath += (currentPath ? '/' : '') + part;
+        breadcrumb += ' / ';
+        breadcrumb += `<a href="#" class="gh-folder" data-path="${currentPath}" style="color: #60a5fa;">${part}</a>`;
+      });
+      
+      breadcrumb += '</div>';
+      
+      // Create folder list
+      let html = breadcrumb;
+      
+      if (folders.length > 0) {
+        html += '<div style="margin-bottom: 10px;">';
+        html += '<div style="font-weight: bold; margin-bottom: 5px;">Thư mục:</div>';
+        html += folders.map(folder => (
+          `<a href="#" class="gh-folder" data-path="${path ? path + '/' : ''}${folder.name}" style="display:inline-flex;align-items:center;padding:6px 10px;margin:0 5px 5px 0;border:1px solid #3b82f6;border-radius:8px;background:rgba(59,130,246,0.1);color:#60a5fa;text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            ${folder.name}
+          </a>`
+        )).join('');
+        html += '</div>';
+      }
+      
+      // Create file list
+      if (files.length > 0) {
+        html += '<div>';
+        html += '<div style="font-weight: bold; margin: 10px 0 5px 0;">Tập tin JSON:</div>';
+        html += files.map(file => (
+          `<a href="#" class="gh-json" data-url="${file.download_url || ''}" data-name="${file.name || ''}" style="display:inline-flex;align-items:center;padding:6px 10px;margin:0 5px 5px 0;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#4b5563;text-decoration:none;transition:all 0.2s ease;box-shadow:0 1px 2px 0 rgba(0,0,0,0.05);font-size:0.9em;max-width:100%;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="margin-right:6px;flex-shrink:0;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span style="white-space: normal; word-break: break-word; text-align: left;">${file.name}</span>
+          </a>`
+        )).join('');
+        html += '</div>';
+      }
+      
+      if (folders.length === 0 && files.length === 0) {
+        html += '<div>Không tìm thấy thư mục hoặc file JSON nào.</div>';
+      }
+      
+      ghList.innerHTML = html;
+      
     } catch (e) {
-      ghList.textContent = 'Lỗi tải danh sách GitHub.';
+      console.error('Error loading GitHub browser:', e);
+      ghList.innerHTML = '<div style="color: #ef4444;">Lỗi tải danh sách từ GitHub. Vui lòng thử lại sau.</div>';
     }
   }
 
@@ -1834,16 +1899,25 @@ start();
       jsonFile.value = '';
     }
   });
-  if (ghList) ghList.addEventListener('click', (e) => {
+  if (ghList) ghList.addEventListener('click', async (e) => {
+    e.preventDefault();
     const t = e.target;
-    if (t && t.closest) {
-      const a = t.closest('a.gh-json');
-      if (a) {
-        e.preventDefault();
-        const url = a.getAttribute('data-url');
-        const name = a.getAttribute('data-name');
-        if (url) openCardsFromGithub(url, name);
-      }
+    if (!t || !t.closest) return;
+    
+    // Handle folder navigation
+    const folderLink = t.closest('a.gh-folder');
+    if (folderLink) {
+      const path = folderLink.getAttribute('data-path') || '';
+      await loadGithubBrowser(path);
+      return;
+    }
+    
+    // Handle JSON file click
+    const jsonLink = t.closest('a.gh-json');
+    if (jsonLink) {
+      const url = jsonLink.getAttribute('data-url');
+      const name = jsonLink.getAttribute('data-name');
+      if (url) openCardsFromGithub(url, name);
     }
   });
 
