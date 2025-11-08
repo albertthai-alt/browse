@@ -509,12 +509,34 @@
   }
 
   async function refreshGh(container){
-    container.innerHTML = '<div class="small">Đang tải danh sách...</div>';
-    try{
-      const items = await fetchGithubJsonList();
-      renderGhList(container, items);
-    }catch(e){
-      container.innerHTML = '<div class="small">Không tải được danh sách.</div>';
+    if (!container) return;
+    
+    try {
+      // Show loading state
+      const statusEl = container.closest('.panel')?.querySelector('.status') || container;
+      container.innerHTML = '<div class="small">Đang tải dữ liệu từ GitHub...</div>';
+      
+      const path = currentGhPath === GH_BASE_PATH ? '' : currentGhPath.replace(`${GH_BASE_PATH}/`, '');
+      const items = await fetchGithubContents(path);
+      
+      // Only update if container still exists
+      if (document.body.contains(container)) {
+        renderGhList(container, items);
+      }
+    } catch (e) {
+      console.error('GitHub fetch error:', e);
+      // Only update if container still exists
+      if (document.body.contains(container)) {
+        container.innerHTML = `
+          <div class="error" style="color: #dc2626; padding: 12px; background: #fef2f2; border-radius: 4px; margin: 8px 0;">
+            <div style="font-weight: bold;">Lỗi tải dữ liệu</div>
+            <div style="margin-top: 4px; font-size: 0.9em;">${e.message || 'Không thể kết nối đến GitHub'}</div>
+            <button onclick="currentGhPath = '${GH_BASE_PATH}'; ghPathHistory = []; refreshGh(this.closest('.panel').querySelector('.gh-list'))" 
+                    style="margin-top: 8px; padding: 4px 8px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Về thư mục gốc
+            </button>
+          </div>`;
+      }
     }
   }
 
@@ -808,49 +830,277 @@
   // GitHub listing and open/append
   const GH_OWNER = 'albertthai-alt';
   const GH_REPO = 'browse';
-  const GH_PATH = 'mcq-tester';
+  const GH_BASE_PATH = 'mcq-tester';
+  let currentGhPath = GH_BASE_PATH;
+  let ghPathHistory = [];
 
-  async function fetchGithubJsonList(){
-    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
-    const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-    if(!res.ok) throw new Error('Không tải được danh sách GitHub');
-    const data = await res.json();
-    return (Array.isArray(data) ? data : []).filter(item => item.type === 'file' && /\.json$/i.test(item.name));
+  async function fetchGithubContents(path = '') {
+    const fullPath = path ? `${GH_BASE_PATH}/${path}` : GH_BASE_PATH;
+    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${fullPath}`;
+    
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Lỗi: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!Array.isArray(data)) {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('GitHub API error:', error);
+      throw new Error('Không kết nối được với GitHub. Vui lòng thử lại sau.');
+    }
   }
 
-  function renderGhList(container, items){
+  function renderGhList(container, items) {
     container.innerHTML = '';
-    if(!items.length){
+    
+    // Add breadcrumb navigation
+    const breadcrumb = document.createElement('div');
+    breadcrumb.className = 'breadcrumb';
+    breadcrumb.style.margin = '0 0 4px 0'; // Reduced bottom margin to 4px, removed other margins
+    breadcrumb.style.padding = '0'; // Ensure no padding
+    breadcrumb.style.display = 'flex';
+    breadcrumb.style.flexWrap = 'wrap';
+    breadcrumb.style.alignItems = 'center';
+    breadcrumb.style.gap = '4px';
+    breadcrumb.style.fontSize = '0.9em';
+    breadcrumb.style.color = '#9fb0ff';
+
+    // Add root link
+    const rootLink = document.createElement('a');
+    rootLink.href = '#';
+    rootLink.textContent = 'Thư mục gốc';
+    rootLink.style.color = '#9fb0ff';
+    rootLink.style.textDecoration = 'none';
+    rootLink.onclick = (e) => {
+      e.preventDefault();
+      if (currentGhPath !== GH_BASE_PATH) {
+        ghPathHistory = [];
+        currentGhPath = GH_BASE_PATH;
+        refreshGh(container);
+      }
+    };
+    breadcrumb.appendChild(rootLink);
+
+    // Add path segments if not at root
+    if (currentGhPath !== GH_BASE_PATH) {
+      const segments = currentGhPath.replace(GH_BASE_PATH + '/', '').split('/');
+      let currentPath = GH_BASE_PATH;
+      
+      segments.forEach((segment, index) => {
+        // Add separator
+        const sep = document.createElement('span');
+        sep.textContent = ' / ';
+        breadcrumb.appendChild(sep);
+
+        // Add path segment
+        currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+        
+        if (index < segments.length - 1) {
+          // For non-last segments, make them clickable
+          const segLink = document.createElement('a');
+          segLink.href = '#';
+          segLink.textContent = segment;
+          segLink.style.color = '#9fb0ff';
+          segLink.style.textDecoration = 'none';
+          segLink.onclick = (e) => {
+            e.preventDefault();
+            const pathToGo = currentPath;
+            const historyIndex = ghPathHistory.indexOf(pathToGo);
+            if (historyIndex !== -1) {
+              ghPathHistory = ghPathHistory.slice(0, historyIndex);
+            }
+            currentGhPath = pathToGo;
+            refreshGh(container);
+          };
+          breadcrumb.appendChild(segLink);
+        } else {
+          // Last segment is not clickable
+          const lastSeg = document.createElement('span');
+          lastSeg.textContent = segment;
+          lastSeg.style.color = '#e6ecff';
+          lastSeg.style.fontWeight = '500';
+          breadcrumb.appendChild(lastSeg);
+        }
+      });
+    }
+
+    container.appendChild(breadcrumb);
+
+    // Show current path (hidden from UI but kept in code for functionality)
+    const pathInfo = document.createElement('div');
+    pathInfo.className = 'small';
+    pathInfo.style.marginBottom = '12px';
+    pathInfo.style.display = 'none'; // Hide the path info
+    pathInfo.textContent = `Đường dẫn: ${currentGhPath === GH_BASE_PATH ? 'Gốc' : currentGhPath.replace(`${GH_BASE_PATH}/`, '')}`;
+    container.appendChild(pathInfo);
+
+    if(!items.length) {
       const empty = document.createElement('div');
       empty.className = 'small';
-      empty.textContent = 'Không có file .json trong thư mục.';
+      empty.textContent = 'Không có thư mục hoặc file JSON nào.';
       container.appendChild(empty);
       return;
     }
-    const wrap = document.createElement('div');
-    wrap.style.display = 'flex';
-    wrap.style.flexWrap = 'wrap';
-    wrap.style.gap = '8px 12px';
-    items.forEach(it => {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.textContent = it.name;
-      a.style.fontWeight = '400';
-      a.onclick = async (ev) => {
-        ev.preventDefault();
-        const inTest = !viewTest.classList.contains('hidden');
-        const useAppend = (inTest ? (chkAppendTest && chkAppendTest.checked) : (chkAppend && chkAppend.checked)) && quiz.questions.length > 0;
-        if(useAppend){
-          setInfoStatus(`Đang thêm từ GitHub: ${it.name} ...`);
-          await appendFromGithubPath(it.path, it.name);
-        } else {
-          setInfoStatus(`Đang mở từ GitHub: ${it.name} ...`);
-          await openFromGithubPath(it.path, it.name);
-        }
-      };
-      wrap.appendChild(a);
-    });
-    container.appendChild(wrap);
+
+    // Separate folders and files
+    const folders = items.filter(item => item.type === 'dir');
+    const jsonFiles = items.filter(item => item.type === 'file' && item.name.endsWith('.json'));
+
+    // Render folders first
+    if (folders.length > 0) {
+      const folderSection = document.createElement('div');
+      folderSection.style.margin = '0'; // Remove all margins
+      folderSection.style.padding = '0'; // Remove all padding
+      
+      // Folder title removed to make folders appear directly under the root
+      const folderTitle = document.createElement('div');
+      folderTitle.className = 'small';
+      folderTitle.style.margin = '0'; // Remove margin
+      folderTitle.style.padding = '0'; // Remove padding
+      folderTitle.style.display = 'none'; // Hide the folder title
+      folderSection.appendChild(folderTitle);
+
+      const folderList = document.createElement('div');
+      folderList.style.display = 'flex';
+      folderList.style.flexWrap = 'wrap';
+      folderList.style.gap = '6px';
+      folderList.style.margin = '0'; // Removed top and bottom margin
+      folderList.style.padding = '0'; // Ensure no padding
+      folderList.style.alignItems = 'center';
+
+      folders.forEach(folder => {
+        const folderItem = document.createElement('div');
+        folderItem.style.display = 'inline-flex';
+        folderItem.style.alignItems = 'center';
+        folderItem.style.gap = '4px';
+        folderItem.style.padding = '4px 12px';
+        folderItem.style.background = '#1a2a6b';
+        folderItem.style.borderRadius = '6px';
+        folderItem.style.border = '1px solid #2a3564';
+        folderItem.style.whiteSpace = 'nowrap';
+        folderItem.style.fontSize = '0.9em';
+        folderItem.style.transition = 'all 0.2s ease';
+        folderItem.style.cursor = 'pointer';
+        folderItem.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+        folderItem.onmouseover = () => {
+          folderItem.style.background = '#2a3a8b';
+          folderItem.style.borderColor = '#3b5bfd';
+          folderItem.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        };
+        folderItem.onmouseout = () => {
+          folderItem.style.background = '#1a2a6b';
+          folderItem.style.borderColor = '#2a3564';
+          folderItem.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+        };
+        
+        const icon = document.createElement('span');
+        icon.textContent = '📂';
+        icon.style.fontSize = '1.1em';
+        icon.style.filter = 'hue-rotate(180deg) saturate(1.5)';
+        icon.style.fontSize = '1.1em';
+        
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = folder.name;
+        link.style.textDecoration = 'none';
+        link.style.color = '#1d4ed8';
+        link.onclick = async (e) => {
+          e.preventDefault();
+          ghPathHistory.push(currentGhPath);
+          currentGhPath = folder.path;
+          // Clear the container and show loading state
+          container.innerHTML = '<div class="small">Đang tải thư mục...</div>';
+          try {
+            const items = await fetchGithubContents(folder.path.replace(`${GH_BASE_PATH}/`, ''));
+            renderGhList(container, items);
+          } catch (error) {
+            container.innerHTML = `
+              <div class="error" style="color: #dc2626; padding: 8px; background: #fef2f2; border-radius: 4px;">
+                Lỗi tải thư mục: ${error.message}
+                <div style="margin-top: 4px;">
+                  <button onclick="currentGhPath = '${GH_BASE_PATH}'; ghPathHistory = []; refreshGh(this.closest('.panel').querySelector('.gh-list'))" 
+                          style="padding: 2px 8px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 4px;">
+                    Về thư mục gốc
+                  </button>
+                </div>
+              </div>`;
+            console.error('Error loading folder:', error);
+          }
+        };
+        
+        folderItem.appendChild(icon);
+        folderItem.appendChild(link);
+        folderList.appendChild(folderItem);
+      });
+      
+      folderSection.appendChild(folderList);
+      container.appendChild(folderSection);
+    }
+
+    // Then render JSON files
+    if (jsonFiles.length > 0) {
+      const fileSection = document.createElement('div');
+      
+      // File title with adjusted styling to remove the label
+      const fileTitle = document.createElement('div');
+      fileTitle.className = 'small';
+      fileTitle.style.margin = '8px 0 4px 0';
+      fileTitle.style.paddingTop = '8px';
+      fileTitle.style.borderTop = '1px dashed #e2e8f0';
+      fileTitle.style.paddingBottom = '4px';
+      fileTitle.style.display = 'none'; // Hide the file title
+      fileSection.appendChild(fileTitle);
+
+      const fileList = document.createElement('div');
+      fileList.style.display = 'flex';
+      fileList.style.flexDirection = 'column';
+      fileList.style.gap = '6px';
+      fileList.style.marginLeft = '8px';
+
+      jsonFiles.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.style.display = 'flex';
+        fileItem.style.alignItems = 'center';
+        fileItem.style.gap = '6px';
+        
+        const icon = document.createElement('span');
+        icon.textContent = '📄';
+        
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = file.name;
+        link.style.textDecoration = 'none';
+        link.style.color = '#1d4ed8';
+        link.onclick = async (e) => {
+          e.preventDefault();
+          const inTest = !viewTest.classList.contains('hidden');
+          const useAppend = (inTest ? (chkAppendTest && chkAppendTest.checked) : (chkAppend && chkAppend.checked)) && quiz.questions.length > 0;
+          
+          if(useAppend) {
+            setInfoStatus(`Đang thêm từ GitHub: ${file.name} ...`);
+            await appendFromGithubPath(file.path, file.name);
+          } else {
+            setInfoStatus(`Đang mở từ GitHub: ${file.name} ...`);
+            await openFromGithubPath(file.path, file.name);
+          }
+        };
+        
+        fileItem.appendChild(icon);
+        fileItem.appendChild(link);
+        fileList.appendChild(fileItem);
+      });
+      
+      fileSection.appendChild(fileList);
+      container.appendChild(fileSection);
+    }
   }
 
   // Backward-compatible raw URL open (not used by list now)
@@ -962,9 +1212,28 @@
 
   if(btnGhRefreshEdit && ghListEdit){ btnGhRefreshEdit.onclick = ()=> refreshGh(ghListEdit); }
   if(btnGhRefreshTest && ghListTest){ btnGhRefreshTest.onclick = ()=> refreshGh(ghListTest); }
+  // Reset to root path when switching between edit and test views
+  const originalRefreshGh = refreshGh;
+  refreshGh = function(container) {
+    // Reset to root when clicking the refresh button
+    if (container === ghListEdit || container === ghListTest) {
+      currentGhPath = GH_BASE_PATH;
+      ghPathHistory = [];
+    }
+    return originalRefreshGh.call(this, container);
+  };
+
   // Auto load GitHub lists on load
-  if(ghListEdit){ refreshGh(ghListEdit); }
-  if(ghListTest){ refreshGh(ghListTest); }
+  if(ghListEdit){ 
+    ghListEdit.style.minHeight = '100px';
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => refreshGh(ghListEdit), 0);
+  }
+  if(ghListTest){ 
+    ghListTest.style.minHeight = '100px';
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => refreshGh(ghListTest), 0);
+  }
 
   function slugify(s){
     return (s||'').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
