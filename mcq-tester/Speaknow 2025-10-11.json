@@ -4,118 +4,365 @@
     {
       "text": "A ______ is not an animal.",
       "choices": [
-        {"text": "pig", "explanation": "Incorrect. A pig is an animal.", "correct": false},
-        {"text": "doll", "explanation": "Correct. A doll is a toy, not an animal.", "correct": true},
-        {"text": "bird", "explanation": "Incorrect. A bird is an animal.", "correct": false},
-        {"text": "dog", "explanation": "Incorrect. A dog is an animal.", "correct": false}
+        {
+          "text": "pig",
+          "explanation": "Incorrect. A pig is an animal.",
+          "correct": false
+        },
+        {
+          "text": "doll",
+          "explanation": "Correct. A doll is a toy, not an animal.",
+          "correct": true
+        },
+        {
+          "text": "bird",
+          "explanation": "Incorrect. A bird is an animal.",
+          "correct": false
+        },
+        {
+          "text": "dog",
+          "explanation": "Incorrect. A dog is an animal.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        1
       ]
     },
     {
       "text": "A ______ is round.",
       "choices": [
-        {"text": "circle", "explanation": "Correct. A circle is round in shape.", "correct": true},
-        {"text": "square", "explanation": "Incorrect. A square has four sides and corners.", "correct": false},
-        {"text": "corner", "explanation": "Incorrect. A corner is not round.", "correct": false},
-        {"text": "pass", "explanation": "Incorrect. 'Pass' is a verb, not an object.", "correct": false}
+        {
+          "text": "circle",
+          "explanation": "Correct. A circle is round in shape.",
+          "correct": true
+        },
+        {
+          "text": "square",
+          "explanation": "Incorrect. A square has four sides and corners.",
+          "correct": false
+        },
+        {
+          "text": "corner",
+          "explanation": "Incorrect. A corner is not round.",
+          "correct": false
+        },
+        {
+          "text": "pass",
+          "explanation": "Incorrect. 'Pass' is a verb, not an object.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        0
       ]
     },
     {
       "text": "I like to ______ my room to make it look pretty.",
       "choices": [
-        {"text": "delicious", "explanation": "Incorrect. 'Delicious' describes taste.", "correct": false},
-        {"text": "frozen", "explanation": "Incorrect. 'Frozen' means very cold.", "correct": false},
-        {"text": "decorate", "explanation": "Correct. 'Decorate' means make something look nice.", "correct": true},
-        {"text": "confident", "explanation": "Incorrect. 'Confident' describes a person, not a room.", "correct": false}
+        {
+          "text": "delicious",
+          "explanation": "Incorrect. 'Delicious' describes taste.",
+          "correct": false
+        },
+        {
+          "text": "frozen",
+          "explanation": "Incorrect. 'Frozen' means very cold.",
+          "correct": false
+        },
+        {
+          "text": "decorate",
+          "explanation": "Correct. 'Decorate' means make something look nice.",
+          "correct": true
+        },
+        {
+          "text": "confident",
+          "explanation": "Incorrect. 'Confident' describes a person, not a room.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        2
       ]
     },
     {
       "text": "If you try to walk on an icy pond you may ______.",
       "choices": [
-        {"text": "lean", "explanation": "Incorrect. 'Lean' means bend your body.", "correct": false},
-        {"text": "confess", "explanation": "Incorrect. 'Confess' means admit something.", "correct": false},
-        {"text": "slide", "explanation": "Correct. On ice, you may slide.", "correct": true},
-        {"text": "submit", "explanation": "Incorrect. 'Submit' means hand in or yield.", "correct": false}
+        {
+          "text": "lean",
+          "explanation": "Incorrect. 'Lean' means bend your body.",
+          "correct": false
+        },
+        {
+          "text": "confess",
+          "explanation": "Incorrect. 'Confess' means admit something.",
+          "correct": false
+        },
+        {
+          "text": "slide",
+          "explanation": "Correct. On ice, you may slide.",
+          "correct": true
+        },
+        {
+          "text": "submit",
+          "explanation": "Incorrect. 'Submit' means hand in or yield.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        2
       ]
     },
     {
       "text": "The idea was very ______.",
       "choices": [
-        {"text": "hostile", "explanation": "Incorrect. 'Hostile' means unfriendly.", "correct": false},
-        {"text": "rehearse", "explanation": "Incorrect. 'Rehearse' is a verb, not adjective.", "correct": false},
-        {"text": "problematic", "explanation": "Correct. A problematic idea causes difficulties.", "correct": true},
-        {"text": "scarce", "explanation": "Incorrect. 'Scarce' means rare, not describing an idea.", "correct": false}
+        {
+          "text": "hostile",
+          "explanation": "Incorrect. 'Hostile' means unfriendly.",
+          "correct": false
+        },
+        {
+          "text": "rehearse",
+          "explanation": "Incorrect. 'Rehearse' is a verb, not adjective.",
+          "correct": false
+        },
+        {
+          "text": "problematic",
+          "explanation": "Correct. A problematic idea causes difficulties.",
+          "correct": true
+        },
+        {
+          "text": "scarce",
+          "explanation": "Incorrect. 'Scarce' means rare, not describing an idea.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        2
       ]
     },
     {
       "text": "Harry is 9. Judy is 12. Bill is 15. Which statement is true?",
       "choices": [
-        {"text": "Bill is the older.", "explanation": "Incorrect. Should be 'the oldest'.", "correct": false},
-        {"text": "Harry is more young than Judy.", "explanation": "Incorrect. Wrong comparative form.", "correct": false},
-        {"text": "Judy is oldest to Harry.", "explanation": "Incorrect. Wrong structure.", "correct": false},
-        {"text": "Bill is older than Harry.", "explanation": "Correct. 15 > 9.", "correct": true}
+        {
+          "text": "Bill is the older.",
+          "explanation": "Incorrect. Should be 'the oldest'.",
+          "correct": false
+        },
+        {
+          "text": "Harry is more young than Judy.",
+          "explanation": "Incorrect. Wrong comparative form.",
+          "correct": false
+        },
+        {
+          "text": "Judy is oldest to Harry.",
+          "explanation": "Incorrect. Wrong structure.",
+          "correct": false
+        },
+        {
+          "text": "Bill is older than Harry.",
+          "explanation": "Correct. 15 > 9.",
+          "correct": true
+        }
+      ],
+      "correctAnswers": [
+        3
       ]
     },
     {
       "text": "John hurt himself on a hike.",
       "choices": [
-        {"text": "He is walking a long time before he hurt himself.", "explanation": "Incorrect. Tense mismatch.", "correct": false},
-        {"text": "He has been walked a long time before he hurt himself.", "explanation": "Incorrect. Wrong passive form.", "correct": false},
-        {"text": "He had been walking a long time before he hurt himself.", "explanation": "Correct. Past perfect continuous describes duration before another past action.", "correct": true},
-        {"text": "He has been walking a long time before he hurt himself.", "explanation": "Incorrect. Should be past perfect continuous.", "correct": false}
+        {
+          "text": "He is walking a long time before he hurt himself.",
+          "explanation": "Incorrect. Tense mismatch.",
+          "correct": false
+        },
+        {
+          "text": "He has been walked a long time before he hurt himself.",
+          "explanation": "Incorrect. Wrong passive form.",
+          "correct": false
+        },
+        {
+          "text": "He had been walking a long time before he hurt himself.",
+          "explanation": "Correct. Past perfect continuous describes duration before another past action.",
+          "correct": true
+        },
+        {
+          "text": "He has been walking a long time before he hurt himself.",
+          "explanation": "Incorrect. Should be past perfect continuous.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        2
       ]
     },
     {
       "text": "I started my job two months ago and still work in the same place. Which sentence has a similar meaning?",
       "choices": [
-        {"text": "I am working at my job for two months.", "explanation": "Incorrect. Present continuous doesn’t express duration.", "correct": false},
-        {"text": "I had been working at my job for two months.", "explanation": "Incorrect. Refers to a past event before another past event.", "correct": false},
-        {"text": "I have been working at my job for two months.", "explanation": "Correct. Present perfect continuous expresses an action started in the past and continuing now.", "correct": true},
-        {"text": "I was working at my job for two months.", "explanation": "Incorrect. Refers to a past period only.", "correct": false}
+        {
+          "text": "I am working at my job for two months.",
+          "explanation": "Incorrect. Present continuous doesn’t express duration.",
+          "correct": false
+        },
+        {
+          "text": "I had been working at my job for two months.",
+          "explanation": "Incorrect. Refers to a past event before another past event.",
+          "correct": false
+        },
+        {
+          "text": "I have been working at my job for two months.",
+          "explanation": "Correct. Present perfect continuous expresses an action started in the past and continuing now.",
+          "correct": true
+        },
+        {
+          "text": "I was working at my job for two months.",
+          "explanation": "Incorrect. Refers to a past period only.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        2
       ]
     },
     {
       "text": "Sue is 1.6 m. Henry is 1.7 m. Paul is 1.8 m. Which statement is true?",
       "choices": [
-        {"text": "Paul is more taller than Sue.", "explanation": "Incorrect. 'More taller' is double comparative.", "correct": false},
-        {"text": "Sue is the shortest.", "explanation": "Correct. 1.6 m is less than 1.7 and 1.8.", "correct": true},
-        {"text": "Henry is less tall to Paul.", "explanation": "Incorrect. Wrong comparative form.", "correct": false},
-        {"text": "Sue is the tall.", "explanation": "Incorrect. Should be 'the tallest'.", "correct": false}
+        {
+          "text": "Paul is more taller than Sue.",
+          "explanation": "Incorrect. 'More taller' is double comparative.",
+          "correct": false
+        },
+        {
+          "text": "Sue is the shortest.",
+          "explanation": "Correct. 1.6 m is less than 1.7 and 1.8.",
+          "correct": true
+        },
+        {
+          "text": "Henry is less tall to Paul.",
+          "explanation": "Incorrect. Wrong comparative form.",
+          "correct": false
+        },
+        {
+          "text": "Sue is the tall.",
+          "explanation": "Incorrect. Should be 'the tallest'.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        1
       ]
     },
     {
       "text": "What are your plans for next year?",
       "choices": [
-        {"text": "I will look for a new job.", "explanation": "Correct. 'Will' shows future intention.", "correct": true},
-        {"text": "I looking for a new job.", "explanation": "Incorrect. Missing 'am'.", "correct": false},
-        {"text": "I am look for a new job.", "explanation": "Incorrect. Wrong verb form.", "correct": false},
-        {"text": "I maybe look for a new job.", "explanation": "Incorrect. 'Maybe' cannot modify a verb directly.", "correct": false}
+        {
+          "text": "I will look for a new job.",
+          "explanation": "Correct. 'Will' shows future intention.",
+          "correct": true
+        },
+        {
+          "text": "I looking for a new job.",
+          "explanation": "Incorrect. Missing 'am'.",
+          "correct": false
+        },
+        {
+          "text": "I am look for a new job.",
+          "explanation": "Incorrect. Wrong verb form.",
+          "correct": false
+        },
+        {
+          "text": "I maybe look for a new job.",
+          "explanation": "Incorrect. 'Maybe' cannot modify a verb directly.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        0
       ]
     },
     {
       "text": "How did the accident occur?",
       "choices": [
-        {"text": "The bus drove and a car was crashing into it.", "explanation": "Incorrect. Past continuous doesn’t fit after 'drove'.", "correct": false},
-        {"text": "The bus drove and then a car crashed into it.", "explanation": "Correct. Describes sequence of past actions clearly.", "correct": true},
-        {"text": "The bus was driving and a car was crashing into it.", "explanation": "Incorrect. Both continuous forms sound unnatural together.", "correct": false},
-        {"text": "The bus was driving when a car crashed into it.", "explanation": "Also acceptable. Describes an interrupted action.", "correct": true}
+        {
+          "text": "The bus drove and a car was crashing into it.",
+          "explanation": "Incorrect. Past continuous doesn’t fit after 'drove'.",
+          "correct": false
+        },
+        {
+          "text": "The bus drove and then a car crashed into it.",
+          "explanation": "Incorrect. “The bus drove” chỉ nói rằng chiếc xe buýt đã chạy — một hành động hoàn tất. Trong thực tế, khi mô tả tai nạn, ta muốn nói rằng xe buýt đang chạy thì bị đâm, chứ không phải nó chạy xong rồi mới bị đâm.",
+          "correct": false
+        },
+        {
+          "text": "The bus was driving and a car was crashing into it.",
+          "explanation": "Incorrect. Both continuous forms sound unnatural together.",
+          "correct": false
+        },
+        {
+          "text": "The bus was driving when a car crashed into it.",
+          "explanation": "Correct. Describes an interrupted action.",
+          "correct": true
+        }
+      ],
+      "correctAnswers": [
+        3
       ]
     },
     {
       "text": "Which is the most correct?",
       "choices": [
-        {"text": "If you will leave milk out, it will spoil.", "explanation": "Incorrect. 'If' clause should not use 'will'.", "correct": false},
-        {"text": "If you leave milk out, it spoils.", "explanation": "Correct. Zero conditional expresses general truth.", "correct": true},
-        {"text": "If you are leaving milk out, it is spoiling.", "explanation": "Incorrect. Awkward tense combination.", "correct": false},
-        {"text": "If you left milk out, it spoiled.", "explanation": "Incorrect. Past simple doesn’t express general rule.", "correct": false}
+        {
+          "text": "If you will leave milk out, it will spoil.",
+          "explanation": "Incorrect. 'If' clause should not use 'will'.",
+          "correct": false
+        },
+        {
+          "text": "If you leave milk out, it spoils.",
+          "explanation": "Correct. Zero conditional expresses general truth.",
+          "correct": true
+        },
+        {
+          "text": "If you are leaving milk out, it is spoiling.",
+          "explanation": "Incorrect. Awkward tense combination.",
+          "correct": false
+        },
+        {
+          "text": "If you left milk out, it spoiled.",
+          "explanation": "Incorrect. Past simple doesn’t express general rule.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        1
       ]
     },
     {
       "text": "You are making plans for your vacation. Which is correct?",
       "choices": [
-        {"text": "If I will be tired, I would go to the beach.", "explanation": "Incorrect. Wrong combination of 'will' and 'would'.", "correct": false},
-        {"text": "If I have enough courage, I will go climbing.", "explanation": "Correct. First conditional: present + future form.", "correct": true},
-        {"text": "If I will have enough money, I will go far away.", "explanation": "Incorrect. 'Will' is not used in 'if' clause.", "correct": false},
-        {"text": "If I have a lot of time, I take a long trip.", "explanation": "Incorrect. Missing future form in result clause.", "correct": false}
+        {
+          "text": "If I will be tired, I would go to the beach.",
+          "explanation": "Incorrect. Wrong combination of 'will' and 'would'.",
+          "correct": false
+        },
+        {
+          "text": "If I have enough courage, I will go climbing.",
+          "explanation": "Correct. First conditional: present + future form.",
+          "correct": true
+        },
+        {
+          "text": "If I will have enough money, I will go far away.",
+          "explanation": "Incorrect. 'Will' is not used in 'if' clause.",
+          "correct": false
+        },
+        {
+          "text": "If I have a lot of time, I take a long trip.",
+          "explanation": "Incorrect. Missing future form in result clause.",
+          "correct": false
+        }
+      ],
+      "correctAnswers": [
+        1
       ]
     }
   ]
