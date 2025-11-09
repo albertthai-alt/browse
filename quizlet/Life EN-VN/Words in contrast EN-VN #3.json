@@ -105,7 +105,7 @@
     },
     {
       "term": "limit (n)",
-      "definition": "(n) giới hạn (cụ thể như thời gian, tốc độ)\n(___ limit)",
+      "definition": "(n) giới hạn (cụ thể như thời gian, tốc độ)\n(Speed ___)",
       "starred": false,
       "timestamp": "2025-11-09T15:24:42.418Z"
     },
