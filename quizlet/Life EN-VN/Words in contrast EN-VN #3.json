@@ -1,1 +1,305 @@
-
+{
+  "title": "Flashcards",
+  "cards": [
+    {
+      "term": "finish",
+      "definition": "(v) hoàn thành (thông dụng, đơn giản là xong)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.414Z"
+    },
+    {
+      "term": "complete",
+      "definition": "(v) hoàn thành (trong công việc, đầy đủ, trọn vẹn, theo quy trình)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "can\n(/kæn/ nhưng thường phát âm nhẹ như /kən/)",
+      "definition": "(mod) có thể",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "can't\n(/kænt/, nhấn mạnh đặc biệt âm t)",
+      "definition": "(mod) không thể",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "strength",
+      "definition": "(n) sức mạnh cơ bắp (có lực, khỏe về mặt vật lý)\n(He has great upper body ___.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "fitness",
+      "definition": "(n) thể lực toàn diện (sức bền, sức mạnh, dẻo dai, nhịp tim, v.v.)\n(His ___ has really improved.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "insistent",
+      "definition": "(a) khăng khăng, nài nỉ (hơi nghiên về tiêu cực)\n(He's ___ that we follow his plan.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "persistent",
+      "definition": "(a) kiên trì bền bỉ (tích cực)\n(She's ___ in chasing her dreams.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "duplicate (a)",
+      "definition": "(a) trùng lặp, bản sao (thường dùng)\n(___ items should be deleted.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "duplicated",
+      "definition": "đã bị sao chép, lặp lại (ít dùng)\n(We found a ___ invoice.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "pronounce",
+      "definition": "(v) phát âm\n(Did I ___ it right?)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "spell",
+      "definition": "đánh vần\n(How do you ___ it? C-A-T or K-A-T)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "complain",
+      "definition": "(v) Phàn nàn, Than phiền, Kêu ca",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "complaint",
+      "definition": "(n) lời phàn nàn",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "notable",
+      "definition": "(a) đáng chú ý (vì quan trọng, nổi bật)\n(There were several ___ achievements last year)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "noticeable",
+      "definition": "(a) dễ nhận thấy (về cảm giác, quan sát)\n(His weight loss was ___)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "limit (v)",
+      "definition": "(v) hạn chế\n(I'm trying to ___ checking my phone at work)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "limit (n)",
+      "definition": "(n) giới hạn (cụ thể như thời gian, tốc độ)\n(___ limit)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "limitation",
+      "definition": "(n) sự hạn chế, điểm bất lợi, điểm yếu\n(the team has a ___ due to lack of access to the system)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "depend",
+      "definition": "(v) phụ thuộc (lựa chọn, hành vi thực tế)\n(She ___ on her family for emotional support.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "dependent",
+      "definition": "(a) phụ thuộc, lệ thuộc (bị động, lâu dài, hoàn cảnh)\n(The offshore team is ___ on the onshore team for deployment due to lack of access rights.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "depended",
+      "definition": "(v3) bị phụ thuộc\n(She is ___ on by her children.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "welcome (a)",
+      "definition": "(a) được hoan nghênh, được chào đón\n(We are always ___.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.418Z"
+    },
+    {
+      "term": "welcome (v)",
+      "definition": "(v) hoan nghênh, chào đón\n(They always ___ us)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "resident",
+      "definition": "(n) cư dân",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "president",
+      "definition": "chủ tịch",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "affect",
+      "definition": "(v) làm ảnh hưởng, tác động đến\n(Stress ___ your health.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "effect",
+      "definition": "(n) sự ảnh hưởng\n(Stress has a bad ___ on health.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "impact",
+      "definition": "(n, v) ảnh hưởng, tác động (mạnh, sâu sắc)\n(Climate change has a big ___ on wildlife.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "weather",
+      "definition": "thời tiết (tại một thời điểm ngắn hạn)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "climate",
+      "definition": "khí hậu, thời tiết (đặc trưng của một vùng nào đó)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "candy",
+      "definition": "kẹo",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "sweets",
+      "definition": "(plural) kẹo, đồ ngọt",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "try",
+      "definition": "(v) thử, cố gắng\n(___ to learn English every day.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "strive",
+      "definition": "(v) cố gắng, phấn đấu (văn viết, trang trọng)\n(She ___ for excellence in everything she does.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "intent",
+      "definition": "(n) ý định, mục đích (trang trọng, mục tiêu rõ ràng)\n(He acted with criminal ___.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "intention",
+      "definition": "(n) ý định, mục đích (phổ biến trong giao tiếp hàng ngày, ý định chung)\n(She had no ___ of hurting you.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "dish",
+      "definition": "món ăn (một món ăn cụ thể)\n(Pho is a famous Vietnamese ___.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "course (food)",
+      "definition": "món ăn trong trình tự bữa ăn\n(The meal had three ___s: soup, steak, and ice cream.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "pier",
+      "definition": "cầu tàu chìa ra ngoài (biển, sông) (dùng cho tàu thuyền nhỏ)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "dock",
+      "definition": "bến tàu (nơi tàu đậu để dỡ hàng hoặc đón khách)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "wharf",
+      "definition": "bến dọc bờ (để bốc dỡ)\n(Bach Dang ___)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "port",
+      "definition": "bến cảng (toàn bộ khu vực có nhiều cầu cảng, bến, kho, dịch vụ hỗ trợ)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "harbor",
+      "definition": "vùng nước an toàn cho tàu neo",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "incur",
+      "definition": "(v) gánh chịu\n(If you cancel the booking now, you will ___ a fee.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "occur",
+      "definition": "(v) xảy ra, xuất hiện (sự kiện, ý nghĩ) (dùng trong văn viết trang trọng)\n(The accident ___ at midnight.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "happen",
+      "definition": "(v) xảy ra (tình huống, sự kiện) (dùng thân mật hơn)\n(Something bad ___ yesterday.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "concurrent",
+      "definition": "(a) đồng thời\n(He is taking three ___ courses this semester.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "recurring",
+      "definition": "(a) định kỳ, tái diễn\n(She has a ___ headache.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    },
+    {
+      "term": "occurrence",
+      "definition": "(n) lần xảy ra, một buổi họp trong meeting series\n(I need to reschedule one ___ of our weekly meeting.)",
+      "starred": false,
+      "timestamp": "2025-11-09T15:24:42.419Z"
+    }
+  ]
+}
