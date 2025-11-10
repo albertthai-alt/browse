@@ -1944,7 +1944,9 @@ start();
     try { synth.addEventListener('voiceschanged', loadVoices); } catch {}
   }
   function isVietnameseText(t) {
-    const s = String(t || '').toLowerCase();
+    // Remove content within parentheses before language detection
+    const cleanedText = String(t || '').replace(/\([^)]*\)/g, '').trim();
+    const s = cleanedText.toLowerCase();
     if (!s) return false;
     // Check for Vietnamese-specific diacritics and characters
     const viChars = /[ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/i;
@@ -1958,11 +1960,15 @@ start();
   function speakText(text) {
     if (!text || !synth || !chkRead.checked) return;
     
+    // Remove content within parentheses
+    const cleanedText = text.replace(/\([^)]*\)/g, '').trim();
+    if (!cleanedText) return;
+    
     // Cancel any ongoing speech
     try { synth.cancel(); } catch {}
     
-    // Create a new speech utterance
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Create a new speech utterance with cleaned text
+    const utterance = new SpeechSynthesisUtterance(cleanedText);
     
     // Decide desired language
     const wantVi = isVietnameseText(text);
