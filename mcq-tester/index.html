@@ -36,7 +36,7 @@
         <button id="tabTest" class="tab">Kiểm tra</button>
         <button id="tabResult" class="tab" disabled>Kết quả</button>
       </nav>
-      <div class="brand-sub">v1.5</div>
+      <div class="brand-sub">v1.6</div>
     </header>
 
     <main id="viewEdit" class="view">
@@ -85,6 +85,7 @@
         </div>
         <button id="btnStartTest" class="btn primary">Bắt đầu</button>
         <button id="btnLoadResultsJson" class="btn">Mở kết quả</button>
+        <button id="btnLoadResultsJsonBin" class="btn">Mở kết quả JsonBin</button>
         <label class="small" style="display:flex;align-items:center;gap:6px;">
           <input id="chkAppendTest" type="checkbox" /> Mở thêm
         </label>
@@ -119,7 +120,10 @@
       <section id="resultSummary" class="result-summary"></section>
       <section id="resultDetail" class="result-detail"></section>
       <section class="footbar">
-        <button id="btnExportAnswers" class="btn">Tải JSON</button>
+        <div style="display: flex; gap: 8px;">
+          <button id="btnExportAnswers" class="btn">Tải JSON</button>
+          <button id="btnSaveToJsonBin" class="btn primary">Lưu kết quả vào JsonBin</button>
+        </div>
       </section>
     </main>
 

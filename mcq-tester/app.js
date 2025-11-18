@@ -608,6 +608,12 @@
     };
   }
 
+  // JSONBin configuration
+  const JSONBIN_API_KEY = '$2a$10$xn4fMyT.KvPOUmj84gm9t.YtAcoyYCV6Vti1YZtWz9Ivo3EUq0eCy';
+  const JSONBIN_BIN_ID = '691bd6b643b1c97be9b44102';
+  const JSONBIN_API_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+  const JSONBIN_API_URL_LATEST = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`;
+
   // Keep track who triggered file open to read checkbox state appropriately
   let openContext = 'edit'; // 'edit' | 'test' | 'results'
   
@@ -631,48 +637,92 @@
     };
   }
 
+  // Load results from JSONBin
+  if(btnLoadResultsJsonBin) {
+    btnLoadResultsJsonBin.onclick = async () => {
+      try {
+        setInfoStatus('Đang tải kết quả từ JSONBin...');
+        
+        const response = await fetch(JSONBIN_API_URL_LATEST, {
+          headers: {
+            'X-Master-Key': JSONBIN_API_KEY
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(`Lỗi ${response.status}: ${JSON.stringify(error)}`);
+        }
+
+        const result = await response.json();
+        const resultData = result.record;
+        
+        if (!resultData.testQuestions || !resultData.answers) {
+          throw new Error('Dữ liệu không hợp lệ: thiếu thông tin bài kiểm tra hoặc câu trả lời');
+        }
+
+        // Set the original quiz data if available (for reference)
+        if (resultData.originalQuiz) {
+          quiz = resultData.originalQuiz;
+        }
+        
+        // Set the test questions (shuffled) and answers
+        testQuestions = resultData.testQuestions;
+        answers = resultData.answers;
+        
+        // Go directly to the result view to show the results
+        setMode('result');
+        renderResult();
+        setInfoStatus('Đã tải kết quả từ JSONBin thành công!');
+      } catch (error) {
+        console.error('Lỗi khi tải kết quả từ JSONBin:', error);
+        setInfoStatus('Lỗi: ' + (error.message || 'Không thể tải kết quả từ JSONBin'));
+      }
+    };
+  }
+
   // Handle loading test results JSON
   fileOpenResults.onchange = (e) => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
     
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = (event) => {
       try {
-        const resultData = JSON.parse(String(reader.result));
+        const resultData = JSON.parse(event.target.result);
         
-        // Check if this is a results file (should have answers array and quiz data)
-        if (resultData.answers && resultData.quiz) {
-          // Validate the quiz data
-          const err = validateQuiz(resultData.quiz);
-          if (err) { 
-            alert('Lỗi dữ liệu câu hỏi: ' + err); 
-            return; 
+        // Check if this is the new format with testQuestions
+        if (resultData.testQuestions && resultData.answers) {
+          // New format with shuffled questions
+          if (resultData.originalQuiz) {
+            quiz = resultData.originalQuiz;
           }
-          
-          // Set the quiz data
+          testQuestions = resultData.testQuestions;
+          answers = resultData.answers;
+        } 
+        // Check if this is the old format with just quiz and answers
+        else if (resultData.quiz && resultData.answers) {
+          // Old format - convert to new format
           quiz = resultData.quiz;
-          
-          // Set the answers if the length matches
-          if (resultData.answers.length === quiz.questions.length) {
-            answers = resultData.answers;
-            // Go directly to the result view to show the results
-            setMode('result');
-            renderResult();
-          } else {
-            alert('Số lượng câu trả lời không khớp với số câu hỏi.');
-          }
+          testQuestions = [...quiz.questions]; // Use original order
+          answers = resultData.answers;
         } else {
-          alert('Đây không phải file kết quả hợp lệ. File cần chứa dữ liệu câu hỏi và đáp án.');
+          throw new Error('Định dạng tệp không hợp lệ');
         }
-      } catch(err) {
-        console.error('Lỗi khi đọc file kết quả:', err);
-        alert('Lỗi khi đọc file kết quả: ' + (err.message || 'Dữ liệu không hợp lệ'));
+        
+        // Set mode and render results
+        setMode('result');
+        renderResult();
+        setInfoStatus('Đã tải kết quả từ tệp thành công!');
+      } catch (error) {
+        console.error('Lỗi khi tải kết quả:', error);
+        setInfoStatus('Lỗi: ' + (error.message || 'Không thể đọc tệp kết quả'));
       }
     };
+    reader.onerror = () => {
+      setInfoStatus('Lỗi: Không thể đọc tệp');
+    };
     reader.readAsText(file);
-    // Reset the input to allow selecting the same file again
-    e.target.value = '';
   };
 
   // Handle loading quiz JSON
@@ -693,8 +743,6 @@
           // First try to parse as-is
           data = JSON.parse(fileContent);
         } catch (parseError) {
-          console.log('Initial parse failed, trying to clean JSON...', parseError);
-          
           // Try to fix common JSON issues with a simpler approach
           try {
             // Remove BOM if present
@@ -716,12 +764,10 @@
             fixedContent = fixedContent.replace(/([\{\,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
             
             // Fix trailing commas in arrays and objects
-            fixedContent = fixedContent.replace(/,\s*([}\]])/g, '$1');
+            fixedContent = fixedContent.replace(/,\s*([\]\}])/g, '$1');
             
-            console.log('Cleaned JSON:', fixedContent);
             data = JSON.parse(fixedContent);
           } catch (fixError) {
-            console.error('Failed to parse JSON after cleaning:', fixError);
             throw new Error('Định dạng JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp file.');
           }
         }
@@ -817,15 +863,120 @@
   btnBackToEdit.onclick = () => setMode('edit');
   btnRetake.onclick = () => { setMode('test'); startTest(); };
   btnExportAnswers.onclick = () => {
-    // Export complete quiz data and user answers for later review
+    // Export complete test state including shuffled questions and answers
     const exportData = {
-      quiz: quiz,
+      // Include the original quiz for reference
+      originalQuiz: quiz,
+      // Include the shuffled test questions (with their original indices)
+      testQuestions: testQuestions,
+      // Include user's answers (these correspond to the shuffled questions)
       answers: answers,
-      timestamp: new Date().toISOString()
+      // Include metadata
+      timestamp: new Date().toISOString(),
+      // Include the title for display purposes
+      title: quiz.title || 'Kết quả kiểm tra',
+      // Include the result summary
+      result: computeResult()
     };
+    
     const filename = (quiz.title ? slugify(quiz.title) : 'quiz') + '-result.json';
     download(filename, JSON.stringify(exportData, null, 2));
   };
+
+  // Save results to JSONBin
+  const btnSaveToJsonBin = $('#btnSaveToJsonBin');
+  if (btnSaveToJsonBin) {
+    btnSaveToJsonBin.onclick = async () => {
+      try {
+        setInfoStatus('Đang lưu kết quả lên JSONBin...');
+        
+        // Prepare data to save with test state
+        const dataToSave = {
+          // Include the original quiz for reference
+          originalQuiz: quiz,
+          // Include the shuffled test questions (with their original indices)
+          testQuestions: testQuestions,
+          // Include user's answers (these correspond to the shuffled questions)
+          answers: answers,
+          // Include metadata
+          timestamp: new Date().toISOString(),
+          // Include the title for display purposes
+          title: quiz.title || 'Kết quả kiểm tra',
+          // Include the result summary
+          result: computeResult()
+        };
+        
+        // Create a safe bin name (ASCII only)
+        const safeTitle = (quiz.title || 'Untitled').replace(/[^\x00-\x7F]/g, '');
+        
+        // Make the request with proper encoding
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY,
+            'X-Bin-Name': 'MCQ Tester - ' + safeTitle.substring(0, 50), // Limit length and remove non-ASCII
+            'X-Bin-Versioning': 'false',
+            'X-Bin-Private': 'false'
+          },
+          body: JSON.stringify(dataToSave, null, 2)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(`Lỗi ${response.status}: ${JSON.stringify(result)}`);
+        }
+
+        // Show success message with more visibility
+        const successMessage = document.createElement('div');
+        successMessage.className = 'success-message';
+        successMessage.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: #4CAF50;
+          color: white;
+          padding: 15px 30px;
+          border-radius: 4px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          z-index: 1000;
+          animation: fadeInOut 3s ease-in-out;
+        `;
+        successMessage.textContent = '✅ Đã lưu kết quả lên JSONBin thành công!';
+        document.body.appendChild(successMessage);
+        
+        // Remove the message after animation
+        setTimeout(() => {
+          successMessage.style.animation = 'fadeOut 0.5s ease-in-out';
+          setTimeout(() => successMessage.remove(), 500);
+        }, 2500);
+        
+        // Add CSS for the animation
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -20px); }
+            10% { opacity: 1; transform: translate(-50%, 0); }
+            90% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+          }
+          @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, 0); }
+            to { opacity: 0; transform: translate(-50%, -20px); }
+          }
+        `;
+        document.head.appendChild(style);
+        
+        // Also update the status text
+        setInfoStatus('Đã lưu kết quả lên JSONBin thành công!');
+      } catch (error) {
+        console.error('Lỗi khi lưu kết quả lên JSONBin:', error);
+        setInfoStatus('Lỗi: ' + (error.message || 'Không thể lưu kết quả lên JSONBin'));
+      }
+    };
+  }
 
   // GitHub listing and open/append
   const GH_OWNER = 'albertthai-alt';
