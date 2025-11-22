@@ -49,6 +49,7 @@
             display: block;
             max-width: 100%;
             height: auto;
+            touch-action: none; /* Prevent default touch behaviors like scrolling */
         }
         .cell {
             width: 25px;
@@ -333,13 +334,19 @@
                 return false;
             }
 
-            // Handle cell click
+            // Handle cell click and touch
             function handleClick(event) {
-                if (gameOver) return;
+                if (gameOver) {
+                    event.preventDefault();
+                    return false;
+                }
                 
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
+                // Prevent default to avoid any unwanted behaviors like scrolling
+                event.preventDefault();
+                
+                const pos = getCursorPosition(canvas, event);
+                const x = pos.x;
+                const y = pos.y;
                 
                 const col = Math.floor(x / CELL_SIZE);
                 const row = Math.floor(y / CELL_SIZE);
@@ -366,8 +373,32 @@
                 }
             }
 
+            // Get correct position accounting for canvas scaling
+            function getCursorPosition(canvas, event) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                let clientX, clientY;
+                
+                if (event.type.includes('touch')) {
+                    const touch = event.touches[0] || event.changedTouches[0];
+                    clientX = touch.clientX;
+                    clientY = touch.clientY;
+                } else {
+                    clientX = event.clientX;
+                    clientY = event.clientY;
+                }
+                
+                return {
+                    x: (clientX - rect.left) * scaleX,
+                    y: (clientY - rect.top) * scaleY
+                };
+            }
+
             // Event listeners
             canvas.addEventListener('click', handleClick);
+            canvas.addEventListener('touchstart', handleClick, { passive: false });
             document.getElementById('restartButton').addEventListener('click', initBoard);
 
             // Fullscreen functionality
