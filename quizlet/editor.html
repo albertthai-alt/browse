@@ -192,9 +192,26 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
+        
+        .version-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #5f6368;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
+    <div class="version-indicator">v1.1</div>
+    
     <div style="margin-bottom: 20px;">
         <h1>Editor</h1>
     </div>
@@ -657,6 +674,77 @@
             window.speechSynthesis.speak(utterance);
         }
         
+        // Function to get lastUpdated timestamp from jsonbin.io
+        async function getLastUpdatedFromServer() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': API_MASTER_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to get data: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                return result.record?.lastUpdated || null;
+            } catch (error) {
+                console.error('Error getting lastUpdated from server:', error);
+                return null;
+            }
+        }
+
+        // Function to get lastUpdated timestamp from browser (localStorage)
+        function getLastUpdatedFromBrowser() {
+            try {
+                return localStorage.getItem('lastUpdatedFromServer');
+            } catch (error) {
+                console.error('Error getting lastUpdated from browser:', error);
+                return null;
+            }
+        }
+
+        // Function to save lastUpdated timestamp to browser
+        function saveLastUpdatedToBrowser(timestamp) {
+            try {
+                if (timestamp) {
+                    localStorage.setItem('lastUpdatedFromServer', timestamp);
+                }
+            } catch (error) {
+                console.error('Error saving lastUpdated to browser:', error);
+            }
+        }
+
+        // Function to compare timestamps and check if sync is needed
+        async function checkSyncNeeded() {
+            const serverLastUpdated = await getLastUpdatedFromServer();
+            const browserLastUpdated = getLastUpdatedFromBrowser();
+            
+            if (!serverLastUpdated && !browserLastUpdated) {
+                return { syncNeeded: false, serverNewer: false, browserNewer: false };
+            }
+            
+            if (!serverLastUpdated) {
+                return { syncNeeded: false, serverNewer: false, browserNewer: false };
+            }
+            
+            if (!browserLastUpdated) {
+                return { syncNeeded: true, serverNewer: true, browserNewer: false };
+            }
+            
+            const serverTime = new Date(serverLastUpdated);
+            const browserTime = new Date(browserLastUpdated);
+            
+            return {
+                syncNeeded: serverTime.getTime() !== browserTime.getTime(),
+                serverNewer: serverTime.getTime() > browserTime.getTime(),
+                browserNewer: browserTime.getTime() > serverTime.getTime(),
+                serverTimestamp: serverLastUpdated,
+                browserTimestamp: browserLastUpdated
+            };
+        }
+
         // Function to load data from jsonbin.io
         async function loadFromJsonBin() {
             try {
@@ -675,6 +763,7 @@
 
                 let enViCards = [];
                 let viEnCards = [];
+                let lastUpdated = null;
 
                 if (response && response.ok) {
                     try {
@@ -699,10 +788,13 @@
                             
                             // Update last saved time if available
                             if (result.record.lastUpdated) {
+                                lastUpdated = result.record.lastUpdated;
                                 const lastSavedEl = document.getElementById('lastSaved');
                                 if (lastSavedEl) {
                                     lastSavedEl.textContent = formatTimestamp(result.record.lastUpdated);
                                 }
+                                // Save to browser for future comparison
+                                saveLastUpdatedToBrowser(lastUpdated);
                             }
                         }
                     } catch (e) {
@@ -824,19 +916,57 @@
             const editBtn = document.createElement('button');
             editBtn.textContent = 'Sửa';
             editBtn.title = 'Sửa thẻ';
-            editBtn.onclick = (e) => {
+            editBtn.onclick = async (e) => {
                 e.stopPropagation();
+                
+                // Check if sync is needed before editing
+                const syncStatus = await checkSyncNeeded();
+                
+                if (syncStatus.syncNeeded && syncStatus.serverNewer) {
+                    // Server has newer data, show warning and ask user to refresh
+                    const confirmRefresh = confirm(
+                        'Có dữ liệu mới hơn trên máy chủ. Bạn có muốn làm mới trang trước khi sửa thẻ không?\n\n' +
+                        'Nhấn OK để làm mới trang và tải dữ liệu mới nhất.\n' +
+                        'Nhấn Cancel để hủy sửa thẻ.'
+                    );
+                    
+                    if (confirmRefresh) {
+                        // Refresh the page to load latest data
+                        window.location.reload();
+                    }
+                    return;
+                }
+                
                 enableEditMode(cardDiv, isEnToVi);
             };
             
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Xóa';
             deleteBtn.title = 'Xóa thẻ';
-            deleteBtn.onclick = (e) => {
+            deleteBtn.onclick = async (e) => {
                 e.stopPropagation();
+                
+                // Check if sync is needed before deleting
+                const syncStatus = await checkSyncNeeded();
+                
+                if (syncStatus.syncNeeded && syncStatus.serverNewer) {
+                    // Server has newer data, show warning and ask user to refresh
+                    const confirmRefresh = confirm(
+                        'Có dữ liệu mới hơn trên máy chủ. Bạn có muốn làm mới trang trước khi xóa thẻ không?\n\n' +
+                        'Nhấn OK để làm mới trang và tải dữ liệu mới nhất.\n' +
+                        'Nhấn Cancel để hủy xóa thẻ.'
+                    );
+                    
+                    if (confirmRefresh) {
+                        // Refresh the page to load latest data
+                        window.location.reload();
+                    }
+                    return;
+                }
+                
                 if (confirm('Bạn có chắc chắn muốn xóa thẻ này?')) {
                     cardDiv.remove();
-                    saveAllData();
+                    await saveAllData();
                 }
             };
             
@@ -878,7 +1008,7 @@
             const saveBtn = document.createElement('button');
             saveBtn.textContent = 'Lưu';
             saveBtn.className = 'save-btn';
-            saveBtn.onclick = (e) => {
+            saveBtn.onclick = async (e) => {
                 e.stopPropagation();
                 const newTerm = termInput.value.trim();
                 const newDefinition = definitionInput.value.trim();
@@ -886,7 +1016,7 @@
                     // Create new card content
                     cardDiv.innerHTML = '';
                     cardDiv.appendChild(createCardContent(newTerm, newDefinition, isEnToVi));
-                    saveAllData();
+                    await saveAllData();
                 }
             };
             
@@ -955,10 +1085,18 @@
             return cardDiv;
         }
         
-        // Function to add a card
-        function addCard(term, definition, isEnToVi = true) {
+        // Function to add a card with sync logic
+        async function addCard(term, definition, isEnToVi = true) {
             // Allow adding card if at least one field has content
             if (!term && !definition) return false;
+            
+            // Check if sync is needed before adding
+            const syncStatus = await checkSyncNeeded();
+            
+            if (syncStatus.syncNeeded && syncStatus.serverNewer) {
+                // Server has newer data, reload from server first
+                await loadFromJsonBin();
+            }
             
             const cardList = document.getElementById(isEnToVi ? 'enViCardList' : 'viEnCardList');
             if (!cardList) return false;
@@ -980,29 +1118,29 @@
                 cardPreview.style.display = 'block';
             }
             
-            // Save to localStorage
-            saveAllData();
+            // Save to jsonbin.io
+            await saveAllData();
             
             return true;
         }
         
         // Add card button handlers
-        document.getElementById('addEnViCardBtn').addEventListener('click', () => {
+        document.getElementById('addEnViCardBtn').addEventListener('click', async () => {
             const englishText = document.getElementById('englishText').value.trim();
             const vietnameseText = document.getElementById('vietnameseText').value.trim();
             
-            if (addCard(englishText, vietnameseText, true)) {
+            if (await addCard(englishText, vietnameseText, true)) {
                 // Clear the input fields
                 document.getElementById('englishText').value = '';
                 document.getElementById('vietnameseText').value = '';
             }
         });
         
-        document.getElementById('addViEnCardBtn').addEventListener('click', () => {
+        document.getElementById('addViEnCardBtn').addEventListener('click', async () => {
             const vietnameseText = document.getElementById('vietnameseText2').value.trim();
             const englishText = document.getElementById('englishText2').value.trim();
             
-            if (addCard(vietnameseText, englishText, false)) {
+            if (await addCard(vietnameseText, englishText, false)) {
                 // Clear the input fields
                 document.getElementById('vietnameseText2').value = '';
                 document.getElementById('englishText2').value = '';
@@ -1039,11 +1177,29 @@
         }
 
         // Delete cards button click handler
-        document.getElementById('deleteCardsBtn').addEventListener('click', () => {
+        document.getElementById('deleteCardsBtn').addEventListener('click', async () => {
+            // Check if sync is needed before deleting
+            const syncStatus = await checkSyncNeeded();
+            
+            if (syncStatus.syncNeeded && syncStatus.serverNewer) {
+                // Server has newer data, show warning and ask user to refresh
+                const confirmRefresh = confirm(
+                    'Có dữ liệu mới hơn trên máy chủ. Bạn có muốn làm mới trang trước khi xóa tất cả thẻ không?\n\n' +
+                    'Nhấn OK để làm mới trang và tải dữ liệu mới nhất.\n' +
+                    'Nhấn Cancel để hủy xóa thẻ.'
+                );
+                
+                if (confirmRefresh) {
+                    // Refresh the page to load latest data
+                    window.location.reload();
+                }
+                return;
+            }
+            
             if (confirm('Bạn có chắc chắn muốn xóa tất cả thẻ trong bộ hiện tại không?')) {
                 const cardList = getActiveCardList();
                 cardList.innerHTML = '';
-                saveAllData();
+                await saveAllData();
                 
                 // Show success message
                 const deleteBtn = document.getElementById('deleteCardsBtn');
